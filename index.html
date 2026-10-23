@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>花火島 - 微縮工藝與施放模型</title>
+  <link rel="stylesheet" href="./styles/main.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- 品牌卡 -->
+  <div class="glass-panel" id="brand-card">
+    <div class="eyebrow">CRAFT & FIREWORKS ISLET</div>
+    <h1>示範市．花火島</h1>
+    <p>火藥配製、星體造粒、紙殼成型到夜空施放的微縮工藝島</p>
+  </div>
+
+  <!-- HUD 時段控制面板 -->
+  <div class="glass-panel" id="hud-toolbar">
+    <button class="hud-btn" data-time="360">清晨 06:00</button>
+    <button class="hud-btn" data-time="720">正午 12:00</button>
+    <button class="hud-btn" data-time="1080">黃昏 18:00</button>
+    <button class="hud-btn active" data-time="1260">施放夜 21:00</button>
+    <button class="hud-btn fire-action" id="btn-launch-firework">手動點火</button>
+  </div>
+
+  <!-- 詳細資訊卡片 -->
+  <div class="glass-panel" id="detail-card">
+    <div class="card-close" id="card-close-btn">&times;</div>
+    <div class="eyebrow" id="card-type">工序島嶼</div>
+    <h2 id="card-title">點選島嶼或建築查看</h2>
+    <div id="card-desc">在三維微縮地圖中選擇六角工坊或流水線細項。</div>
+    <div class="stats-grid" id="card-stats"></div>
+  </div>
+
+  <!-- 載入層 -->
+  <div id="loading-overlay">
+    <div class="loader-content">
+      <h2>花火工藝模型建構中...</h2>
+      <p>正在組裝 12 座工藝六角島與煙火粒子系統</p>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

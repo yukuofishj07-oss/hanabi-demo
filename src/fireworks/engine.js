@@ -68,7 +68,6 @@ export class FireworksEngine {
   }
 
   update() {
-    // 發射火箭階段
     for (let i = this.rockets.length - 1; i >= 0; i--) {
       const r = this.rockets[i];
       r.pos.add(r.vel);
@@ -79,7 +78,6 @@ export class FireworksEngine {
       }
     }
 
-    // 爆炸粒子階段
     let activeCount = 0;
     const posAttr = this.points.geometry.attributes.position;
     const colAttr = this.points.geometry.attributes.color;
@@ -93,7 +91,7 @@ export class FireworksEngine {
         continue;
       }
 
-      p.vel.y -= 0.0025; // 模擬重力
+      p.vel.y -= 0.0025;
       p.pos.add(p.vel);
 
       if (activeCount < this.maxParticles) {
@@ -109,7 +107,6 @@ export class FireworksEngine {
       }
     }
 
-    // 清空未啟用的粒子數據
     for (let i = activeCount; i < this.maxParticles; i++) {
       const idx = i * 3;
       posAttr.array[idx + 1] = -9999;
@@ -118,7 +115,6 @@ export class FireworksEngine {
     posAttr.needsUpdate = true;
     colAttr.needsUpdate = true;
 
-    // 漸暗閃光燈
     if (this.pointLight.intensity > 0) {
       this.pointLight.intensity -= 0.15;
       if (this.pointLight.intensity < 0) this.pointLight.intensity = 0;

@@ -28,7 +28,6 @@ class App {
       this.setupRaycast();
       this.setupUI();
 
-      // 定期自動施放煙火
       setInterval(() => {
         this.fireworks.launch();
       }, 3500);
@@ -82,7 +81,6 @@ class App {
 
     card.classList.add("active");
 
-    // 相機緩動對焦
     const target = axialToWorld(island.axial.q, island.axial.r);
     this.sceneMgr.controls.target.set(target.x, 0, target.z);
   }

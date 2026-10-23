@@ -42,7 +42,6 @@ export function buildAllBuildings(scene, kit, islandDataList) {
 
         case "mortar":
         case "mortar_multi":
-          // 發射砲管
           for (let m = 0; m < 3; m++) {
             dummy.scale.set(0.18, 0.75, 0.18);
             dummy.position.set(bx + (m - 1) * 0.25, by + 0.35, bz);
