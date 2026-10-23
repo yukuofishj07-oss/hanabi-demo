@@ -12,7 +12,7 @@ export class SceneManager {
     // 窄視角 32 度微縮玩具模型視角
     this.camera = new THREE.PerspectiveCamera(32, this.width / this.height, 0.3, 350);
     // 預設將相機擺在正面偏上方，完全包覆 S 型工藝島與上方夜空
-    this.camera.position.set(0, 26, 44);
+    this.camera.position.set(0, 24, 46);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
     this.renderer.setSize(this.width, this.height);
@@ -20,7 +20,7 @@ export class SceneManager {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.toneMappingExposure = 1.1;
     this.container.appendChild(this.renderer.domElement);
 
     this.labelRenderer = new CSS2DRenderer();
@@ -37,9 +37,9 @@ export class SceneManager {
     this.controls.enablePan = false;
     this.controls.minPolarAngle = THREE.MathUtils.degToRad(20);
     this.controls.maxPolarAngle = THREE.MathUtils.degToRad(72);
-    this.controls.minDistance = 6;
+    this.controls.minDistance = 8;
     this.controls.maxDistance = 75;
-    this.controls.target.set(0, 0, 0);
+    this.controls.target.set(0, 0, 1.0);
 
     this.isFlying = false;
     this.flyStartTime = 0;
@@ -67,7 +67,7 @@ export class SceneManager {
   }
 
   setTopdownView() {
-    this.flyTo(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.01, 38, 4));
+    this.flyTo(new THREE.Vector3(0, 0, 1.0), new THREE.Vector3(0.01, 38, 4));
   }
 
   onResize() {

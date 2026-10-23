@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>花火島 HANABI ISLAND - 3D 微縮工藝與璀璨盛典</title>
+  <title>花火島 HANABI ISLAND - 傳統煙火工藝與璀璨盛典</title>
   <link rel="stylesheet" href="./styles/main.css">
   <script type="importmap">
     {
@@ -19,17 +19,17 @@
 
   <!-- 品牌面板 -->
   <div class="glass-panel" id="brand-card">
-    <div class="eyebrow">HANABI CRAFT & FESTIVAL</div>
-    <h1>示範市．花火島</h1>
-    <p>蛇狀 S 型工藝島鏈：從火藥配研、星珠造粒、玉張糊緊到夜空盛大綻放！</p>
+    <div class="eyebrow">HANABI ARTISAN HERITAGE</div>
+    <h1>示範市．花火工藝島</h1>
+    <p class="subtitle">S型微縮工藝島鏈：日本傳統尺玉花火 10 道嚴謹古法工序全解析</p>
     <div class="badge-row">
-      <span class="chip">🐍 S 型工藝蛇狀排列</span>
-      <span class="chip">🌳 綠植步道與微縮路燈</span>
-      <span class="chip">🎆 璀璨雙層實時煙火</span>
+      <span class="chip">🎨 溫暖黏土微縮景觀</span>
+      <span class="chip">🎆 實時璀璨雙層花火</span>
+      <span class="chip">📖 繁體中文全工藝詳解</span>
     </div>
   </div>
 
-  <!-- 右上工藝即時動態 -->
+  <!-- 即時工藝狀態 -->
   <div class="glass-panel" id="live-log-panel">
     <div class="log-header">
       <span class="live-dot"></span>
@@ -37,9 +37,9 @@
       <span id="fps-badge">60 FPS</span>
     </div>
     <div id="log-list">
-      <div class="log-item">🟢 01 配研室：黑火藥 75:15:10 黃金配比完成</div>
-      <div class="log-item">✨ 03 造粒廠：同心星珠滾製 24 層完畢</div>
-      <div class="log-item">🎆 10 砲陣地：10 吋尺玉錦冠彈填裝發射中</div>
+      <div class="log-item">🟢 01 配研室：硝酸鉀:松木炭:硫磺 75:15:10 研磨達標</div>
+      <div class="log-item">✨ 03 造粒廠：以油菜籽為核，24層同心星珠滾製完成</div>
+      <div class="log-item">🎆 10 砲陣地：10吋錦冠尺玉裝填完畢，高空發射中</div>
     </div>
   </div>
 
@@ -49,33 +49,47 @@
       <button class="hud-btn" data-time="360">🌅 清晨</button>
       <button class="hud-btn" data-time="720">☀️ 正午</button>
       <button class="hud-btn" data-time="1065">🌇 霞暮</button>
-      <button class="hud-btn active" data-time="1260">🎆 施放夜</button>
+      <button class="hud-btn active" data-time="1260">🎆 盛典夜</button>
     </div>
     <div class="hud-divider"></div>
     <div class="hud-group">
-      <button class="hud-btn toggle-btn active" id="toggle-flow">⚡ 工藝流光</button>
-      <button class="hud-btn" id="btn-topdown">🔭 全景鳥瞰</button>
-      <button class="hud-btn fire-action" id="btn-launch-firework">🎇 立即點火</button>
+      <button class="hud-btn" id="btn-topdown">🔭 全景/特寫</button>
+      <button class="hud-btn fire-action" id="btn-launch-firework">🎇 發射煙火</button>
       <button class="hud-btn fire-action-combo" id="btn-launch-barrage">🎆 萬彈齊發</button>
     </div>
   </div>
 
-  <!-- 左側詳細工序資訊卡片 -->
+  <!-- 左側詳細工序資訊卡片 (繁體中文完整詳解) -->
   <div class="glass-panel" id="detail-card">
     <div class="card-close" id="card-close-btn">&times;</div>
-    <div class="eyebrow" id="card-type">第 01 道工序</div>
-    <h2 id="card-title">點選島嶼查看作業流程</h2>
-    <div id="card-desc">在微縮地圖中選擇六角工坊，查看專屬工藝內容與重要指標。</div>
+    <div class="eyebrow" id="card-step-badge">第 01 道工序 ． 原料配研</div>
+    <h2 id="card-title">01 黑色火藥配研室</h2>
+    
+    <div class="card-section">
+      <div class="section-title">【工藝核心目的】</div>
+      <p id="card-purpose" class="section-body"></p>
+    </div>
+
+    <div class="card-section">
+      <div class="section-title">【傳統古法操作流程】</div>
+      <p id="card-process" class="section-body"></p>
+    </div>
+
+    <div class="card-section">
+      <div class="section-title">【嚴格檢驗與科學標準】</div>
+      <p id="card-standard" class="section-body"></p>
+    </div>
+
     <div class="stats-grid" id="card-stats"></div>
     <button class="card-action-btn" id="card-fire-btn">🚀 在此工島上空施放專屬煙火</button>
   </div>
 
-  <!-- 載入層 -->
+  <!-- 啟動覆蓋層 -->
   <div id="loading-overlay">
     <div class="loader-content">
       <div class="loader-spinner"></div>
-      <h2>花火島 蛇狀工藝世界組裝中...</h2>
-      <p>正在建造 S 型六角島鏈、鋪設步道植栽與調校璀璨煙火</p>
+      <h2>花火工藝微縮世界組裝中...</h2>
+      <p>正在注入精緻溫暖黏土材質、搭建 S 型小拱橋與調校夜空璀璨花火</p>
     </div>
   </div>
 

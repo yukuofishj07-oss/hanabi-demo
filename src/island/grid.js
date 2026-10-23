@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
-import { GRID } from "../config/constants.js";
+import { GRID, COLORS } from "../config/constants.js";
 
 export function axialToWorld(q, r) {
   const x = Math.sqrt(3) * GRID.SPACING * (q + r / 2);
@@ -14,19 +14,20 @@ export function createGroundTexture() {
   canvas.height = 256;
   const ctx = canvas.getContext("2d");
 
-  // 溫暖黏土陶土底色
+  // 溫暖乾淨的陶土米黃底
   ctx.fillStyle = "#ebdccb";
   ctx.fillRect(0, 0, 256, 256);
 
+  // 細緻斑點雜紋
   ctx.fillStyle = "#dfd0bc";
-  for (let i = 0; i < 400; i++) {
+  for (let i = 0; i < 300; i++) {
     const rx = Math.random() * 256;
     const ry = Math.random() * 256;
     ctx.fillRect(rx, ry, 2, 2);
   }
 
-  // 中心石板步道環紋
-  ctx.strokeStyle = "rgba(180, 160, 140, 0.4)";
+  // 典雅鋪石拼紋
+  ctx.strokeStyle = "rgba(170, 150, 130, 0.35)";
   ctx.lineWidth = 3;
   for (let x = 0; x < 256; x += 32) {
     ctx.beginPath();
@@ -49,9 +50,10 @@ export function buildHexIslands(scene, islandDataList, onIslandClick) {
   const hexGeo = new THREE.CylinderGeometry(GRID.R, GRID.R, GRID.TOP, 6);
   hexGeo.rotateY(Math.PI / 6);
 
+  // 溫暖消光黏土島面
   const mat = new THREE.MeshStandardMaterial({
     map: groundTex,
-    roughness: 0.9,
+    roughness: 0.85,
     metalness: 0.05
   });
 
@@ -67,27 +69,27 @@ export function buildHexIslands(scene, islandDataList, onIslandClick) {
     group.add(mesh);
     islandMeshes.push(mesh);
 
-    // 1. 半徑 1.8 步道環 (淺磚色 #d8bda5)
-    const walkGeo = new THREE.RingGeometry(1.52, 1.80, 6);
+    // 1. 半徑 1.8 淺磚色步道環
+    const walkGeo = new THREE.RingGeometry(1.55, 1.82, 6);
     walkGeo.rotateX(-Math.PI / 2);
     walkGeo.rotateY(Math.PI / 6);
-    const walkMat = new THREE.MeshStandardMaterial({ color: 0xd8bda5, roughness: 0.85 });
+    const walkMat = new THREE.MeshStandardMaterial({ color: COLORS.pathway, roughness: 0.85 });
     const walkway = new THREE.Mesh(walkGeo, walkMat);
     walkway.position.set(x, GRID.TOP + 0.003, z);
     walkway.receiveShadow = true;
     group.add(walkway);
 
-    // 2. 外緣路緣裝飾環 (#e4d6c3)
+    // 2. 外緣圓潤路緣裝飾環
     const rimGeo = new THREE.RingGeometry(GRID.R - 0.12, GRID.R, 6);
     rimGeo.rotateX(-Math.PI / 2);
     rimGeo.rotateY(Math.PI / 6);
-    const rimMat = new THREE.MeshBasicMaterial({ color: 0xe4d6c3 });
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xdfcfb7, roughness: 0.7 });
     const rim = new THREE.Mesh(rimGeo, rimMat);
     rim.position.set(x, GRID.TOP + 0.006, z);
     group.add(rim);
 
-    // 3. 白色海水消波泡沫環
-    const foamGeo = new THREE.RingGeometry(GRID.R + 0.06, GRID.R + 0.24, 6);
+    // 3. 白色消波浪花環
+    const foamGeo = new THREE.RingGeometry(GRID.R + 0.06, GRID.R + 0.22, 6);
     foamGeo.rotateX(-Math.PI / 2);
     foamGeo.rotateY(Math.PI / 6);
     const foamMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.45 });
@@ -105,7 +107,7 @@ export function buildHexIslands(scene, islandDataList, onIslandClick) {
     });
 
     const c2dObj = new CSS2DObject(pill);
-    c2dObj.position.set(x, GRID.TOP + 0.72, z + GRID.R * 0.72);
+    c2dObj.position.set(x, GRID.TOP + 0.75, z + GRID.R * 0.72);
     group.add(c2dObj);
   });
 

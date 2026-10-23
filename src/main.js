@@ -4,9 +4,7 @@ import { Environment } from "./core/environment.js";
 import { DATA } from "./config/data.js";
 import { buildHexIslands, axialToWorld } from "./island/grid.js";
 import { buildBridges } from "./island/bridges.js";
-import { AssetKit } from "./assets/kit.js";
 import { buildAllBuildings } from "./assets/buildings.js";
-import { FlowLinesManager } from "./logistics/flows.js";
 import { FireworksEngine } from "./fireworks/engine.js";
 
 class App {
@@ -16,7 +14,6 @@ class App {
     try {
       this.sceneMgr = new SceneManager(this.container);
       this.env = new Environment(this.sceneMgr.scene);
-      this.kit = new AssetKit();
 
       // 1. 六角島 (S 型蛇狀佈局)
       const { islandMeshes } = buildHexIslands(
@@ -29,13 +26,10 @@ class App {
       // 2. S 型小拱橋
       buildBridges(this.sceneMgr.scene, DATA.islands);
 
-      // 3. 實例化工坊、植栽樹木、長椅與路燈
-      buildAllBuildings(this.sceneMgr.scene, this.kit, DATA.islands);
+      // 3. 實例化溫暖彩色黏土工坊、植栽樹木、長椅與路燈 (修復黑剪影問題)
+      buildAllBuildings(this.sceneMgr.scene, DATA.islands);
 
-      // 4. 工藝流光帶
-      this.flowMgr = new FlowLinesManager(this.sceneMgr.scene, DATA.islands, DATA.flowLines);
-
-      // 5. 璀璨煙火引擎 (無音效干擾)
+      // 4. 璀璨煙火物理引擎
       this.fireworks = new FireworksEngine(this.sceneMgr.scene);
 
       this.setupRaycast();
@@ -46,7 +40,10 @@ class App {
       this.frameCount = 0;
       this.lastFpsUpdate = performance.now();
 
-      // 進入畫面
+      // 預設選取第 1 島展示詳細流程
+      this.selectIsland(DATA.islands[0]);
+
+      // 隱藏載入層
       document.getElementById("loading-overlay").classList.add("hidden");
 
       this.clock = new THREE.Clock();
@@ -88,9 +85,12 @@ class App {
   selectIsland(island) {
     this.currentSelectedIsland = island;
     const card = document.getElementById("detail-card");
-    document.getElementById("card-type").innerText = `第 ${island.step} 道工序`;
+
+    document.getElementById("card-step-badge").innerText = `第 ${island.step} 道工序 ． 傳統尺玉古法`;
     document.getElementById("card-title").innerText = island.name;
-    document.getElementById("card-desc").innerText = island.desc;
+    document.getElementById("card-purpose").innerText = island.purpose;
+    document.getElementById("card-process").innerText = island.process;
+    document.getElementById("card-standard").innerText = island.standard;
 
     const statsGrid = document.getElementById("card-stats");
     statsGrid.innerHTML = "";
@@ -107,7 +107,7 @@ class App {
     card.classList.add("active");
 
     const target = axialToWorld(island.axial.q, island.axial.r);
-    this.sceneMgr.flyTo(new THREE.Vector3(target.x, 0.65, target.z));
+    this.sceneMgr.flyTo(new THREE.Vector3(target.x, 0.68, target.z));
 
     document.querySelectorAll(".island-label-pill").forEach((pill) => {
       if (pill.innerText.includes(island.name.split(" ")[1])) {
@@ -116,19 +116,6 @@ class App {
         pill.classList.remove("selected");
       }
     });
-
-    this.addLiveLog(`🔍 檢視工藝工序：${island.name}`);
-  }
-
-  addLiveLog(msg) {
-    const list = document.getElementById("log-list");
-    const item = document.createElement("div");
-    item.className = "log-item";
-    item.innerText = msg;
-    list.prepend(item);
-    if (list.children.length > 4) {
-      list.removeChild(list.lastChild);
-    }
   }
 
   setupUI() {
@@ -141,8 +128,7 @@ class App {
     document.getElementById("card-fire-btn").addEventListener("click", () => {
       if (this.currentSelectedIsland) {
         const p = axialToWorld(this.currentSelectedIsland.axial.q, this.currentSelectedIsland.axial.r);
-        this.fireworks.launch(new THREE.Vector3(p.x, 0.65, p.z));
-        this.addLiveLog(`🚀 ${this.currentSelectedIsland.name} 現場直接升空試射！`);
+        this.fireworks.launch(new THREE.Vector3(p.x, 0.68, p.z));
       }
     });
 
@@ -153,39 +139,28 @@ class App {
         btn.classList.add("active");
         const minutes = parseInt(btn.getAttribute("data-time"), 10);
         this.env.setTime(minutes);
-        this.addLiveLog(`🕒 時段變更至 ${btn.innerText.trim()}`);
       });
     });
 
-    // 流光開關
-    let flowActive = true;
-    document.getElementById("toggle-flow").addEventListener("click", (e) => {
-      flowActive = !flowActive;
-      e.target.classList.toggle("active", flowActive);
-      this.flowMgr.toggle(flowActive);
-    });
-
-    // 鳥瞰模式切換
+    // 全景鳥瞰模式切換
     let topdown = false;
     document.getElementById("btn-topdown").addEventListener("click", () => {
       topdown = !topdown;
       if (topdown) {
         this.sceneMgr.setTopdownView();
       } else {
-        this.sceneMgr.flyTo(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 26, 44));
+        this.sceneMgr.flyTo(new THREE.Vector3(0, 0, 1.0), new THREE.Vector3(0, 24, 46));
       }
     });
 
     // 單發發射
     document.getElementById("btn-launch-firework").addEventListener("click", () => {
       this.fireworks.launch();
-      this.addLiveLog("💥 10號砲陣地發射 10吋尺玉錦冠煙火");
     });
 
     // 萬彈齊發
     document.getElementById("btn-launch-barrage").addEventListener("click", () => {
       this.fireworks.launchBarrage();
-      this.addLiveLog("🎆 10號砲陣地啟動連發矩陣盛典齊射！");
     });
   }
 
@@ -206,7 +181,6 @@ class App {
 
     this.sceneMgr.update();
     this.env.update(time);
-    this.flowMgr.update(time);
     this.fireworks.update();
     this.sceneMgr.render();
   }
