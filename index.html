@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>花火工坊島 Hanabi Craft Island - 3D 黏土微縮展示</title>
+  <title>花火工坊島 Hanabi Craft Island - 高精緻度 3D 黏土微縮展示</title>
   <style>
     :root {
       --coral: #db6a41;
-      --ink: #211d1d;
-      --cream: #fff8f4;
-      --yellow: #fcea8b;
-      --gold: #ffbe3b;
+      --ink: #1f1b1b;
+      --cream: #fff9f5;
+      --yellow: #fde883;
+      --gold: #f5a623;
+      --slate: #4a5568;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body, html {
       width: 100%; height: 100%; overflow: hidden;
       font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-      background: radial-gradient(circle at 50% 50%, #fffdf9 0%, #edddcf 100%);
+      background: radial-gradient(circle at 50% 50%, #fffdf9 0%, #ecdccf 100%);
     }
     #webgl-canvas, #css-canvas {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -27,93 +28,143 @@
     .ui-layer {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       z-index: 10; pointer-events: none; display: flex; flex-direction: column;
-      justify-content: space-between; padding: 20px;
+      justify-content: space-between; padding: 24px;
     }
+
+    /* 頂部品牌卡 */
     .brand-card {
       pointer-events: auto;
-      background: rgba(255, 248, 244, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      padding: 12px 20px;
-      border-radius: 16px;
+      background: rgba(255, 249, 245, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      padding: 14px 22px;
+      border-radius: 18px;
       width: fit-content;
-      box-shadow: 0 6px 20px rgba(74, 42, 20, 0.08);
+      box-shadow: 0 10px 30px rgba(74, 42, 20, 0.08);
     }
     .brand-eyebrow {
-      font-family: monospace; font-size: 10px; font-weight: 700;
-      color: var(--coral); letter-spacing: 2px;
+      font-family: ui-monospace, monospace; font-size: 10px; font-weight: 700;
+      color: var(--coral); letter-spacing: 2px; text-transform: uppercase;
     }
-    .brand-title { font-size: 18px; font-weight: 800; color: var(--ink); }
+    .brand-title {
+      font-size: 20px; font-weight: 800; color: var(--ink);
+      display: flex; align-items: center; gap: 8px; margin-top: 2px;
+    }
+    .brand-tag {
+      font-size: 11px; font-weight: 700; background: var(--coral);
+      color: #fff; padding: 2px 8px; border-radius: 999px;
+    }
 
+    /* 左側工藝資訊卡 */
+    .info-panel {
+      pointer-events: auto;
+      position: absolute;
+      top: 100px;
+      left: 24px;
+      width: 320px;
+      background: rgba(255, 249, 245, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 12px 36px rgba(74, 42, 20, 0.12);
+      transform: translateX(0);
+      transition: all 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+    .info-panel.hidden {
+      transform: translateX(-380px);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .info-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
+    }
+    .info-badge {
+      font-size: 11px; font-weight: 700; background: var(--yellow);
+      color: var(--ink); padding: 3px 8px; border-radius: 6px;
+    }
+    .info-close {
+      cursor: pointer; border: none; background: transparent;
+      font-size: 18px; color: var(--slate); font-weight: 700;
+    }
+    .info-title { font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+    .info-desc { font-size: 13px; color: #5a4b41; line-height: 1.5; margin-bottom: 14px; }
+    .metrics-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;
+    }
+    .metric-box {
+      background: rgba(255, 255, 255, 0.7);
+      padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.04);
+    }
+    .metric-label { font-size: 10px; color: #8c786c; font-weight: 600; }
+    .metric-value { font-size: 15px; font-weight: 800; color: var(--coral); font-family: Georgia, serif; }
+    .aesthetics-tag-row {
+      display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px;
+    }
+    .aes-tag {
+      font-size: 11px; font-weight: 700; background: #fff;
+      border: 1px solid rgba(219, 106, 65, 0.3); color: var(--coral);
+      padding: 3px 8px; border-radius: 999px;
+    }
+
+    /* 底部 HUD */
     .bottom-hud {
       pointer-events: auto; align-self: center; display: flex; align-items: center;
-      gap: 10px; background: rgba(255, 248, 244, 0.9);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      gap: 10px; background: rgba(255, 249, 245, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
       padding: 8px 16px; border-radius: 999px;
-      box-shadow: 0 8px 24px rgba(74, 42, 20, 0.12);
+      box-shadow: 0 10px 30px rgba(74, 42, 20, 0.12);
     }
     .time-badge {
-      font-family: monospace; font-weight: 700; font-size: 13px;
-      color: var(--ink); padding: 4px 8px; background: rgba(219, 106, 65, 0.12);
-      border-radius: 6px;
+      font-family: ui-monospace, monospace; font-weight: 700; font-size: 13px;
+      color: var(--ink); padding: 4px 10px; background: rgba(219, 106, 65, 0.12);
+      border-radius: 8px;
     }
     .hud-btn {
-      min-height: 36px; padding: 4px 14px; border-radius: 999px; border: none;
+      min-height: 38px; padding: 4px 14px; border-radius: 999px; border: none;
       background: #fff; color: var(--ink); font-size: 12px; font-weight: 700;
-      cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: 0.2s;
+      cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: all 0.2s ease;
     }
     .hud-btn:hover { background: var(--yellow); transform: translateY(-1px); }
     .hud-btn.active { background: var(--coral); color: #fff; }
     .hud-btn.fire-btn {
-      background: var(--coral);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      box-shadow: 0 2px 10px rgba(219, 106, 65, 0.4);
+      background: linear-gradient(135deg, #e65627 0%, #db6a41 100%);
+      color: #fff; box-shadow: 0 4px 12px rgba(219, 106, 65, 0.4);
     }
     .hud-btn.fire-btn:hover {
-      background: #e65627;
-      transform: translateY(-2px) scale(1.03);
-    }
-    .hud-btn.fire-btn:active {
-      transform: translateY(0);
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 6px 16px rgba(219, 106, 65, 0.55);
     }
 
+    /* 懸浮標籤 */
     .island-pill {
-      pointer-events: auto; cursor: pointer; background: rgba(255, 248, 244, 0.95);
-      border: 1px solid rgba(219, 106, 65, 0.35); padding: 5px 12px;
-      border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--ink);
-      white-space: nowrap; box-shadow: 0 4px 12px rgba(74, 42, 20, 0.15);
-      transform: translate(-50%, -50%); transition: all 0.2s ease;
+      pointer-events: auto; cursor: pointer; background: rgba(255, 249, 245, 0.95);
+      border: 1px solid rgba(219, 106, 65, 0.35); padding: 6px 14px;
+      border-radius: 999px; font-size: 12px; font-weight: 800; color: var(--ink);
+      white-space: nowrap; box-shadow: 0 4px 14px rgba(74, 42, 20, 0.15);
+      transform: translate(-50%, -50%); transition: all 0.2s cubic-bezier(0.2, 0.8, 0.4, 1);
     }
     .island-pill:hover {
       background: var(--yellow); border-color: var(--coral);
-      transform: translate(-50%, -55%) scale(1.06);
+      transform: translate(-50%, -60%) scale(1.08);
     }
     .island-pill.selected {
       background: var(--ink); color: #fff; border-color: var(--yellow);
+      transform: translate(-50%, -50%) scale(1.12);
     }
 
     #fire-tip {
-      position: absolute;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(33, 29, 29, 0.85);
-      color: #fff;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 15;
+      position: absolute; bottom: 84px; left: 50%;
+      transform: translateX(-50%); background: rgba(31, 27, 27, 0.88);
+      color: #fff; padding: 6px 18px; border-radius: 999px;
+      font-size: 12px; font-weight: 600; letter-spacing: 1px;
+      pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
     }
   </style>
 
@@ -129,17 +180,44 @@
 <body>
   <div class="ui-layer">
     <div class="brand-card">
-      <div class="brand-eyebrow">HANABI CRAFT ISLAND 3D</div>
-      <div class="brand-title">花火工坊：包裝・曝曬・施放</div>
+      <div class="brand-eyebrow">Hanabi Craftsmanship 3D</div>
+      <div class="brand-title">花火工坊島 <span class="brand-tag">職人高階版</span></div>
     </div>
-    <div id="fire-tip">點擊砲陣地或發射按鈕綻放夜空花火！</div>
+
+    <!-- 左側工藝資訊面板 -->
+    <div class="info-panel" id="info-panel">
+      <div class="info-header">
+        <span class="info-badge" id="info-stage">工序 01</span>
+        <button class="info-close" id="btn-close-info">&times;</button>
+      </div>
+      <div class="info-title" id="info-title">裝填包裝工坊</div>
+      <div class="info-desc" id="info-desc">將同心圓菊先變色星體排列於半球玉皮內，中心充填棉籽割藥，完成和紙玉掛與力線捆紮。</div>
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <div class="metric-label" id="m1-label">星體層數</div>
+          <div class="metric-value" id="m1-val">3 重芯</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label" id="m2-label">玉掛糊貼</div>
+          <div class="metric-value" id="m2-val">24 層牛皮紙</div>
+        </div>
+      </div>
+      <div style="font-size: 11px; font-weight: 700; color: #8c786c; margin-bottom: 4px;">鑑賞指標：</div>
+      <div class="aesthetics-tag-row" id="aes-tags">
+        <span class="aes-tag">型 - 圓度真球</span>
+        <span class="aes-tag">流 - 昇曲導火</span>
+      </div>
+    </div>
+
+    <div id="fire-tip">點擊砲台發射煙火，感受夜空變色花火與全島照光！</div>
+
     <div class="bottom-hud">
       <div class="time-badge" id="hud-clock">12:00</div>
       <button class="hud-btn active" data-time="720">日間工序</button>
       <button class="hud-btn" data-time="1140">夕暮霞光</button>
       <button class="hud-btn" data-time="1260">夜間試射</button>
-      <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1); margin: 0 4px;"></div>
-      <button class="hud-btn fire-btn" id="btn-fire">🎇 發射尺玉</button>
+      <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1); margin: 0 2px;"></div>
+      <button class="hud-btn fire-btn" id="btn-fire">🎇 施放尺玉</button>
       <button class="hud-btn" id="btn-reset">重置全景</button>
     </div>
   </div>
@@ -152,10 +230,44 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
+    // 1. 工藝島資料
     const ISLANDS_DATA = [
-      { id: "pack", name: "01 裝填包裝", q: -1, r: 0, theme: "#db6a41" },
-      { id: "dry",  name: "02 陽光曝曬", q: 0,  r: 0, theme: "#e09f3e" },
-      { id: "fire", name: "03 砲陣施放", q: 1,  r: 0, theme: "#466f7f" }
+      {
+        id: "pack",
+        name: "01 裝填包裝",
+        stage: "工序 01",
+        q: -1, r: 0,
+        theme: "#db6a41",
+        title: "裝填包裝與尺玉解構",
+        desc: "精準配置同心圓變色星體（菊先星）與棉籽割藥，完成和紙玉掛封口與麻繩縱橫力線捆紮，確保空中完美真球綻放。",
+        m1_lbl: "星體配置", m1_val: "3 重同心芯",
+        m2_lbl: "力線捆紮", m2_val: "縱橫 48 道",
+        tags: ["型 - 真球幾何", "雅 - 變色秩序"]
+      },
+      {
+        id: "dry",
+        name: "02 陽光曝曬",
+        stage: "工序 02",
+        q: 0, r: 0,
+        theme: "#e09f3e",
+        title: "天然晾乾與溫濕控管",
+        desc: "在階梯式通風晾曬棚進行自然乾燥，嚴格管控藥粒含水率低於 1.2%，防止未燃殘渣並保證發色火光的最高純度。",
+        m1_lbl: "含水率標準", m1_val: "< 1.2 %",
+        m2_lbl: "日曬週期", m2_val: "72 小時循環",
+        tags: ["流 - 燃燒流暢", "雅 - 煙氣極微"]
+      },
+      {
+        id: "fire",
+        name: "03 砲陣施放",
+        stage: "工序 03",
+        q: 1, r: 0,
+        theme: "#466f7f",
+        title: "迫擊砲陣與電子點火",
+        desc: "從 3 吋速射筒到 10 吋巨大尺玉發射管排列，配置防爆沙包環與數位時碼點火台，點火瞬間黑火藥推進將球彈推向 330 米高空。",
+        m1_lbl: "昇空高度", m1_val: "330 公尺",
+        m2_lbl: "開花直徑", m2_val: "280 公尺",
+        tags: ["魄 - 震天砲響", "情 - 錦冠垂柳", "型 - 滿天光華"]
+      }
     ];
 
     const R = 2.02, SPACING = 2.3, TOP = 0.65, WATER_Y = -0.18;
@@ -173,11 +285,12 @@
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
 
     const labelRenderer = new CSS2DRenderer({ element: cssContainer });
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
 
-    const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.3, 200);
+    const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.3, 260);
     const defaultDir = new THREE.Vector3(0.2, 0.36, 0.88).normalize();
     camera.position.copy(defaultDir.clone().multiplyScalar(22));
 
@@ -188,28 +301,34 @@
     controls.minPolarAngle = THREE.MathUtils.degToRad(20);
     controls.maxPolarAngle = THREE.MathUtils.degToRad(75);
     controls.minDistance = 4;
-    controls.maxDistance = 60;
+    controls.maxDistance = 65;
     controls.target.set(0, 0.2, 0);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xf4eee3, 30, 95);
+    scene.fog = new THREE.Fog(0xf4eee3, 32, 110);
 
-    // 光照系統
+    // 2. 光源系統（太陽、環境半球、補光，以及煙火瞬間閃光燈）
     const hemiLight = new THREE.HemisphereLight(0xeef6fa, 0x8f8270, 1.3);
     scene.add(hemiLight);
 
     const sunLight = new THREE.DirectionalLight(0xfff1de, 2.6);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.set(2048, 2048);
-    sunLight.shadow.camera.left = -15;
-    sunLight.shadow.camera.right = 15;
-    sunLight.shadow.camera.top = 15;
-    sunLight.shadow.camera.bottom = -15;
+    sunLight.shadow.camera.left = -16;
+    sunLight.shadow.camera.right = 16;
+    sunLight.shadow.camera.top = 16;
+    sunLight.shadow.camera.bottom = -16;
     sunLight.shadow.bias = -0.0006;
     scene.add(sunLight);
 
-    // 水面 Shader
-    const waterGeo = new THREE.CircleGeometry(80, 48);
+    // 關鍵亮點：全島煙火照明點光源（PointLight）
+    const burstFlashLight = new THREE.PointLight(0xffffff, 0, 80, 1.4);
+    burstFlashLight.castShadow = true;
+    burstFlashLight.shadow.bias = -0.002;
+    scene.add(burstFlashLight);
+
+    // 3. 水面 Shader
+    const waterGeo = new THREE.CircleGeometry(100, 64);
     const waterMat = new THREE.ShaderMaterial({
       fog: true,
       uniforms: {
@@ -234,11 +353,11 @@
         uniform float fogNear, fogFar;
         varying vec3 vWorldPos;
         void main() {
-          float wave = sin(vWorldPos.x * 0.4 + uTime) * cos(vWorldPos.z * 0.4 + uTime * 0.8);
-          vec3 col = mix(uColorA, uColorB, wave * 0.25 + 0.5);
+          float wave = sin(vWorldPos.x * 0.35 + uTime * 1.2) * cos(vWorldPos.z * 0.35 + uTime * 0.9);
+          vec3 col = mix(uColorA, uColorB, wave * 0.28 + 0.5);
           float d = length(vWorldPos - cameraPosition);
           float f = smoothstep(fogNear, fogFar, d);
-          gl_FragColor = vec4(mix(col, fogColor, f), 0.95);
+          gl_FragColor = vec4(mix(col, fogColor, f), 0.96);
         }
       `,
       transparent: true
@@ -246,32 +365,72 @@
     const water = new THREE.Mesh(waterGeo, waterMat);
     water.rotation.x = -Math.PI / 2;
     water.position.y = WATER_Y;
+    water.receiveShadow = true;
     scene.add(water);
 
-    // 共用材質
+    // 4. 背景遠山與低模白雲
+    const mountainMat = new THREE.MeshStandardMaterial({ color: 0x9fb896, roughness: 0.95, flatShading: true });
+    for (let i = 0; i < 9; i++) {
+      const ang = (i / 9) * Math.PI * 2;
+      const dist = 32 + (i % 3) * 6;
+      const m = new THREE.Mesh(new THREE.ConeGeometry(7 + (i % 2) * 3, 7 + (i % 3) * 3, 5), mountainMat);
+      m.position.set(Math.cos(ang) * dist, 2.5, Math.sin(ang) * dist);
+      scene.add(m);
+    }
+
+    const cloudGroup = new THREE.Group();
+    const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+    for (let c = 0; c < 5; c++) {
+      const cMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(1.4 + Math.random() * 0.8, 1), cloudMat);
+      cMesh.position.set((Math.random() - 0.5) * 35, 12 + Math.random() * 5, (Math.random() - 0.5) * 35);
+      cloudGroup.add(cMesh);
+    }
+    scene.add(cloudGroup);
+
+    // 5. 黏土微縮材質
     const hexGeo = new THREE.CircleGeometry(R - 0.05, 6).rotateZ(Math.PI / 6).rotateX(-Math.PI / 2);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0xf3eee3, roughness: 0.9 });
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0xb48560, roughness: 0.75 });
-    const ironMat = new THREE.MeshStandardMaterial({ color: 0x3d4349, roughness: 0.5, metalness: 0.3 });
-    const ballMat = new THREE.MeshStandardMaterial({ color: 0xdb6a41, roughness: 0.7 });
-    const sandMat = new THREE.MeshStandardMaterial({ color: 0xd6c498, roughness: 0.9 });
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5cda7, roughness: 0.8 });
-    const clothesMat = new THREE.MeshStandardMaterial({ color: 0x2b4c7e, roughness: 0.8 });
-    const capMat = new THREE.MeshStandardMaterial({ color: 0xffce54, roughness: 0.7 });
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0xf4eee4, roughness: 0.92 });
+    const walkMat   = new THREE.MeshStandardMaterial({ color: 0xe0c4ad, roughness: 0.88 });
+    const curbMat   = new THREE.MeshStandardMaterial({ color: 0xdfd2c0, roughness: 0.85 });
+    const woodMat   = new THREE.MeshStandardMaterial({ color: 0xb5845c, roughness: 0.76 });
+    const darkWood  = new THREE.MeshStandardMaterial({ color: 0x734c2c, roughness: 0.85 });
+    const ironMat   = new THREE.MeshStandardMaterial({ color: 0x3c424a, roughness: 0.45, metalness: 0.35 });
+    const bronzeMat = new THREE.MeshStandardMaterial({ color: 0x9c7444, roughness: 0.5, metalness: 0.2 });
+    const ballMat   = new THREE.MeshStandardMaterial({ color: 0xd9653b, roughness: 0.72 });
+    const coreMat   = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.95 });
+    const starGold  = new THREE.MeshStandardMaterial({ color: 0xfcc419, roughness: 0.6 });
+    const starPurple= new THREE.MeshStandardMaterial({ color: 0x9b5de5, roughness: 0.6 });
+    const starCyan  = new THREE.MeshStandardMaterial({ color: 0x00bbf9, roughness: 0.6 });
+    const sandMat   = new THREE.MeshStandardMaterial({ color: 0xd4c29a, roughness: 0.9 });
+    const paperMat  = new THREE.MeshStandardMaterial({ color: 0xebd3a8, roughness: 0.9 });
 
     const pills = [];
-    const interactiveObjects = [];
+    const interactiveLaunchers = [];
 
-    // 建立 3 座工藝島
+    // ==========================================
+    // 6. 島嶼建造與超精緻機台
+    // ==========================================
     ISLANDS_DATA.forEach((isle) => {
       const pos = axialToWorld(isle.q, isle.r);
       const group = new THREE.Group();
       group.position.set(pos.x, 0, pos.z);
 
+      // 島面與路緣
       const top = new THREE.Mesh(hexGeo, groundMat);
       top.position.y = TOP;
       top.receiveShadow = true;
       group.add(top);
+
+      const walkGeo = new THREE.RingGeometry(1.5, 1.8, 6).rotateZ(Math.PI / 6).rotateX(-Math.PI / 2);
+      const walk = new THREE.Mesh(walkGeo, walkMat);
+      walk.position.y = TOP + 0.003;
+      group.add(walk);
+
+      const curbGeo = new THREE.RingGeometry(1.8, 1.95, 6).rotateZ(Math.PI / 6).rotateX(-Math.PI / 2);
+      const curb = new THREE.Mesh(curbGeo, curbMat);
+      curb.position.y = TOP + 0.006;
+      curb.receiveShadow = true;
+      group.add(curb);
 
       const decoGeo = new THREE.CylinderGeometry(R, R - 0.02, 0.14, 6).rotateY(Math.PI / 6);
       const decoMat = new THREE.MeshStandardMaterial({ color: isle.theme, roughness: 0.7 });
@@ -281,98 +440,216 @@
 
       const cliff = new THREE.Mesh(
         new THREE.CylinderGeometry(R - 0.02, R * 0.94, TOP - WATER_Y, 6).rotateY(Math.PI / 6),
-        new THREE.MeshStandardMaterial({ color: 0x937f6d, roughness: 0.95 })
+        new THREE.MeshStandardMaterial({ color: 0x8a7767, roughness: 0.95 })
       );
       cliff.position.y = (TOP + WATER_Y) / 2;
+      cliff.receiveShadow = true;
       group.add(cliff);
 
+      // -------------------------------------------------------------
+      // 01 裝填包裝島：重頭戲「尺玉剖面展示」＋工藝機台
+      // -------------------------------------------------------------
       if (isle.id === "pack") {
-        const table = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 0.8), woodMat);
-        table.position.set(0, TOP + 0.15, 0);
-        table.castShadow = true;
-        group.add(table);
+        // 主作業長桌
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.28, 0.85), woodMat);
+        bench.position.set(0, TOP + 0.14, 0);
+        bench.castShadow = true;
+        group.add(bench);
 
-        const shellA = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 8, 0, Math.PI), ballMat);
-        shellA.rotation.x = Math.PI / 2;
-        shellA.position.set(-0.3, TOP + 0.36, 0);
-        group.add(shellA);
+        // 尺玉剖面展示座（木質半月托架）
+        const cradle = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.08, 0.35), darkWood);
+        cradle.position.set(0.18, TOP + 0.32, 0);
+        cradle.castShadow = true;
+        group.add(cradle);
 
-        const shellB = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), ballMat);
-        shellB.position.set(0.3, TOP + 0.44, 0);
-        shellB.castShadow = true;
-        group.add(shellB);
-      } 
+        // 尺玉剖面模型 (Cutaway Shell)
+        const cutawayGroup = new THREE.Group();
+        cutawayGroup.position.set(0.18, TOP + 0.58, 0);
+        cutawayGroup.rotation.y = -Math.PI / 5;
+
+        // 外殼半球（牛皮紙層）
+        const shellHalf = new THREE.Mesh(
+          new THREE.SphereGeometry(0.32, 24, 16, 0, Math.PI),
+          new THREE.MeshStandardMaterial({ color: 0xd9653b, roughness: 0.7, side: THREE.DoubleSide })
+        );
+        shellHalf.rotation.x = Math.PI / 2;
+        cutawayGroup.add(shellHalf);
+
+        // 剖面中心割藥（Burst Charge）
+        const centerBurst = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.03, 16), coreMat);
+        centerBurst.rotation.x = Math.PI / 2;
+        cutawayGroup.add(centerBurst);
+
+        // 內圈色星（紫星）
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI;
+          const s = new THREE.Mesh(new THREE.SphereGeometry(0.026, 8, 8), starPurple);
+          s.position.set(Math.cos(a) * 0.16, Math.sin(a) * 0.16, 0.01);
+          cutawayGroup.add(s);
+        }
+
+        // 外圈菊先星（金星）
+        for (let i = 0; i < 14; i++) {
+          const a = (i / 14) * Math.PI;
+          const s = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), starGold);
+          s.position.set(Math.cos(a) * 0.25, Math.sin(a) * 0.25, 0.01);
+          cutawayGroup.add(s);
+        }
+        group.add(cutawayGroup);
+
+        // 桌上道具：膠合和紙卷架 + 糨糊碗 + 砝碼磅秤
+        const paperRoll = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.22, 12), paperMat);
+        paperRoll.position.set(-0.45, TOP + 0.36, -0.2);
+        paperRoll.rotation.z = Math.PI / 2;
+        group.add(paperRoll);
+
+        const glueBucket = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.1, 10), bronzeMat);
+        glueBucket.position.set(-0.48, TOP + 0.33, 0.2);
+        group.add(glueBucket);
+
+        const scaleBase = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.04, 0.16), ironMat);
+        scaleBase.position.set(-0.2, TOP + 0.3, 0.24);
+        group.add(scaleBase);
+      }
+
+      // -------------------------------------------------------------
+      // 02 陽光曝曬島：階梯式通風棚架＋多色星體曬盤＋溫濕度立牌
+      // -------------------------------------------------------------
       else if (isle.id === "dry") {
-        for (let x of [-0.6, 0.6]) {
-          for (let z of [-0.4, 0.4]) {
-            const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.8), woodMat);
-            post.position.set(x, TOP + 0.4, z);
-            group.add(post);
-          }
-        }
-        const bar1 = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.04, 0.04), woodMat);
-        bar1.position.set(0, TOP + 0.78, -0.4);
-        const bar2 = bar1.clone(); bar2.position.set(0, TOP + 0.78, 0.4);
-        group.add(bar1, bar2);
+        // 多層木質曬架柱與階梯橫條
+        const rackGroup = new THREE.Group();
+        rackGroup.position.set(0, TOP, 0);
 
-        for (let x = -0.4; x <= 0.4; x += 0.26) {
-          for (let z = -0.2; z <= 0.2; z += 0.26) {
-            const ball = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 12), ballMat);
-            ball.position.set(x, TOP + 0.1, z);
-            ball.castShadow = true;
-            group.add(ball);
-          }
+        for (let x of [-0.65, 0.65]) {
+          const mainPost = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.9), darkWood);
+          mainPost.position.set(x, 0.45, -0.4);
+          const frontPost = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.65), darkWood);
+          frontPost.position.set(x, 0.325, 0.35);
+          rackGroup.add(mainPost, frontPost);
         }
-      } 
+
+        // 半透明遮陽竹簾斜頂
+        const roof = new THREE.Mesh(
+          new THREE.BoxGeometry(1.45, 0.02, 0.9),
+          new THREE.MeshStandardMaterial({ color: 0xd9c298, roughness: 0.85 })
+        );
+        roof.position.set(0, 0.88, -0.05);
+        roof.rotation.x = 0.26;
+        roof.castShadow = true;
+        rackGroup.add(roof);
+
+        // 階梯式曬盤（三層，分別晾曬金星、青星、紫星）
+        const tiers = [
+          { y: 0.26, z: 0.2, mat: starGold },
+          { y: 0.42, z: -0.02, mat: starCyan },
+          { y: 0.58, z: -0.24, mat: starPurple }
+        ];
+
+        tiers.forEach((t) => {
+          const tray = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.03, 0.24), woodMat);
+          tray.position.set(0, t.y, t.z);
+          tray.castShadow = true;
+          rackGroup.add(tray);
+
+          // 曬盤內的色星顆粒群
+          for (let sx = -0.46; sx <= 0.46; sx += 0.1) {
+            for (let sz = -0.07; sz <= 0.07; sz += 0.07) {
+              const pellet = new THREE.Mesh(new THREE.SphereGeometry(0.022, 6, 6), t.mat);
+              pellet.position.set(sx + (Math.random()-0.5)*0.03, t.y + 0.03, t.z + sz);
+              rackGroup.add(pellet);
+            }
+          }
+        });
+
+        // 溫濕度立牌與安全防燄水桶
+        const signPost = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.5), woodMat);
+        signPost.position.set(-0.85, 0.25, 0.4);
+        const signBoard = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.03), paperMat);
+        signBoard.position.set(-0.85, 0.45, 0.4);
+        rackGroup.add(signPost, signBoard);
+
+        const bucket = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.06, 0.16, 12), new THREE.MeshStandardMaterial({ color: 0xb53b2b }));
+        bucket.position.set(0.82, 0.08, 0.35);
+        rackGroup.add(bucket);
+
+        group.add(rackGroup);
+      }
+
+      // -------------------------------------------------------------
+      // 03 砲陣施放島：階梯式迫擊砲排架＋沙包陣＋電子點火箱與線路
+      // -------------------------------------------------------------
       else if (isle.id === "fire") {
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
-          const sand = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.16, 0.18), sandMat);
-          sand.position.set(Math.cos(a) * 0.9, TOP + 0.08, Math.sin(a) * 0.9);
-          sand.rotation.y = -a;
+        // 環狀防爆沙包
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 5) {
+          const sand = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.16, 0.22), sandMat);
+          sand.position.set(Math.cos(a) * 0.95, TOP + 0.08, Math.sin(a) * 0.95);
+          sand.rotation.y = -a + 0.1;
           sand.castShadow = true;
           group.add(sand);
         }
-        [-0.32, 0, 0.32].forEach((offset, idx) => {
-          const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.11, 0.8, 16), ironMat);
-          tube.position.set(offset, TOP + 0.38, 0);
-          tube.rotation.z = (idx - 1) * 0.12;
+
+        // 發射迫擊砲排架（小吋數 3 門 + 巨大尺玉筒 1 門）
+        const launcherRacks = [
+          { x: -0.36, z: 0.12, h: 0.65, r: 0.08, rotZ: 0.12 },
+          { x: -0.12, z: 0.12, h: 0.72, r: 0.09, rotZ: 0.04 },
+          { x: 0.12,  z: 0.12, h: 0.75, r: 0.09, rotZ: -0.04 },
+          { x: 0.42,  z: -0.05, h: 1.05, r: 0.16, rotZ: -0.1 } // 10 吋巨大尺玉迫擊筒
+        ];
+
+        launcherRacks.forEach((cfg) => {
+          const tube = new THREE.Mesh(new THREE.CylinderGeometry(cfg.r, cfg.r * 1.05, cfg.h, 16), ironMat);
+          tube.position.set(cfg.x, TOP + cfg.h / 2, cfg.z);
+          tube.rotation.z = cfg.rotZ;
           tube.castShadow = true;
           tube.userData = { isLauncher: true };
           group.add(tube);
-          interactiveObjects.push(tube);
+          interactiveLaunchers.push(tube);
         });
+
+        // 數位時碼電子點火盒（黃色手提防震外箱）
+        const eMatchBox = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.14, 0.18), new THREE.MeshStandardMaterial({ color: 0xf5a623, roughness: 0.5 }));
+        eMatchBox.position.set(-0.35, TOP + 0.07, -0.45);
+        group.add(eMatchBox);
+
+        // 點火引信排線
+        const wireGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.55);
+        wireGeo.rotateZ(Math.PI / 3);
+        const wire = new THREE.Mesh(wireGeo, new THREE.MeshBasicMaterial({ color: 0x111111 }));
+        wire.position.set(-0.1, TOP + 0.1, -0.2);
+        group.add(wire);
       }
 
+      // 懸浮膠囊標籤
       const pillDiv = document.createElement('div');
       pillDiv.className = 'island-pill';
       pillDiv.textContent = isle.name;
       pillDiv.dataset.id = isle.id;
 
       const pillObj = new CSS2DObject(pillDiv);
-      pillObj.position.set(0, TOP + 0.35, 1.55);
+      pillObj.position.set(0, TOP + 0.4, 1.6);
       group.add(pillObj);
       pills.push(pillDiv);
 
       pillDiv.addEventListener('pointerdown', (e) => {
         e.stopPropagation();
-        flyTo(pos, 800, new THREE.Vector3(1.8, 3.2, 4.2));
-        pills.forEach(p => p.classList.toggle('selected', p.dataset.id === isle.id));
+        selectIsland(isle.id);
       });
 
       scene.add(group);
     });
 
-    // 拱橋連接
+    // 7. 拱橋連接
     function addBridge(posA, posB) {
       const bridge = new THREE.Group();
-      for (let i = 0; i < 7; i++) {
-        const t = (i + 0.5) / 7;
+      for (let i = 0; i < 9; i++) {
+        const t = (i + 0.5) / 9;
         const p = new THREE.Vector3().lerpVectors(posA, posB, t);
-        const y = Math.sin(t * Math.PI) * 0.12 + TOP - 0.02;
-        const deck = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.04, 0.12), woodMat);
+        const y = Math.sin(t * Math.PI) * 0.14 + TOP - 0.02;
+        const deck = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 0.11), woodMat);
         deck.position.set(p.x, y, p.z);
         deck.rotation.y = Math.PI / 2;
         deck.castShadow = true;
+        deck.receiveShadow = true;
         bridge.add(deck);
       }
       scene.add(bridge);
@@ -384,136 +661,148 @@
     addBridge(posDry, posFire);
 
     // ==========================================
-    // 職人推車動畫 (Worker with Handcart)
+    // 8. 職人小人與手推車
     // ==========================================
     const workerGroup = new THREE.Group();
-    // 職人人偶組裝
-    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.14, 4, 8), clothesMat);
-    body.position.y = 0.22;
-    body.castShadow = true;
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), skinMat);
-    head.position.y = 0.38;
-    const hat = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.06, 12), capMat);
-    hat.position.y = 0.46;
-    
-    // 左右腿
+    const clothesMat = new THREE.MeshStandardMaterial({ color: 0x2b4c7e, roughness: 0.8 });
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5cda7, roughness: 0.8 });
+
+    const wBody = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.15, 4, 8), clothesMat);
+    wBody.position.y = 0.23;
+    wBody.castShadow = true;
+    const wHead = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), skinMat);
+    wHead.position.y = 0.39;
+    const wHat = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.07, 12), new THREE.MeshStandardMaterial({ color: 0xfcc419 }));
+    wHat.position.y = 0.48;
+
     const legGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.14);
-    const leftLeg = new THREE.Mesh(legGeo, clothesMat); leftLeg.position.set(-0.04, 0.07, 0);
-    const rightLeg = new THREE.Mesh(legGeo, clothesMat); rightLeg.position.set(0.04, 0.07, 0);
+    const wLegL = new THREE.Mesh(legGeo, clothesMat); wLegL.position.set(-0.04, 0.07, 0);
+    const wLegR = new THREE.Mesh(legGeo, clothesMat); wLegR.position.set(0.04, 0.07, 0);
 
-    // 推車本體
-    const cart = new THREE.Group();
-    const cartBox = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.38), woodMat);
-    cartBox.position.set(0, 0.15, -0.32);
+    const wCart = new THREE.Group();
+    const cartBox = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.15, 0.4), woodMat);
+    cartBox.position.set(0, 0.16, -0.32);
     cartBox.castShadow = true;
-    const wheelGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.03, 12);
-    wheelGeo.rotateZ(Math.PI / 2);
-    const leftWheel = new THREE.Mesh(wheelGeo, ironMat); leftWheel.position.set(-0.16, 0.07, -0.32);
-    const rightWheel = new THREE.Mesh(wheelGeo, ironMat); rightWheel.position.set(0.16, 0.07, -0.32);
-    // 載運的球彈
-    const loadedBall = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), ballMat);
-    loadedBall.position.set(0, 0.25, -0.32);
-    cart.add(cartBox, leftWheel, rightWheel, loadedBall);
+    const wheelGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.03, 12); wheelGeo.rotateZ(Math.PI / 2);
+    const wheelL = new THREE.Mesh(wheelGeo, ironMat); wheelL.position.set(-0.17, 0.07, -0.32);
+    const wheelR = new THREE.Mesh(wheelGeo, ironMat); wheelR.position.set(0.17, 0.07, -0.32);
+    const carriedBall = new THREE.Mesh(new THREE.SphereGeometry(0.1, 14, 14), ballMat);
+    carriedBall.position.set(0, 0.28, -0.32);
+    wCart.add(cartBox, wheelL, wheelR, carriedBall);
 
-    workerGroup.add(body, head, hat, leftLeg, rightLeg, cart);
+    workerGroup.add(wBody, wHead, wHat, wLegL, wLegR, wCart);
     scene.add(workerGroup);
 
-    // 移動路徑插值點 (包裝 -> 曝曬 -> 砲台)
-    const workerWaypoints = [
-      new THREE.Vector3(posPack.x + 0.6, TOP, posPack.z + 0.2),
-      new THREE.Vector3((posPack.x + posDry.x) / 2, TOP + 0.1, posPack.z),
-      new THREE.Vector3(posDry.x, TOP, posDry.z + 0.2),
-      new THREE.Vector3((posDry.x + posFire.x) / 2, TOP + 0.1, posDry.z),
-      new THREE.Vector3(posFire.x - 0.6, TOP, posFire.z + 0.2)
+    const waypoints = [
+      new THREE.Vector3(posPack.x + 0.6, TOP, posPack.z + 0.18),
+      new THREE.Vector3((posPack.x + posDry.x) / 2, TOP + 0.12, posPack.z),
+      new THREE.Vector3(posDry.x, TOP, posDry.z + 0.18),
+      new THREE.Vector3((posDry.x + posFire.x) / 2, TOP + 0.12, posDry.z),
+      new THREE.Vector3(posFire.x - 0.5, TOP, posFire.z + 0.18)
     ];
 
-    let workerT = 0;
-    let workerDir = 1;
+    let wProgress = 0, wDir = 1;
     function updateWorker(dt) {
-      workerT += dt * 0.16 * workerDir;
-      if (workerT >= 1) { workerT = 1; workerDir = -1; }
-      else if (workerT <= 0) { workerT = 0; workerDir = 1; }
+      wProgress += dt * 0.15 * wDir;
+      if (wProgress >= 1) { wProgress = 1; wDir = -1; }
+      else if (wProgress <= 0) { wProgress = 0; wDir = 1; }
 
-      // 沿節點路徑取樣
-      const totalSegs = workerWaypoints.length - 1;
-      const progress = workerT * totalSegs;
-      const segIndex = Math.min(Math.floor(progress), totalSegs - 1);
-      const segProgress = progress - segIndex;
+      const totalSegs = waypoints.length - 1;
+      const p = wProgress * totalSegs;
+      const seg = Math.min(Math.floor(p), totalSegs - 1);
+      const frac = p - seg;
 
-      const pA = workerWaypoints[segIndex];
-      const pB = workerWaypoints[segIndex + 1];
-      const curPos = new THREE.Vector3().lerpVectors(pA, pB, segProgress);
+      const curPos = new THREE.Vector3().lerpVectors(waypoints[seg], waypoints[seg + 1], frac);
       workerGroup.position.copy(curPos);
 
-      // 朝向計算
-      const lookDelta = workerDir > 0 ? 0.02 : -0.02;
-      const nextT = THREE.MathUtils.clamp(workerT + lookDelta, 0, 1) * totalSegs;
-      const nextSeg = Math.min(Math.floor(nextT), totalSegs - 1);
-      const nextP = new THREE.Vector3().lerpVectors(workerWaypoints[nextSeg], workerWaypoints[nextSeg + 1], nextT - nextSeg);
-      workerGroup.lookAt(nextP.x, workerGroup.position.y, nextP.z);
+      const nextP = wProgress + (wDir > 0 ? 0.03 : -0.03);
+      const lookT = THREE.MathUtils.clamp(nextP, 0, 1) * totalSegs;
+      const lSeg = Math.min(Math.floor(lookT), totalSegs - 1);
+      const lookPos = new THREE.Vector3().lerpVectors(waypoints[lSeg], waypoints[lSeg + 1], lookT - lSeg);
+      workerGroup.lookAt(lookPos.x, workerGroup.position.y, lookPos.z);
 
-      // 步伐與擺動
-      const walkCycle = performance.now() * 0.008;
-      leftLeg.rotation.x = Math.sin(walkCycle) * 0.6;
-      rightLeg.rotation.x = -Math.sin(walkCycle) * 0.6;
-      workerGroup.position.y += Math.abs(Math.sin(walkCycle * 2)) * 0.015;
+      const cycle = performance.now() * 0.009;
+      wLegL.rotation.x = Math.sin(cycle) * 0.55;
+      wLegR.rotation.x = -Math.sin(cycle) * 0.55;
+      workerGroup.position.y += Math.abs(Math.sin(cycle * 2)) * 0.012;
     }
 
     // ==========================================
-    // 尺玉升空與絢麗夜空綻放 (Fireworks Engine)
+    // 9. 煙火變色與全島照明引擎
     // ==========================================
     const rockets = [];
-    const sparks = [];
-    const sparkGeo = new THREE.BufferGeometry();
-    const sparkMat = new THREE.PointsMaterial({
-      size: 0.24,
-      vertexColors: true,
-      transparent: true,
-      opacity: 1.0,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
+    const fireworksSparks = [];
 
-    const COLOR_PALETTES = [
-      [new THREE.Color(0xff4500), new THREE.Color(0xffd700), new THREE.Color(0xffffff)], // 牡丹金赤
-      [new THREE.Color(0x00d2ff), new THREE.Color(0x7b2cbf), new THREE.Color(0xff007f)], // 錦冠霓虹
-      [new THREE.Color(0x52b788), new THREE.Color(0x74c69d), new THREE.Color(0xffea00)]  // 翡翠綠星
+    // 精心調配的花火色彩：起始色 -> 綻放變色（紫轉金、藍轉粉、翡翠轉亮白）
+    const AESTHETIC_PALETTES = [
+      {
+        name: "菊先紫變金冠",
+        startCol: new THREE.Color(0x9b5de5), // 盛開紫
+        endCol:   new THREE.Color(0xffbe3b), // 下墜轉暗金
+        tailCol:  new THREE.Color(0xffe29a)
+      },
+      {
+        name: "雙重芯牡丹霓虹",
+        startCol: new THREE.Color(0x00f5d4), // 亮藍綠
+        endCol:   new THREE.Color(0xf15bb5), // 漸變粉紅
+        tailCol:  new THREE.Color(0xffd166)
+      },
+      {
+        name: "錦冠菊落柳",
+        startCol: new THREE.Color(0xff6b35), // 熾熱赤紅
+        endCol:   new THREE.Color(0xffd166), // 垂流黃金柳
+        tailCol:  new THREE.Color(0xffffff)
+      }
     ];
 
+    let cameraShakeIntensity = 0;
+
     function launchFirework() {
-      // 升空導引火箭
-      const startX = posFire.x + (Math.random() - 0.5) * 0.4;
-      const startZ = posFire.z + (Math.random() - 0.5) * 0.4;
-      const targetY = 9.5 + Math.random() * 4.0;
+      const palette = AESTHETIC_PALETTES[Math.floor(Math.random() * AESTHETIC_PALETTES.length)];
+      const startX = posFire.x + 0.42 + (Math.random() - 0.5) * 0.15;
+      const startZ = posFire.z - 0.05 + (Math.random() - 0.5) * 0.15;
+      const targetY = 10.5 + Math.random() * 3.5;
+
       rockets.push({
-        pos: new THREE.Vector3(startX, TOP + 0.4, startZ),
-        vel: new THREE.Vector3((Math.random() - 0.5) * 0.3, 7.5 + Math.random() * 2.0, (Math.random() - 0.5) * 0.3),
+        pos: new THREE.Vector3(startX, TOP + 0.8, startZ),
+        vel: new THREE.Vector3((Math.random() - 0.5) * 0.35, 8.8 + Math.random() * 1.5, (Math.random() - 0.5) * 0.35),
         targetY: targetY,
-        palette: COLOR_PALETTES[Math.floor(Math.random() * COLOR_PALETTES.length)]
+        palette: palette
       });
     }
 
-    function createExplosion(pos, palette) {
-      const particleCount = 140;
+    function createAestheticExplosion(pos, palette) {
+      // 1. 全島火光照明：點光源在開花中心瞬間爆發
+      burstFlashLight.position.copy(pos);
+      burstFlashLight.color.copy(palette.startCol);
+      burstFlashLight.intensity = 18.0;
+
+      // 2. 鏡頭震顫（魄 - 震撼瞬間）
+      cameraShakeIntensity = 0.22;
+
+      // 3. 雙層同心球形星體粒子（型 - 真球幾何）
+      const count = 180;
       const positions = [];
       const colors = [];
-      const velocities = [];
+      const vels = [];
+      const origins = [];
 
-      for (let i = 0; i < particleCount; i++) {
-        // 球面均勻分佈（菊先幾何）
+      for (let i = 0; i < count; i++) {
         const theta = Math.random() * Math.PI * 2;
         const phi = Math.acos(Math.random() * 2 - 1);
-        const speed = 2.4 + Math.random() * 3.6;
+        const isCore = Math.random() < 0.25; // 25% 核心內芯
+        const speed = isCore ? (1.5 + Math.random() * 1.2) : (3.6 + Math.random() * 2.8);
 
         const vx = Math.sin(phi) * Math.cos(theta) * speed;
         const vy = Math.sin(phi) * Math.sin(theta) * speed;
         const vz = Math.cos(phi) * speed;
 
-        velocities.push(new THREE.Vector3(vx, vy, vz));
+        vels.push(new THREE.Vector3(vx, vy, vz));
         positions.push(pos.x, pos.y, pos.z);
+        origins.push(pos.x, pos.y, pos.z);
 
-        const col = palette[Math.floor(Math.random() * palette.length)];
-        colors.push(col.r, col.g, col.b);
+        const c = isCore ? palette.tailCol : palette.startCol;
+        colors.push(c.r, c.g, c.b);
       }
 
       const pGeo = new THREE.BufferGeometry();
@@ -521,7 +810,7 @@
       pGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
       const pMat = new THREE.PointsMaterial({
-        size: 0.28,
+        size: 0.34,
         vertexColors: true,
         transparent: true,
         opacity: 1.0,
@@ -532,69 +821,93 @@
       const pMesh = new THREE.Points(pGeo, pMat);
       scene.add(pMesh);
 
-      sparks.push({
+      fireworksSparks.push({
         mesh: pMesh,
         geo: pGeo,
-        vels: velocities,
+        vels: vels,
         life: 1.0,
-        decay: 0.65 + Math.random() * 0.2
+        decay: 0.48, // 約 2.1 秒漸變下垂
+        palette: palette
       });
     }
 
     function updateFireworks(dt) {
-      // 火箭升空
+      // 閃光衰減
+      if (burstFlashLight.intensity > 0) {
+        burstFlashLight.intensity = Math.max(0, burstFlashLight.intensity - dt * 24.0);
+      }
+
+      // 火箭升空與尾焰（流 - 行雲流水）
       for (let i = rockets.length - 1; i >= 0; i--) {
         const r = rockets[i];
         r.pos.addScaledVector(r.vel, dt);
-        r.vel.y -= 3.8 * dt; // 重力
+        r.vel.y -= 3.5 * dt;
 
-        // 煙火尾焰微粒
-        if (Math.random() < 0.6) {
-          const trailCol = [new THREE.Color(0xffbe3b)];
-          createExplosion(r.pos.clone().add(new THREE.Vector3((Math.random()-0.5)*0.1, 0, (Math.random()-0.5)*0.1)), trailCol);
+        // 升空導火金尾焰微粒
+        if (Math.random() < 0.75) {
+          const trailGeo = new THREE.BufferGeometry();
+          trailGeo.setAttribute('position', new THREE.Float32BufferAttribute([r.pos.x, r.pos.y, r.pos.z], 3));
+          trailGeo.setAttribute('color', new THREE.Float32BufferAttribute([r.palette.tailCol.r, r.palette.tailCol.g, r.palette.tailCol.b], 3));
+          const trailMat = new THREE.PointsMaterial({ size: 0.22, vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+          const trailMesh = new THREE.Points(trailGeo, trailMat);
+          scene.add(trailMesh);
+          fireworksSparks.push({ mesh: trailMesh, geo: trailGeo, vels: [new THREE.Vector3(0, -0.6, 0)], life: 0.3, decay: 1.5, palette: r.palette });
         }
 
         if (r.pos.y >= r.targetY || r.vel.y <= 0) {
-          createExplosion(r.pos, r.palette);
+          createAestheticExplosion(r.pos, r.palette);
           rockets.splice(i, 1);
         }
       }
 
-      // 炸裂火花粒子推進與淡出
-      for (let i = sparks.length - 1; i >= 0; i--) {
-        const s = sparks[i];
+      // 綻放粒子：動態變色＋重力垂流（情 - 錦冠下墜；雅 - 殘光優雅）
+      for (let i = fireworksSparks.length - 1; i >= 0; i--) {
+        const s = fireworksSparks[i];
         s.life -= s.decay * dt;
-        s.mesh.material.opacity = Math.max(0, s.life);
+        s.mesh.material.opacity = Math.max(0, Math.pow(s.life, 1.2));
 
         const posArr = s.geo.attributes.position.array;
+        const colArr = s.geo.attributes.color.array;
+
+        // 色彩隨生命週期漸變（變色星體）
+        const colorProgress = 1.0 - s.life;
+        const curCol = new THREE.Color().lerpColors(s.palette.startCol, s.palette.endCol, Math.min(colorProgress * 1.6, 1.0));
+
         for (let j = 0; j < s.vels.length; j++) {
           const v = s.vels[j];
           posArr[j * 3]     += v.x * dt;
           posArr[j * 3 + 1] += v.y * dt;
           posArr[j * 3 + 2] += v.z * dt;
 
-          v.y -= 2.2 * dt;  // 重力牽引下垂
-          v.multiplyScalar(0.96); // 空氣阻力
+          // 空氣阻力與柳絮垂落重力
+          v.x *= 0.965;
+          v.z *= 0.965;
+          v.y -= 2.6 * dt;
+
+          colArr[j * 3]     = curCol.r;
+          colArr[j * 3 + 1] = curCol.g;
+          colArr[j * 3 + 2] = curCol.b;
         }
         s.geo.attributes.position.needsUpdate = true;
+        s.geo.attributes.color.needsUpdate = true;
 
         if (s.life <= 0) {
           scene.remove(s.mesh);
           s.geo.dispose();
           s.mesh.material.dispose();
-          sparks.splice(i, 1);
+          fireworksSparks.splice(i, 1);
         }
       }
     }
 
     // ==========================================
-    // 互動控制與日夜切換
+    // 10. 鏡頭控制、資訊卡與日夜系統
     // ==========================================
     let isFlying = false, flyStart = 0, flyDur = 800;
     const startCam = new THREE.Vector3(), endCam = new THREE.Vector3();
     const startTar = new THREE.Vector3(), endTar = new THREE.Vector3();
 
-    function flyTo(target, duration = 800, offset = new THREE.Vector3(2.5, 4.5, 5.5)) {
+    function flyTo(target, duration = 800, offset = new THREE.Vector3(2.5, 4.2, 5.2)) {
       isFlying = true;
       flyStart = performance.now();
       flyDur = duration;
@@ -603,35 +916,70 @@
       startTar.copy(controls.target);
       endTar.copy(target);
     }
-
     controls.addEventListener('start', () => { isFlying = false; });
+
+    const infoPanel = document.getElementById('info-panel');
+    function selectIsland(id) {
+      const data = ISLANDS_DATA.find(d => d.id === id);
+      if (!data) return;
+
+      document.getElementById('info-stage').textContent = data.stage;
+      document.getElementById('info-title').textContent = data.title;
+      document.getElementById('info-desc').textContent = data.desc;
+      document.getElementById('m1-label').textContent = data.m1_lbl;
+      document.getElementById('m1-val').textContent = data.m1_val;
+      document.getElementById('m2-label').textContent = data.m2_lbl;
+      document.getElementById('m2-val').textContent = data.m2_val;
+
+      const tagContainer = document.getElementById('aes-tags');
+      tagContainer.innerHTML = '';
+      data.tags.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'aes-tag';
+        span.textContent = t;
+        tagContainer.appendChild(span);
+      });
+
+      infoPanel.classList.remove('hidden');
+      pills.forEach(p => p.classList.toggle('selected', p.dataset.id === id));
+
+      const pos = axialToWorld(data.q, data.r);
+      flyTo(pos, 800, new THREE.Vector3(1.8, 3.4, 4.4));
+    }
+
+    document.getElementById('btn-close-info').addEventListener('click', () => {
+      infoPanel.classList.add('hidden');
+      pills.forEach(p => p.classList.remove('selected'));
+    });
 
     let currentMinutes = 720;
     function setLighting(mins) {
       currentMinutes = mins;
-      let sunCol = 0xfff1de, sunI = 2.6, hemiCol = 0xeef6fa, night = 0.0;
       const tip = document.getElementById('fire-tip');
 
       if (mins === 720) {
-        sunLight.position.set(15, 25, 20);
+        sunLight.position.set(16, 26, 20);
+        sunLight.color.set(0xfff1de);
+        sunLight.intensity = 2.6;
+        hemiLight.color.set(0xeef6fa);
         scene.fog.color.set(0xf4eee3);
         tip.style.opacity = '0';
       } else if (mins === 1140) {
-        sunCol = 0xff9a7a; sunI = 1.6; hemiCol = 0xc0b2e0;
-        sunLight.position.set(30, 8, 12);
+        sunLight.position.set(28, 8, 12);
+        sunLight.color.set(0xff9a7a);
+        sunLight.intensity = 1.6;
+        hemiLight.color.set(0xc0b2e0);
         scene.fog.color.set(0xd99aa6);
         tip.style.opacity = '0';
       } else if (mins === 1260) {
-        sunCol = 0xb4c2ff; sunI = 0.4; hemiCol = 0x3b4d75; night = 1.0;
         sunLight.position.set(-15, 12, 15);
-        scene.fog.color.set(0x1a233d);
+        sunLight.color.set(0xb4c2ff);
+        sunLight.intensity = 0.35;
+        hemiLight.color.set(0x35446b);
+        scene.fog.color.set(0x182033);
         tip.style.opacity = '1';
-        // 切換到夜間自動發射一枚展示
         launchFirework();
       }
-      sunLight.color.set(sunCol);
-      sunLight.intensity = sunI;
-      hemiLight.color.set(hemiCol);
       document.getElementById('hud-clock').textContent = mins === 720 ? "12:00" : mins === 1140 ? "19:00" : "21:00";
     }
 
@@ -644,7 +992,6 @@
     });
 
     document.getElementById('btn-fire').addEventListener('click', () => {
-      // 若在白天點擊，自動切換至夜間模式以呈現最佳觀賞效果
       if (currentMinutes !== 1260) {
         document.querySelectorAll('.bottom-hud .hud-btn[data-time]').forEach(b => b.classList.remove('active'));
         document.querySelector('.bottom-hud .hud-btn[data-time="1260"]').classList.add('active');
@@ -656,26 +1003,23 @@
     document.getElementById('btn-reset').addEventListener('click', () => {
       flyTo(new THREE.Vector3(0, 0.2, 0), 800, defaultDir.clone().multiplyScalar(22));
       pills.forEach(p => p.classList.remove('selected'));
+      infoPanel.classList.add('hidden');
     });
 
-    // Raycast 點擊砲台發射
+    // 點擊砲管發射
     const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
+    const mouse = new THREE.Vector2();
     let downX = 0, downY = 0;
 
-    window.addEventListener('pointerdown', (e) => {
-      downX = e.clientX;
-      downY = e.clientY;
-    });
-
+    window.addEventListener('pointerdown', (e) => { downX = e.clientX; downY = e.clientY; });
     window.addEventListener('pointerup', (e) => {
       if (Math.hypot(e.clientX - downX, e.clientY - downY) > 6) return;
-      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-      pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(pointer, camera);
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
 
-      const intersects = raycaster.intersectObjects(interactiveObjects, false);
-      if (intersects.length > 0) {
+      const hits = raycaster.intersectObjects(interactiveLaunchers, false);
+      if (hits.length > 0) {
         if (currentMinutes !== 1260) {
           document.querySelectorAll('.bottom-hud .hud-btn[data-time]').forEach(b => b.classList.remove('active'));
           document.querySelector('.bottom-hud .hud-btn[data-time="1260"]').classList.add('active');
@@ -692,6 +1036,9 @@
       labelRenderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    // 預設選取展示 01 裝填島
+    selectIsland("pack");
+
     // 主動畫迴圈
     let last = performance.now();
     function animate(now) {
@@ -700,9 +1047,17 @@
       last = now;
 
       waterMat.uniforms.uTime.value += dt;
+      cloudGroup.rotation.y += dt * 0.015;
 
       updateWorker(dt);
       updateFireworks(dt);
+
+      // 鏡頭微震處理（魄）
+      if (cameraShakeIntensity > 0) {
+        camera.position.x += (Math.random() - 0.5) * cameraShakeIntensity;
+        camera.position.y += (Math.random() - 0.5) * cameraShakeIntensity;
+        cameraShakeIntensity = Math.max(0, cameraShakeIntensity - dt * 0.9);
+      }
 
       if (isFlying) {
         const p = Math.min((now - flyStart) / flyDur, 1.0);
