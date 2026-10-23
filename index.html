@@ -24,7 +24,7 @@
       --yellow: #fcea8b;
       --stone: #c5b5a7;
       --teal: #3e7c8c;
-      --bg-panel: rgba(255, 248, 244, 0.88);
+      --bg-panel: rgba(255, 248, 244, 0.9);
       --border-panel: rgba(219, 106, 65, 0.18);
       --shadow-soft: 0 12px 32px rgba(74, 42, 20, 0.12), 0 2px 6px rgba(74, 42, 20, 0.06);
     }
@@ -64,6 +64,7 @@
       height: 100%;
       z-index: 2;
       pointer-events: none;
+      overflow: hidden;
     }
 
     /* Loading Screen */
@@ -131,7 +132,6 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
-      transition: transform 0.2s ease;
     }
     .brand-eyebrow {
       font-family: ui-monospace, monospace;
@@ -238,7 +238,7 @@
       margin-bottom: 18px;
     }
     .fact-brick {
-      background: #ffffff99;
+      background: #ffffffbb;
       border: 1px solid #f0e3d8;
       border-radius: 14px;
       padding: 10px 14px;
@@ -290,7 +290,7 @@
       color: #8c7365;
     }
 
-    /* Right Sidebar (Navigation & Exploration) */
+    /* Right Sidebar */
     .sidebar {
       position: absolute;
       top: 24px;
@@ -306,36 +306,10 @@
       box-shadow: var(--shadow-soft);
       display: flex;
       flex-direction: column;
-      transform: translateX(0);
       transition: transform 0.3s ease;
     }
     .sidebar.closed {
       transform: translateX(360px);
-    }
-    .sidebar-tabs {
-      display: flex;
-      gap: 6px;
-      background: #eee1d5;
-      padding: 4px;
-      border-radius: 12px;
-      margin-bottom: 14px;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 8px 10px;
-      border: none;
-      border-radius: 9px;
-      background: transparent;
-      font-size: 12px;
-      font-weight: 700;
-      color: #6e6157;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .tab-btn.active {
-      background: #ffffff;
-      color: var(--coral);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
     .search-box {
       width: 100%;
@@ -346,7 +320,6 @@
       font-size: 13px;
       outline: none;
       margin-bottom: 12px;
-      transition: border-color 0.2s;
     }
     .search-box:focus {
       border-color: var(--coral);
@@ -445,9 +418,7 @@
       justify-content: center;
       transition: all 0.2s;
     }
-    .hud-btn:hover {
-      background: var(--yellow);
-    }
+    .hud-btn:hover { background: var(--yellow); }
     .hud-btn.active {
       background: var(--ink);
       color: #fff;
@@ -458,7 +429,7 @@
       margin-bottom: 2px;
     }
 
-    /* Live Activity Log Pill (Top Right) */
+    /* Live Activity Pill */
     .live-log-box {
       position: absolute;
       top: 24px;
@@ -495,7 +466,7 @@
 
     /* CSS2D Island Labels */
     .island-label-pill {
-      background: #ffffffdd;
+      background: #ffffffea;
       backdrop-filter: blur(8px);
       border: 1.5px solid var(--coral);
       color: var(--ink);
@@ -514,18 +485,6 @@
       color: #fff;
       border-color: var(--yellow);
       transform: scale(1.12) translateY(-2px);
-    }
-    .walker-badge {
-      background: #ffffffea;
-      border: 1.5px solid var(--coral);
-      padding: 2px 6px;
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: bold;
-      color: var(--coral);
-      pointer-events: none;
-      white-space: nowrap;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
     /* Mobile Adaptations */
@@ -570,13 +529,12 @@
     <div class="loading-sub" id="loading-status">正在生成黏土島嶼與微縮慶典...</div>
   </div>
 
-  <!-- 3D WebGL Canvas -->
+  <!-- 3D WebGL Canvas & CSS2D Container -->
   <canvas id="webgl-canvas"></canvas>
   <div id="css2d-container"></div>
 
   <!-- Interactive UI Overlay -->
   <div class="ui-layer">
-    <!-- Brand Info -->
     <div class="brand-card interactive">
       <div class="brand-eyebrow">Interactive Clay Model</div>
       <div class="brand-title">
@@ -586,44 +544,32 @@
       <div class="brand-subtitle">由 12 座六角島拼聚的 3D 煙火文創政策與工藝群島</div>
     </div>
 
-    <!-- Live Event Ticker -->
     <div class="live-log-box interactive" id="live-log">
       <span class="live-dot"></span>
-      <span id="log-text">職人隊伍正在向「升空發射臺」運送特裝菊花玉...</span>
+      <span id="log-text">職人隊伍正在向「升空發射陣地」運送特裝菊花玉...</span>
     </div>
 
-    <!-- Detail Drawer (Left) -->
+    <!-- Detail Drawer -->
     <div class="detail-card interactive" id="detail-card">
       <button class="card-close" id="card-close-btn">&times;</button>
-      <span class="card-badge" id="card-badge">島嶼主題</span>
+      <span class="card-badge" id="card-badge">盛典島嶼</span>
       <h2 class="card-title" id="card-title">主島名稱</h2>
-      <p class="card-desc" id="card-desc">這裡將呈現島嶼或項目的核心價值與政策願景。</p>
+      <p class="card-desc" id="card-desc">描述文字...</p>
       
-      <div class="card-facts" id="card-facts">
-        <!-- Fact bricks dynamically injected -->
-      </div>
+      <div class="card-facts" id="card-facts"></div>
 
       <div style="font-size:12px; font-weight:800; margin-top:8px; color:var(--coral);">島內重點設施／細項</div>
-      <div class="card-items-list" id="card-subitems">
-        <!-- Sub items dynamically injected -->
-      </div>
+      <div class="card-items-list" id="card-subitems"></div>
     </div>
 
-    <!-- Exploration Sidebar (Right) -->
+    <!-- Exploration Sidebar -->
     <div class="sidebar interactive" id="sidebar">
-      <div class="sidebar-tabs">
-        <button class="tab-btn active" id="tab-islands">盛典主題 (12)</button>
-        <button class="tab-btn" id="tab-collabs">協作網絡 (8)</button>
-      </div>
-
+      <div style="font-size:14px; font-weight:800; margin-bottom:12px; color:var(--coral);">盛典主題導航 (12)</div>
       <input type="text" class="search-box" id="search-input" placeholder="搜尋煙火技術、設施、物資...">
-
-      <div class="sidebar-list" id="sidebar-list">
-        <!-- List elements injected -->
-      </div>
+      <div class="sidebar-list" id="sidebar-list"></div>
     </div>
 
-    <!-- HUD Controller Toolbar (Bottom) -->
+    <!-- HUD Controller Toolbar -->
     <div class="hud-toolbar interactive">
       <div class="hud-group">
         <button class="hud-btn" id="time-dawn"><span class="icon">🌅</span>清晨</button>
@@ -646,10 +592,9 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-    import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
     /* ========================================================
-       0. DATA OBJECT (花火島群島架構與政策/工藝細項)
+       0. DATA OBJECT (花火島群島架構)
        ======================================================== */
     const DATA = {
       title: "花火島",
@@ -668,7 +613,7 @@
             { num: "100%", label: "深水阻燃安全巡檢率" }
           ],
           items: [
-            { id: "mortar_array", name: "矩陣式迫擊迫射管群", model: "mortar", desc: "精密合金黏土管陣，支援 3 至 12 吋菊玉升空。", facts: ["64 聯裝數位陣列", "耐熱 1,400°C"], year: "第 1 年" },
+            { id: "mortar_array", name: "矩陣式迫射管群", model: "mortar", desc: "精密合金黏土管陣，支援 3 至 12 吋菊玉升空。", facts: ["64 聯裝數位陣列", "耐熱 1,400°C"], year: "第 1 年" },
             { id: "fire_control", name: "中樞發射指揮艙", model: "tower", desc: "監控氣壓、風速與落彈彈道的全視角黏土控制樓。", facts: ["四重備援線路", "毫秒級閉鎖保護"], year: "第 1 年" },
             { id: "barge_berth", name: "海上浮台裝載棧橋", model: "pier", desc: "專供水上浮動發射載具補給特裝彈藥的防爆碼頭。", facts: ["8 座重載泊位", "全天候洋流減震"], year: "2-3 年" }
           ]
@@ -739,7 +684,7 @@
             { num: "45 艘", label: "電控高速發射遙控艇" }
           ],
           items: [
-            { id: "water_fan", name: "孔雀開屏水上發射舷", model: "pier", desc: "向兩側斜角拋射發射筒，在海平面畫出金色羽翼。", facts: ["水密防震設計", "即時防浪穩定基座"], year: "2-3 年" },
+            { id: "water_fan", name: "孔雀開屏發射舷", model: "pier", desc: "向兩側斜角拋射發射筒，在海平面畫出金色羽翼。", facts: ["水密防震設計", "即時防浪穩定基座"], year: "2-3 年" },
             { id: "reef_barrier", name: "消波黏土石礁群", model: "rocks", desc: "保護海灣水面平靜無浪，讓水上倒影達到鏡面級純淨。", facts: ["生態仿生孔隙", "海藻附著率增長 30%"], year: "第 1 年" }
           ]
         },
@@ -790,7 +735,7 @@
             { num: "80 人", label: "常駐島嶼愛樂樂團" }
           ],
           items: [
-            { id: "acoustic_shell", name: "貝殼露天共鳴音樂台", model: "stage", desc: "聲波反射板導引樂音直達海灣，與天際巨響完美卡點。", facts: ["木質聲學曲線設計"], year: "2-3 年" },
+            { id: "acoustic_shell", name: "露天共鳴音樂台", model: "stage", desc: "聲波反射板導引樂音直達海灣，與天際巨響完美卡點。", facts: ["木質聲學曲線設計"], year: "2-3 年" },
             { id: "synth_lab", name: "電音脈衝編程台", model: "lab", desc: "即時將火花爆裂波形轉化為沉浸式低音振幅。", facts: ["MIDI 觸發煙火定時器"], year: "2-3 年" }
           ]
         },
@@ -824,8 +769,8 @@
             { num: "0 事故", label: "連續七季金牌安全紀錄" }
           ],
           items: [
-            { id: "patrol_tower", name: "紅外線海空守護燈塔", model: "lighthouse", desc: "全天候監控掉落星子之火星熄滅狀況，保障林木安全。", facts: ["超長距熱感探測鏡頭"], year: "第 1 年" },
-            { id: "rescue_dock", name: "噴射消防急行艇泊塢", model: "pier", desc: "高壓海水霧化水砲，可在水上形成巨型防護水幕。", facts: ["雙發渦輪噴射引擎"], year: "第 1 年" }
+            { id: "patrol_tower", name: "紅外線守護燈塔", model: "lighthouse", desc: "全天候監控掉落星子之火星熄滅狀況，保障林木安全。", facts: ["超長距熱感探測鏡頭"], year: "第 1 年" },
+            { id: "rescue_dock", name: "消防急行艇泊塢", model: "pier", desc: "高壓海水霧化水砲，可在水上形成巨型防護水幕。", facts: ["雙發渦輪噴射引擎"], year: "第 1 年" }
           ]
         },
         {
@@ -841,8 +786,8 @@
             { num: "海潮發電", label: "碼頭 100% 自主潔淨能源" }
           ],
           items: [
-            { id: "clock_gate", name: "海風鐘樓迎賓大門", model: "gate", desc: "每當整點響起清脆鐘聲，並噴出五彩彩帶煙雲迎接旅客。", facts: ["青銅手工鍛造大鐘"], year: "第 1 年" },
-            { id: "visitor_hub", name: "花火群島導覽行旅驛", model: "house", desc: "領取導覽地圖、花火護照與專屬打卡蓋章點。", facts: ["無紙化 NFC 晶片手環"], year: "第 1 年" }
+            { id: "clock_gate", name: "海風鐘樓迎賓門", model: "gate", desc: "每當整點響起清脆鐘聲，並噴出五彩彩帶煙雲迎接旅客。", facts: ["青銅手工鍛造大鐘"], year: "第 1 年" },
+            { id: "visitor_hub", name: "花火群島行旅驛", model: "house", desc: "領取導覽地圖、花火護照與專屬打卡蓋章點。", facts: ["無紙化 NFC 晶片手環"], year: "第 1 年" }
           ]
         },
         {
@@ -851,39 +796,61 @@
           num: "12",
           q: 0, r: 0,
           colorTheme: "#db6a41",
-          summary: "群島的絕對幾何中心，巍峨聳立的黏土高塔是全島光影能量與天際花火的焦點。",
+          summary: "群島的幾何中心，巍峨聳立的黏土高塔是全島光影能量與天際花火的焦點。",
           facts: [
             { num: "42 米", label: "全島最高黏土景觀塔" },
             { num: "360 束", label: "極光雷射光束同步矩陣" },
             { num: "全息光幕", label: "霧化海風粒子成像投影" }
           ],
           items: [
-            { id: "spire_core", name: "千花稜鏡天幕塔身", model: "spire", desc: "折射四方花火的光華，頂部金球在夜色中如第二輪明月。", facts: ["多稜鏡手工燒製彩晶"], year: "第 1 年" },
+            { id: "spire_core", name: "千花稜鏡天幕塔", model: "spire", desc: "折射四方花火的光華，頂部金球在夜色中如第二輪明月。", facts: ["多稜鏡手工燒製彩晶"], year: "第 1 年" },
             { id: "central_plaza", name: "星之環聚會廣場", model: "plaza", desc: "群島步道交匯的圓形大道，慶典高潮時萬人同歡舞動。", facts: ["透水蓄光暖磚鋪設"], year: "第 1 年" }
           ]
         }
       ],
       collaborations: [
-        { id: "c1", from: "isl_craft", to: "isl_launch", cargo: "尺玉火藥球", role: "搬運工 (特製推車)", style: "official", text: "傳統菊花玉移交發射陣地" },
-        { id: "c2", from: "isl_chem", to: "isl_launch", cargo: "無煙色彩星藥", role: "光學研究員", style: "official", text: "環保無毒星藥配送" },
-        { id: "c3", from: "isl_matsuri", to: "isl_spire", cargo: "祭典燈籠與團扇", role: "浴衣遊行隊", style: "thematic", text: "文化巡遊踩街" },
-        { id: "c4", from: "isl_patrol", to: "isl_bay", cargo: "防護感測器", role: "巡邏警備員", style: "official", text: "水上落星監測網部署" },
-        { id: "c5", from: "isl_zen", to: "isl_observe", cargo: "線香火花禮盒", role: "茶道學徒", style: "thematic", text: "高台觀景品茗奉茶" },
-        { id: "c6", from: "isl_sound", to: "isl_spire", cargo: "光纖音訊線圈", role: "聲學工程師", style: "official", text: "交響樂總譜聲光聯調" },
-        { id: "c7", from: "isl_ferry", to: "isl_matsuri", cargo: "新鮮食材與冰塊", role: "單車貨運伕", style: "pending", text: "迎賓市集後勤補給" },
-        { id: "c8", from: "isl_spire", to: "isl_lantern", cargo: "祈願引火火種", role: "神職領航員", style: "thematic", text: "慶典聖火引渡" }
-      ],
-      dayCycles: [
-        { min: 360, name: "清晨", desc: "柔和粉橘晨霧，職人於島上準備火藥與日曬星藥。" },
-        { min: 720, name: "正午", desc: "艷陽溫暖灑落，渡輪進港，遊客在祭典屋台穿梭品嚐美食。" },
-        { min: 1080, name: "黃昏", desc: "紫霞與落日相伴，燈籠初上，全島太鼓聲起引燃氣氛。" },
-        { min: 1260, name: "花火夜", desc: "深藍靜謐星空，花火在海空連環綻放，建築暖光溢彩。" }
+        { id: "c1", from: "isl_craft", to: "isl_launch", cargo: "尺玉火藥球", role: "搬運工 (特製推車)" },
+        { id: "c2", from: "isl_chem", to: "isl_launch", cargo: "無煙色彩星藥", role: "光學研究員" },
+        { id: "c3", from: "isl_matsuri", to: "isl_spire", cargo: "祭典燈籠與團扇", role: "浴衣遊行隊" },
+        { id: "c4", from: "isl_patrol", to: "isl_bay", cargo: "防護感測器", role: "巡邏警備員" },
+        { id: "c5", from: "isl_zen", to: "isl_observe", cargo: "線香火花禮盒", role: "茶道學徒" },
+        { id: "c6", from: "isl_sound", to: "isl_spire", cargo: "光纖音訊線圈", role: "聲學工程師" },
+        { id: "c7", from: "isl_ferry", to: "isl_matsuri", cargo: "新鮮食材與冰塊", role: "單車貨運伕" },
+        { id: "c8", from: "isl_spire", to: "isl_lantern", cargo: "祈願引火火種", role: "神職領航員" }
       ]
     };
 
     /* ========================================================
-       1. MULBERRY32 DETERMINISTIC RANDOM ENGINE
+       1. 全域變數預先宣告（解決 TDZ 作用域錯誤）
        ======================================================== */
+    let scene, camera, renderer, cssRenderer, controls;
+    let clock = new THREE.Clock();
+    let currentMinutes = 1260;
+    let isNight = 1.0;
+    let isFlying = false;
+    let flightStart = 0;
+    let flightDuration = 800;
+    let camStartPos = new THREE.Vector3(), camEndPos = new THREE.Vector3();
+    let tgtStartPos = new THREE.Vector3(), tgtEndPos = new THREE.Vector3();
+
+    // 關鍵幾何與互動儲存陣列（移至最前避免 Cannot access before initialization）
+    let islandMeshes = [];
+    let clickableItems = [];
+    let walkersList = [];
+    let collabTubes = [];
+    let islandCenterCoords = {};
+    let fireworksArray = [];
+
+    // 環境光源與物件
+    let sunLight, fillLight, hemiLight;
+    let skySphere, waterMesh, basinMesh;
+
+    const SPACING = 2.28;
+    const R = 2.02;
+    const TOP = 0.65;
+    const WATER_Y = -0.18;
+
+    // 確定性偽隨機數
     let seed = 19890604;
     function mulberry32() {
       seed |= 0; seed = seed + 0x6D2B79F5 | 0;
@@ -893,35 +860,6 @@
     }
     const rand = mulberry32;
 
-    /* ========================================================
-       2. THREE.JS INITIALIZATION & SYSTEM ARCHITECTURE
-       ======================================================== */
-    let scene, camera, renderer, cssRenderer, controls;
-    let clock = new THREE.Clock();
-    let currentMinutes = 1260; // 預設 21:00 花火夜
-    let isNight = 1.0;
-    let selectedTarget = null;
-    let isFlying = false;
-    let flightStart = 0;
-    let flightDuration = 800;
-    let camStartPos = new THREE.Vector3(), camEndPos = new THREE.Vector3();
-    let tgtStartPos = new THREE.Vector3(), tgtEndPos = new THREE.Vector3();
-
-    // Lighting refs
-    let sunLight, fillLight, hemiLight;
-    let skySphere, waterMesh, basinMesh;
-    let buildingInstances = {};
-    let walkersList = [];
-    let collabTubes = [];
-    let islandCenterCoords = {};
-    let fireworksArray = [];
-
-    const SPACING = 2.28;
-    const R = 2.02;
-    const TOP = 0.65;
-    const WATER_Y = -0.18;
-
-    // Helper: Axial (q, r) to World (x, z)
     function axialToWorld(q, r) {
       return {
         x: Math.sqrt(3) * SPACING * (q + r / 2),
@@ -929,11 +867,14 @@
       };
     }
 
+    /* ========================================================
+       2. 初始化主程式
+       ======================================================== */
     try {
       const container = document.getElementById('webgl-canvas');
       const cssContainer = document.getElementById('css2d-container');
 
-      // WebGL Renderer with Clay Aesthetic Settings
+      // WebGL Renderer
       renderer = new THREE.WebGLRenderer({
         canvas: container,
         antialias: true,
@@ -947,21 +888,26 @@
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.05;
 
-      // CSS2D Renderer
-      cssRenderer = new CSS2DRenderer({ element: cssContainer });
+      // CSS2D Renderer (相容掛載寫法)
+      cssRenderer = new CSS2DRenderer();
       cssRenderer.setSize(window.innerWidth, window.innerHeight);
+      cssRenderer.domElement.style.position = 'absolute';
+      cssRenderer.domElement.style.top = '0';
+      cssRenderer.domElement.style.left = '0';
+      cssRenderer.domElement.style.pointerEvents = 'none';
+      cssContainer.appendChild(cssRenderer.domElement);
 
-      // Scene
+      // Scene & Fog
       scene = new THREE.Scene();
       scene.fog = new THREE.Fog(0xf4eee3, 42, 150);
 
-      // Perspective Camera (Narrow FOV 32 for miniature toy tilt-shift feel)
+      // Camera
       camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.3, 360);
       const initialDist = window.innerWidth < 800 ? 52 : 36;
       const initDir = new THREE.Vector3(0.24, 0.33, 0.87).normalize();
       camera.position.copy(initDir.clone().multiplyScalar(initialDist));
 
-      // OrbitControls
+      // Controls
       controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.07;
@@ -972,6 +918,7 @@
       controls.maxDistance = 75;
       controls.target.set(0, 0, 0);
 
+      // 構建場景
       initEnvironment();
       initProceduralIslands();
       initBridges();
@@ -979,21 +926,28 @@
       initCollaborationsAndWalkers();
       initUIListeners();
 
-      // Complete Loading
+      // 設定初始夜晚時間
+      setDayTime(1260);
+
+      // 關閉 Loading 畫面
       setTimeout(() => {
         const loader = document.getElementById('loading-screen');
-        loader.classList.add('hidden');
+        if (loader) loader.classList.add('hidden');
         triggerFirework(new THREE.Vector3(0, 6, 0), '#ff5533');
-      }, 700);
+      }, 600);
+
+      requestAnimationFrame(animate);
 
     } catch (err) {
       console.error("Initialization Failed:", err);
-      document.getElementById('loading-status').innerHTML = 
-        `<span style="color:#d9534f;font-weight:bold;">載入遇到異常：${err.message}<br>請確認瀏覽器支援 WebGL2 與 ES 模組。</span>`;
+      const statusEl = document.getElementById('loading-status');
+      if (statusEl) {
+        statusEl.innerHTML = `<span style="color:#d9534f;font-weight:bold;">載入遇到異常：${err.message}<br>請確認瀏覽器環境支援 WebGL 與 ES 模組。</span>`;
+      }
     }
 
     /* ========================================================
-       3. ENVIRONMENT: SKY SHADER, WATER, LIGHTS & BASIN
+       3. 環境、光線與地形
        ======================================================== */
     function initEnvironment() {
       // 1. Sky Dome Shader
@@ -1023,7 +977,6 @@
           uniform vec3 uSunDir;
           varying vec3 vWorldPosition;
 
-          // Simple hash for starry night
           float hash(vec3 p) {
             return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
           }
@@ -1033,11 +986,9 @@
             float h = smoothstep(-0.04, 0.65, dir.y);
             vec3 skyCol = mix(uHorizon, uTop, h);
 
-            // Sun halo
             float sunDot = max(0.0, dot(dir, normalize(uSunDir)));
             skyCol += pow(sunDot, 18.0) * 0.35 * (1.0 - uNight);
 
-            // Stars
             if (uNight > 0.05 && dir.y > 0.05) {
               vec3 starP = floor(dir * 180.0);
               float starVal = hash(starP);
@@ -1045,7 +996,6 @@
                 skyCol += vec3(0.9, 0.95, 1.0) * (starVal - 0.9965) * 600.0 * uNight;
               }
             }
-
             gl_FragColor = vec4(skyCol, 1.0);
           }
         `
@@ -1077,7 +1027,7 @@
       fillLight.position.set(-18, 15, -18);
       scene.add(fillLight);
 
-      // 3. Gentle Animated Water Surface
+      // 3. Water
       const waterGeo = new THREE.CircleGeometry(160, 64);
       const waterMat = new THREE.ShaderMaterial({
         uniforms: {
@@ -1089,10 +1039,8 @@
           fogFar: { value: scene.fog.far }
         },
         vertexShader: `
-          varying vec2 vUv;
           varying vec3 vWorldPos;
           void main() {
-            vUv = uv;
             vec4 wp = modelMatrix * vec4(position, 1.0);
             vWorldPos = wp.xyz;
             gl_Position = projectionMatrix * viewMatrix * wp;
@@ -1105,7 +1053,6 @@
           uniform vec3 fogColor;
           uniform float fogNear;
           uniform float fogFar;
-          varying vec2 vUv;
           varying vec3 vWorldPos;
 
           void main() {
@@ -1114,7 +1061,6 @@
             vec3 col = mix(uShallow, uDeep, smoothstep(12.0, 65.0, dist));
             col += waves * 0.035;
 
-            // Fog application
             float depth = length(vWorldPos - cameraPosition);
             float fogFactor = smoothstep(fogNear, fogFar, depth);
             col = mix(col, fogColor, fogFactor);
@@ -1130,8 +1076,8 @@
       waterMesh.receiveShadow = true;
       scene.add(waterMesh);
 
-      // 4. Distant Clay Basin Terrain (170x170 plane)
-      const basinGeo = new THREE.PlaneGeometry(160, 160, 60, 60);
+      // 4. Basin Terrain
+      const basinGeo = new THREE.PlaneGeometry(160, 160, 50, 50);
       basinGeo.rotateX(-Math.PI / 2);
       const pos = basinGeo.attributes.position;
       for (let i = 0; i < pos.count; i++) {
@@ -1141,7 +1087,7 @@
         let y = -0.3;
         if (d > 22 && d < 65) {
           let h = Math.sin((d - 22) / 43 * Math.PI) * 11.0;
-          if (z > 15) h *= 0.35; // Lower hills facing the front camera
+          if (z > 15) h *= 0.35;
           y += h + (rand() - 0.5) * 1.2;
         }
         pos.setY(i, y);
@@ -1179,12 +1125,9 @@
     }
 
     /* ========================================================
-       4. PROCEDURAL HEXAGONAL ISLANDS
+       4. 六角形島嶼生成
        ======================================================== */
-    const islandMeshes = [];
-
     function initProceduralIslands() {
-      // Procedural Canvas Texture for Clay Island Walkways/Grass
       const canvas = document.createElement('canvas');
       canvas.width = 256;
       canvas.height = 256;
@@ -1206,18 +1149,16 @@
         metalness: 0.02
       });
 
-      // Pointy-top hex geometry
       const hexGeo = new THREE.CylinderGeometry(R, R, TOP, 6);
-      hexGeo.rotateY(Math.PI / 6); // Pointy top
+      hexGeo.rotateY(Math.PI / 6);
 
-      DATA.islands.forEach((isl, idx) => {
+      DATA.islands.forEach((isl) => {
         const { x, z } = axialToWorld(isl.q, isl.r);
         islandCenterCoords[isl.id] = new THREE.Vector3(x, TOP, z);
 
         const islandGroup = new THREE.Group();
         islandGroup.position.set(x, TOP / 2, z);
 
-        // Main clay island body
         const mesh = new THREE.Mesh(hexGeo, islandMat);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
@@ -1225,7 +1166,6 @@
         islandGroup.add(mesh);
         islandMeshes.push(mesh);
 
-        // Decorative colored rim band (0.16 high)
         const rimGeo = new THREE.CylinderGeometry(R + 0.02, R + 0.02, 0.16, 6);
         rimGeo.rotateY(Math.PI / 6);
         const rimMat = new THREE.MeshStandardMaterial({
@@ -1236,21 +1176,19 @@
         rimMesh.position.y = TOP / 2 - 0.08;
         islandGroup.add(rimMesh);
 
-        // Water foam base ring around island
         const foamGeo = new THREE.RingGeometry(R + 0.08, R + 0.42, 6);
         foamGeo.rotateX(-Math.PI / 2);
         foamGeo.rotateZ(Math.PI / 6);
-        const foamMat = new THREE.MeshBasicMaterial({
+        const foam = new THREE.Mesh(foamGeo, new THREE.MeshBasicMaterial({
           color: 0xffffff,
           opacity: 0.45,
           transparent: true,
           side: THREE.DoubleSide
-        });
-        const foam = new THREE.Mesh(foamGeo, foamMat);
+        }));
         foam.position.y = WATER_Y - (TOP / 2) + 0.02;
         islandGroup.add(foam);
 
-        // CSS2D Floating Island Label Pill
+        // 浮動 CSS2D 標籤
         const pillDiv = document.createElement('div');
         pillDiv.className = 'island-label-pill';
         pillDiv.id = `label-${isl.id}`;
@@ -1268,7 +1206,7 @@
     }
 
     /* ========================================================
-       5. ARCHED BRIDGES BETWEEN ADJACENT ISLANDS
+       5. 拱橋生成
        ======================================================== */
     function initBridges() {
       const bridgePlankGeo = new THREE.BoxGeometry(0.38, 0.06, 0.12);
@@ -1281,7 +1219,6 @@
           const key = [a.id, b.id].sort().join('--');
           if (checkedPairs.has(key)) return;
 
-          // Check if hexes are neighbors: axial distance = 1
           const dq = a.q - b.q;
           const dr = a.r - b.r;
           const isNeighbor = (Math.abs(dq) <= 1 && Math.abs(dr) <= 1 && Math.abs(dq + dr) <= 1);
@@ -1299,9 +1236,7 @@
     function buildArchBridge(p1, p2, plankGeo, mat) {
       const numPlanks = 9;
       const group = new THREE.Group();
-      const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
       const dir = new THREE.Vector3().subVectors(p2, p1);
-      const len = dir.length();
       const angle = Math.atan2(dir.x, dir.z);
 
       for (let i = 0; i < numPlanks; i++) {
@@ -1321,12 +1256,9 @@
     }
 
     /* ========================================================
-       6. MODULAR CLAY BUILDINGS & DETAIL ARTIFACTS
+       6. 建築與細項微縮模型
        ======================================================== */
-    const clickableItems = [];
-
     function initModularBuildings() {
-      // Clay material palettes
       const clayWhite = new THREE.MeshStandardMaterial({ color: 0xf4ebdd, roughness: 0.8 });
       const clayCoral = new THREE.MeshStandardMaterial({ color: 0xdb6a41, roughness: 0.78 });
       const clayTeal = new THREE.MeshStandardMaterial({ color: 0x3e7c8c, roughness: 0.8 });
@@ -1337,15 +1269,12 @@
       DATA.islands.forEach(isl => {
         const center = islandCenterCoords[isl.id];
 
-        // 1. Center landmark / main pavilion
         const mainBldg = createIslandLandmark(isl, clayWhite, clayCoral, clayWood, clayGold, clayGlow);
         mainBldg.position.set(center.x, center.y, center.z - 0.45);
         scene.add(mainBldg);
 
-        // 2. Sub items arranged on grid
         isl.items.forEach((item, idx) => {
           const itemMesh = createItemMiniature(item.model, clayWhite, clayCoral, clayTeal, clayWood, clayGold, clayGlow);
-          // Layout in a semi-arc around center
           const theta = (idx / isl.items.length) * Math.PI * 1.5 - Math.PI * 0.75;
           const rad = 0.95;
           const px = center.x + Math.cos(theta) * rad;
@@ -1357,7 +1286,6 @@
           clickableItems.push(itemMesh);
         });
 
-        // 3. Perimeter details: 2-3 mini clay bonsai trees & street lamps
         for (let t = 0; t < 3; t++) {
           const ang = (t / 3) * Math.PI * 2 + (rand() * 0.5);
           const tx = center.x + Math.cos(ang) * (R - 0.3);
@@ -1372,7 +1300,6 @@
     function createIslandLandmark(isl, mWhite, mCoral, mWood, mGold, mGlow) {
       const g = new THREE.Group();
       if (isl.id === "isl_spire") {
-        // High Spire for Center Island
         const base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.7, 0.8, 6), mWhite);
         base.position.y = 0.4;
         const spire = new THREE.Mesh(new THREE.ConeGeometry(0.38, 2.4, 6), mCoral);
@@ -1381,7 +1308,6 @@
         orb.position.y = 3.15;
         g.add(base, spire, orb);
       } else if (isl.id === "isl_craft" || isl.id === "isl_matsuri") {
-        // Japanese Style Hip Roof Workshop
         const wall = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.65, 0.9), mWhite);
         wall.position.y = 0.325;
         const roof = new THREE.Mesh(new THREE.ConeGeometry(0.85, 0.55, 4), mCoral);
@@ -1389,7 +1315,6 @@
         roof.rotation.y = Math.PI / 4;
         g.add(wall, roof);
       } else {
-        // Modern Clay Studio with Lantern/Dome
         const base = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 0.8), mWhite);
         base.position.y = 0.25;
         const dome = new THREE.Mesh(new THREE.SphereGeometry(0.38, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), mCoral);
@@ -1406,7 +1331,7 @@
       g.add(basePlate);
 
       switch (modelType) {
-        case 'mortar': // Fireworks tubes
+        case 'mortar':
           for (let i = -1; i <= 1; i++) {
             const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.45, 8), mCoral);
             tube.position.set(i * 0.12, 0.25, 0);
@@ -1414,14 +1339,14 @@
             g.add(tube);
           }
           break;
-        case 'tower': // Watchtower / Control
+        case 'tower':
           const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 0.75, 6), mWhite);
           tower.position.y = 0.4;
           const cap = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.25, 6), mCoral);
           cap.position.y = 0.85;
           g.add(tower, cap);
           break;
-        case 'shrine': // Torii / Pagoda mini
+        case 'shrine':
           const post1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 6), mCoral);
           post1.position.set(-0.15, 0.25, 0);
           const post2 = post1.clone();
@@ -1430,7 +1355,7 @@
           beam.position.y = 0.48;
           g.add(post1, post2, beam);
           break;
-        case 'stalls': // Matsuri Food Stall with cloth
+        case 'stalls':
           const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.25, 0.3), mWood);
           body.position.y = 0.15;
           const roof = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.2, 4), mGold);
@@ -1438,14 +1363,14 @@
           roof.position.y = 0.38;
           g.add(body, roof);
           break;
-        case 'lighthouse': // Marine safety light
+        case 'lighthouse':
           const lightCol = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.22, 0.8, 8), mWhite);
           lightCol.position.y = 0.42;
           const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), mGlow);
           lamp.position.y = 0.88;
           g.add(lightCol, lamp);
           break;
-        default: // Cozy Clay House
+        default:
           const hWall = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.32, 0.38), mWhite);
           hWall.position.y = 0.2;
           const hRoof = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.28, 4), mCoral);
@@ -1468,17 +1393,16 @@
     }
 
     /* ========================================================
-       7. COLLABORATION FLOW TUBES & CHIBI WALKERS
+       7. 協作網絡與行走小人
        ======================================================== */
     function initCollaborationsAndWalkers() {
-      DATA.collaborations.forEach((collab, idx) => {
+      DATA.collaborations.forEach((collab) => {
         const pA = islandCenterCoords[collab.from];
         const pB = islandCenterCoords[collab.to];
         if (!pA || !pB) return;
 
-        // 1. Curved Flow Tube
         const midPoint = new THREE.Vector3().addVectors(pA, pB).multiplyScalar(0.5);
-        midPoint.y += 0.45; // slight arch
+        midPoint.y += 0.45;
 
         const curve = new THREE.CatmullRomCurve3([
           new THREE.Vector3(pA.x, TOP + 0.05, pA.z),
@@ -1506,51 +1430,41 @@
             varying vec2 vUv;
             void main() {
               float flow = fract(vUv.x * 4.0 - uTime * 1.5);
-              if (flow > 0.6) discard; // Dashed flowing spark style
+              if (flow > 0.6) discard;
               gl_FragColor = vec4(uColor, 0.85);
             }
           `
         });
         const tubeMesh = new THREE.Mesh(tubeGeo, tubeMat);
-        tubeMesh.visible = false; // toggleable
+        tubeMesh.visible = false;
         scene.add(tubeMesh);
         collabTubes.push(tubeMesh);
 
-        // 2. Chibi Walker Pedestrian
-        const walker = createChibiWalker(collab.role);
+        const walker = createChibiWalker();
         walker.userData = {
           curve: curve,
           progress: rand(),
           speed: 0.08 + rand() * 0.04,
-          direction: 1,
-          collabData: collab
+          direction: 1
         };
         scene.add(walker);
         walkersList.push(walker);
       });
     }
 
-    function createChibiWalker(role) {
+    function createChibiWalker() {
       const g = new THREE.Group();
-      // Body capsule
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3e7c8c, roughness: 0.8 });
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.16, 8), bodyMat);
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.16, 8), new THREE.MeshStandardMaterial({ color: 0x3e7c8c, roughness: 0.8 }));
       body.position.y = 0.12;
 
-      // Big Head (40% ratio)
-      const headMat = new THREE.MeshStandardMaterial({ color: 0xffdfd0, roughness: 0.7 });
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 10), headMat);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 10), new THREE.MeshStandardMaterial({ color: 0xffdfd0, roughness: 0.7 }));
       head.position.y = 0.25;
 
-      // Hair cap
-      const hairMat = new THREE.MeshStandardMaterial({ color: 0x221d1d, roughness: 0.85 });
-      const hair = new THREE.Mesh(new THREE.SphereGeometry(0.095, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), hairMat);
+      const hair = new THREE.Mesh(new THREE.SphereGeometry(0.095, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x221d1d, roughness: 0.85 }));
       hair.position.y = 0.26;
 
-      // Tiny fake blob shadow
-      const shadowGeo = new THREE.CircleGeometry(0.1, 10);
-      shadowGeo.rotateX(-Math.PI / 2);
-      const shadow = new THREE.Mesh(shadowGeo, new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.22, transparent: true }));
+      const shadow = new THREE.Mesh(new THREE.CircleGeometry(0.1, 10), new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.22, transparent: true }));
+      shadow.rotation.x = -Math.PI / 2;
       shadow.position.y = 0.01;
 
       g.add(body, head, hair, shadow);
@@ -1559,7 +1473,7 @@
     }
 
     /* ========================================================
-       8. PROCEDURAL 3D FIREWORKS BURST PARTICLES
+       8. 煙火粒子特效
        ======================================================== */
     function triggerFirework(origin, colorHex = '#ff8833') {
       const particleCount = 140;
@@ -1572,7 +1486,6 @@
         pos[i * 3 + 1] = origin.y;
         pos[i * 3 + 2] = origin.z;
 
-        // Spherical blast distribution
         const u = rand();
         const v = rand();
         const theta = u * 2.0 * Math.PI;
@@ -1608,7 +1521,7 @@
     }
 
     /* ========================================================
-       9. TIME & DAY-NIGHT CYCLE ENGINE
+       9. 日夜插值切換
        ======================================================== */
     const DAY_KEYFRAMES = [
       { min: 0,    skyTop: 0x1e2c58, skyHoz: 0x3f4f80, sunCol: 0xb4c2ff, sunI: 1.15, night: 1.0 },
@@ -1620,6 +1533,7 @@
     ];
 
     function setDayTime(minutes) {
+      if (!skySphere || !sunLight) return;
       currentMinutes = minutes % 1440;
       let k1 = DAY_KEYFRAMES[0], k2 = DAY_KEYFRAMES[1];
       for (let i = 0; i < DAY_KEYFRAMES.length - 1; i++) {
@@ -1646,7 +1560,6 @@
       sunLight.color.copy(sunCol);
       sunLight.intensity = sunI;
 
-      // Sun Arc Orbit
       const t = Math.max(0, Math.min(1, (currentMinutes - 360) / 720));
       const az = Math.PI * (0.15 + 0.7 * t);
       const el = 0.35 + Math.sin(t * Math.PI) * 0.75;
@@ -1655,7 +1568,7 @@
     }
 
     /* ========================================================
-       10. CAMERA FLIGHT & SELECTION LOGIC
+       10. 相機平滑聚焦飛行與點選
        ======================================================== */
     function flyToTarget(targetPos, offsetDistance = 14) {
       isFlying = true;
@@ -1672,30 +1585,25 @@
       const isl = DATA.islands.find(i => i.id === islandId);
       if (!isl) return;
 
-      selectedTarget = isl;
       const center = islandCenterCoords[islandId];
       flyToTarget(new THREE.Vector3(center.x, center.y + 0.5, center.z), 11);
 
-      // Highlight UI Pill
       document.querySelectorAll('.island-label-pill').forEach(el => el.classList.remove('selected'));
       const activePill = document.getElementById(`label-${islandId}`);
       if (activePill) activePill.classList.add('selected');
 
-      // Update Detail Drawer
       document.getElementById('card-badge').innerText = `盛典島嶼 ${isl.num}`;
       document.getElementById('card-title').innerText = isl.name;
       document.getElementById('card-desc').innerText = isl.summary;
 
-      const factsContainer = document.getElementById('card-facts');
-      factsContainer.innerHTML = isl.facts.map(f => `
+      document.getElementById('card-facts').innerHTML = isl.facts.map(f => `
         <div class="fact-brick">
           <div class="fact-number">${f.num}</div>
           <div class="fact-label">${f.label}</div>
         </div>
       `).join('');
 
-      const subContainer = document.getElementById('card-subitems');
-      subContainer.innerHTML = isl.items.map(it => `
+      document.getElementById('card-subitems').innerHTML = isl.items.map(it => `
         <div class="item-row" onclick="window.selectItemById('${it.id}')">
           <span class="item-row-name">${it.name}</span>
           <span class="item-row-tag">${it.year}</span>
@@ -1703,8 +1611,6 @@
       `).join('');
 
       document.getElementById('detail-card').classList.add('active');
-
-      // Random celebratory firework over island
       triggerFirework(new THREE.Vector3(center.x, 8 + rand() * 4, center.z), isl.colorTheme);
     }
 
@@ -1729,7 +1635,7 @@
     };
 
     /* ========================================================
-       11. RAYCASTING INTERACTION
+       11. 射線點選交互
        ======================================================== */
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -1738,12 +1644,12 @@
     window.addEventListener('pointerdown', (e) => {
       ptrDownPos.x = e.clientX;
       ptrDownPos.y = e.clientY;
-      if (isFlying) isFlying = false; // User interrupt cancels flight
+      if (isFlying) isFlying = false;
     });
 
     window.addEventListener('pointerup', (e) => {
       const dist = Math.hypot(e.clientX - ptrDownPos.x, e.clientY - ptrDownPos.y);
-      if (dist > 6) return; // Dragged, ignore raycast click
+      if (dist > 6) return;
 
       mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -1765,10 +1671,9 @@
     });
 
     /* ========================================================
-       12. UI CONTROLLERS & EVENT BINDINGS
+       12. UI 事件綁定
        ======================================================== */
     function initUIListeners() {
-      // Time Presets
       document.getElementById('time-dawn').onclick = () => { setActiveTimeBtn('time-dawn'); setDayTime(360); };
       document.getElementById('time-noon').onclick = () => { setActiveTimeBtn('time-noon'); setDayTime(720); };
       document.getElementById('time-dusk').onclick = () => { setActiveTimeBtn('time-dusk'); setDayTime(1080); };
@@ -1779,13 +1684,11 @@
         document.getElementById(id).classList.add('active');
       }
 
-      // Card Close
       document.getElementById('card-close-btn').onclick = () => {
         document.getElementById('detail-card').classList.remove('active');
         document.querySelectorAll('.island-label-pill').forEach(el => el.classList.remove('selected'));
       };
 
-      // Toggle Flow Lines
       let collabsActive = false;
       document.getElementById('toggle-collab').onclick = function() {
         collabsActive = !collabsActive;
@@ -1793,24 +1696,20 @@
         collabTubes.forEach(t => t.visible = collabsActive);
       };
 
-      // Bird's Eye View
       document.getElementById('toggle-birds').onclick = function() {
         flyToTarget(new THREE.Vector3(0.01, 40, 6), 1);
       };
 
-      // Launch Fireworks Button
       document.getElementById('fire-firework').onclick = () => {
         const randIsl = DATA.islands[Math.floor(rand() * DATA.islands.length)];
         const pos = islandCenterCoords[randIsl.id];
         triggerFirework(new THREE.Vector3(pos.x, 8 + rand() * 5, pos.z), randIsl.colorTheme);
       };
 
-      // Sidebar Toggle
       document.getElementById('toggle-sidebar').onclick = () => {
         document.getElementById('sidebar').classList.toggle('closed');
       };
 
-      // Populate Sidebar
       const sidebarList = document.getElementById('sidebar-list');
       DATA.islands.forEach(isl => {
         const acc = document.createElement('details');
@@ -1827,7 +1726,6 @@
         sidebarList.appendChild(acc);
       });
 
-      // Search functionality
       document.getElementById('search-input').addEventListener('input', (e) => {
         const q = e.target.value.toLowerCase().trim();
         document.querySelectorAll('.island-accordion').forEach(acc => {
@@ -1836,7 +1734,6 @@
         });
       });
 
-      // Window Resize Handler
       window.addEventListener('resize', onWindowResize);
     }
 
@@ -1848,7 +1745,7 @@
     }
 
     /* ========================================================
-       13. MAIN ANIMATION LOOP
+       13. 渲染主迴圈
        ======================================================== */
     let lastLogTime = 0;
     const logPool = [
@@ -1865,17 +1762,14 @@
 
       const delta = Math.min(clock.getDelta(), 0.08);
 
-      // 1. Water shader time
       if (waterMesh) {
         waterMesh.material.uniforms.uTime.value += delta;
       }
 
-      // 2. Collab Tubes Pulse
       collabTubes.forEach(t => {
         t.material.uniforms.uTime.value += delta;
       });
 
-      // 3. Move Pedestrian Walkers
       walkersList.forEach(w => {
         const u = w.userData;
         u.progress += delta * u.speed * u.direction;
@@ -1884,18 +1778,16 @@
 
         const pt = u.curve.getPointAt(u.progress);
         w.position.copy(pt);
-        // Gentle bobbing gait
         w.position.y += Math.abs(Math.sin(time * 0.008 + u.progress * 20)) * 0.04;
       });
 
-      // 4. Update Fireworks Particles
       for (let i = fireworksArray.length - 1; i >= 0; i--) {
         const fw = fireworksArray[i];
         const posAttr = fw.points.geometry.attributes.position;
         fw.life -= fw.decay;
 
         for (let p = 0; p < fw.velocities.length; p++) {
-          fw.velocities[p].y -= 2.2 * delta; // Gravity
+          fw.velocities[p].y -= 2.2 * delta;
           posAttr.setXYZ(
             p,
             posAttr.getX(p) + fw.velocities[p].x * delta,
@@ -1914,18 +1806,15 @@
         }
       }
 
-      // 5. Automatic periodic fireworks in night mode
       if (isNight > 0.6 && rand() < 0.02) {
         const randomIsl = DATA.islands[Math.floor(rand() * DATA.islands.length)];
         const pos = islandCenterCoords[randomIsl.id];
         triggerFirework(new THREE.Vector3(pos.x + (rand() - 0.5) * 3, 7 + rand() * 6, pos.z + (rand() - 0.5) * 3), randomIsl.colorTheme);
       }
 
-      // 6. Smooth Camera Interpolation (Flight)
       if (isFlying) {
         const elapsed = performance.now() - flightStart;
         const t = Math.min(1.0, elapsed / flightDuration);
-        // easeInOutCubic
         const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
         camera.position.lerpVectors(camStartPos, camEndPos, ease);
@@ -1934,7 +1823,6 @@
         if (t >= 1.0) isFlying = false;
       }
 
-      // 7. Ambient Clouds Motion
       if (scene.userData.clouds) {
         scene.userData.clouds.children.forEach(c => {
           c.position.x += c.userData.speed * delta;
@@ -1942,7 +1830,6 @@
         });
       }
 
-      // 8. Dynamic Live Log Ticker
       if (time - lastLogTime > 6000) {
         lastLogTime = time;
         const msg = logPool[Math.floor(rand() * logPool.length)];
@@ -1954,11 +1841,6 @@
       renderer.render(scene, camera);
       cssRenderer.render(scene, camera);
     }
-
-    // Set initial environment & start loop
-    setDayTime(1260);
-    requestAnimationFrame(animate);
-
   </script>
 </body>
 </html>
