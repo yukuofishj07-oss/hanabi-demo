@@ -1,252 +1,360 @@
 import * as THREE from "three";
-import { SceneManager } from "./core/scene.js";
-import { Environment } from "./core/environment.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
+import { WORLD } from "./config/constants.js";
 import { DATA } from "./config/data.js";
-import { buildHexIslands, getIslandPos } from "./island/grid.js";
-import { buildBridges } from "./island/bridges.js";
-import { BuildingsManager } from "./assets/buildings.js";
-import { WorkerCrowd } from "./logistics/workers.js";
-import { FireworksEngine } from "./fireworks/engine.js";
+import { EnvironmentManager } from "./world/environment.js";
+import { IslandsBuilder, axialToWorld } from "./world/islands.js";
+import { KitBuilder } from "./world/kit.js";
+import { WalkersAndFlowsManager } from "./entities/walkers.js";
+import { FireworksShow } from "./entities/fireworks.js";
+import { UIController } from "./ui/interface.js";
 
-class App {
+class HanabiPolicyIslandApp {
   constructor() {
-    this.container = document.getElementById("canvas-container");
-    this.currentIndex = 0;
-    this.autoTour = true;
-    this.tourTimer = 0;
-
     try {
-      this.sceneMgr = new SceneManager(this.container);
-      this.env = new Environment(this.sceneMgr.scene);
+      this.container = document.getElementById("canvas-container");
+      this.minutes = 600; // 從白天 10:00 開始自動走
+      this.isPaused = false;
+      this.isTopDown = false;
+      this.selectedOwnerId = null;
 
-      // 1. 建立放大兩倍的六角島群與極簡 4 字小標籤
-      const { islandMeshes } = buildHexIslands(
-        this.sceneMgr.scene,
-        DATA.islands,
-        (island) => {
-          this.stopAutoTour();
-          this.selectIsland(island);
+      this.initRendererAndCamera();
+      this.env = new EnvironmentManager(this.scene);
+      this.islandsBuilder = new IslandsBuilder(this.scene, DATA.islands);
+      this.kitBuilder = new KitBuilder(this.scene, DATA.islands);
+
+      this.walkersMgr = new WalkersAndFlowsManager(
+        this.scene,
+        DATA.flows,
+        this.islandsBuilder,
+        (ev, flow) => {
+          if (this.ui) this.ui.pushLiveLog(ev, flow);
         }
       );
-      this.islandMeshes = islandMeshes;
 
-      // 2. 建立日式太鼓橋與橋頭燈籠
-      buildBridges(this.sceneMgr.scene, DATA.islands);
+      this.fireworks = new FireworksShow(this.scene, DATA.islands);
 
-      // 3. 建立 10 座動態微縮機關工坊與蓬鬆樹簇
-      this.buildingsMgr = new BuildingsManager(this.sceneMgr.scene, DATA.islands);
+      this.ui = new UIController(this.scene, DATA, this.kitBuilder, {
+        onSelectIsland: (isl) => this.selectIsland(isl),
+        onSelectItem: (item, isl) => this.selectItem(item, isl),
+        onSelectFlow: (flow) => this.selectFlow(flow)
+      });
 
-      // 4. 建立二頭身黏土工匠群
-      this.workerCrowd = new WorkerCrowd(this.sceneMgr.scene, DATA.islands);
+      // 初始推播 3 筆日誌
+      this.ui.pushLiveLog("depart", DATA.flows[0]);
+      this.ui.pushLiveLog("handoff", DATA.flows[5]);
+      this.ui.pushLiveLog("handoff", DATA.flows[9]);
 
-      // 5. 建立流線型金絲拖尾煙火系統
-      this.fireworks = new FireworksEngine(this.sceneMgr.scene);
+      this.bindEvents();
+      this.setPanoramaView(false);
 
-      this.setupRaycast();
-      this.setupUI();
-      this.setupAutoFireworks();
-
-      this.fpsBadge = document.getElementById("fps-badge");
-      this.frameCount = 0;
-      this.lastFpsUpdate = performance.now();
-
-      // 開場聚焦第 01 站，並於背景夜空施放三枚迎賓流線煙火
-      this.selectIsland(DATA.islands[0], false);
-      this.fireworks.launch({ x: -5.1, z: -9.5 }, "chrysanthemum");
-      setTimeout(() => this.fireworks.launch({ x: 5.1, z: -9.5 }, "willow"), 450);
-      setTimeout(() => this.fireworks.launch({ x: 0.0, z: 9.5 }, "peony"), 900);
+      // 定期施放煙火 (於 11 號迫擊砲陣地與 12 號觀禮台)
+      setInterval(() => {
+        if (!this.isPaused) {
+          this.fireworks.launchFromIsland(DATA.islands[10]);
+        }
+      }, 3200);
 
       document.getElementById("loading-overlay").classList.add("hidden");
 
       this.clock = new THREE.Clock();
       this.animate();
     } catch (err) {
-      console.error("Initialization Failed:", err);
-      const errBox = document.createElement("div");
-      errBox.style.cssText = "color:red;padding:20px;position:absolute;top:0;z-index:9999;background:#fff;";
-      errBox.innerText = "無法載入 3D 渲染系統：" + err.message;
-      document.body.appendChild(errBox);
+      console.error(err);
+      const title = document.getElementById("loading-title");
+      const sub = document.getElementById("loading-sub");
+      if (title) title.innerText = "載入失敗：" + err.message;
+      if (sub) sub.innerText = "請確認您的瀏覽器支援 WebGL2 與網路連線正常。";
     }
   }
 
-  setupAutoFireworks() {
-    setInterval(() => {
-      this.fireworks.launch();
-    }, 2200);
+  initRendererAndCamera() {
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+
+    this.scene = new THREE.Scene();
+
+    // 規格書第 3 節：PerspectiveCamera fov 32（窄視角做出微縮模型城市感）
+    this.camera = new THREE.PerspectiveCamera(32, this.width / this.height, 0.5, 650);
+
+    const isMobile = this.width <= 800;
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer.setSize(this.width, this.height);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.4 : 1.75));
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.container.appendChild(this.renderer.domElement);
+
+    this.labelRenderer = new CSS2DRenderer();
+    this.labelRenderer.setSize(this.width, this.height);
+    this.labelRenderer.domElement.style.position = "absolute";
+    this.labelRenderer.domElement.style.inset = "0";
+    this.labelRenderer.domElement.style.pointerEvents = "none";
+    this.container.appendChild(this.labelRenderer.domElement);
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.07;
+    this.controls.enablePan = false;
+    this.controls.minPolarAngle = THREE.MathUtils.degToRad(18);
+    this.controls.maxPolarAngle = THREE.MathUtils.degToRad(70);
+    this.controls.minDistance = 12;
+    this.controls.maxDistance = 195;
+
+    this.flyState = { active: false, t0: 0, dur: 800, sPos: new THREE.Vector3(), ePos: new THREE.Vector3(), sTar: new THREE.Vector3(), eTar: new THREE.Vector3() };
+
+    this.renderer.domElement.addEventListener("pointerdown", () => {
+      this.flyState.active = false;
+    });
+
+    const ro = new ResizeObserver(() => {
+      this.width = window.innerWidth;
+      this.height = window.innerHeight;
+      this.camera.aspect = this.width / this.height;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(this.width, this.height);
+      this.labelRenderer.setSize(this.width, this.height);
+    });
+    ro.observe(document.body);
   }
 
-  stopAutoTour() {
-    this.autoTour = false;
-    const btn = document.getElementById("btn-auto-tour");
-    if (btn) {
-      btn.classList.remove("active");
-      btn.innerText = "🎬 自動巡覽: 關";
+  flyTo(targetVec, offsetVec) {
+    this.flyState.sPos.copy(this.camera.position);
+    this.flyState.sTar.copy(this.controls.target);
+    this.flyState.eTar.copy(targetVec);
+    this.flyState.ePos.copy(targetVec).add(offsetVec);
+    this.flyState.t0 = performance.now();
+    this.flyState.active = true;
+  }
+
+  setPanoramaView(animate = true) {
+    const dir = new THREE.Vector3(0.24, 0.36, 0.87).normalize();
+    const dist = this.width / this.height > 1.3 ? 105 : 135;
+    const center = new THREE.Vector3(-4, 0, 0);
+
+    if (!animate) {
+      this.controls.target.copy(center);
+      this.camera.position.copy(center).addScaledVector(dir, dist);
+      this.controls.update();
+    } else {
+      this.flyTo(center, dir.multiplyScalar(dist));
     }
   }
 
-  setupRaycast() {
+  selectIsland(island) {
+    const S = WORLD.SCALE;
+    this.selectedOwnerId = island.id;
+    this.ui.renderIslandCard(island);
+    this.walkersMgr.highlightRelatedFlows(island.id, null);
+
+    const { x, z } = axialToWorld(island.axial.q, island.axial.r);
+    const deskShift = this.width > 860 ? 1.5 * S : 0;
+    this.flyTo(
+      new THREE.Vector3(x + deskShift * 0.25, WORLD.TOP, z),
+      new THREE.Vector3(2.75 * S, 5.3 * S, 6.2 * S)
+    );
+    this.fireworks.launchFromIsland(island);
+  }
+
+  selectItem(item, island) {
+    const S = WORLD.SCALE;
+    this.selectedOwnerId = item.id;
+    this.ui.renderItemCard(item, island);
+    this.walkersMgr.highlightRelatedFlows(island.id, null);
+
+    const anchor = this.kitBuilder.itemAnchors[item.id];
+    if (anchor) {
+      this.flyTo(
+        new THREE.Vector3(anchor.x, WORLD.TOP + 0.5, anchor.z),
+        new THREE.Vector3(1.6 * S, 2.5 * S, 3.2 * S)
+      );
+    }
+  }
+
+  selectFlow(flow) {
+    const S = WORLD.SCALE;
+    this.selectedOwnerId = null;
+    this.ui.clearItemPins();
+    this.ui.updatePillSelection(null);
+    this.ui.renderFlowCard(flow);
+    this.walkersMgr.highlightRelatedFlows(null, flow.id);
+
+    const islA = DATA.islands.find((i) => i.id === flow.from);
+    const islB = DATA.islands.find((i) => i.id === flow.to);
+    if (islA && islB) {
+      const pA = axialToWorld(islA.axial.q, islA.axial.r);
+      const pB = axialToWorld(islB.axial.q, islB.axial.r);
+      this.flyTo(
+        new THREE.Vector3((pA.x + pB.x) * 0.5, WORLD.TOP, (pA.z + pB.z) * 0.5),
+        new THREE.Vector3(3.2 * S, 6.8 * S, 8.2 * S)
+      );
+    }
+  }
+
+  clearSelection() {
+    this.selectedOwnerId = null;
+    this.ui.clearItemPins();
+    this.ui.updatePillSelection(null);
+    document.getElementById("detail-card").classList.remove("active");
+    this.walkersMgr.highlightRelatedFlows(null, null);
+  }
+
+  bindEvents() {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-    let downPos = { x: 0, y: 0 };
+    let downPt = { x: 0, y: 0 };
 
-    window.addEventListener("pointerdown", (e) => {
-      downPos.x = e.clientX;
-      downPos.y = e.clientY;
+    this.renderer.domElement.addEventListener("pointerdown", (e) => {
+      downPt = { x: e.clientX, y: e.clientY };
     });
 
-    window.addEventListener("pointerup", (e) => {
-      if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 6) return;
+    this.renderer.domElement.addEventListener("pointerup", (e) => {
+      if (Math.hypot(e.clientX - downPt.x, e.clientY - downPt.y) > 6) return;
 
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      mouse.x = (e.clientX / this.width) * 2 - 1;
+      mouse.y = -(e.clientY / this.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, this.camera);
 
-      raycaster.setFromCamera(mouse, this.sceneMgr.camera);
-      const intersects = raycaster.intersectObjects(this.islandMeshes);
+      // 優先拾取細項 -> 小人 -> 協作線 -> 島嶼
+      const itemHits = raycaster.intersectObjects(this.kitBuilder.itemPickMeshes, false);
+      if (itemHits.length > 0) {
+        const { item, island } = itemHits[0].object.userData;
+        this.selectItem(item, island);
+        return;
+      }
 
-      if (intersects.length > 0) {
-        const item = intersects[0].object.userData.data;
-        if (item) {
-          this.stopAutoTour();
-          this.selectIsland(item, true);
+      const walkerHits = raycaster.intersectObjects(this.walkersMgr.walkerPickMeshes, true);
+      if (walkerHits.length > 0) {
+        let obj = walkerHits[0].object;
+        while (obj && !obj.userData?.flow) obj = obj.parent;
+        if (obj && obj.userData?.flow) {
+          this.selectFlow(obj.userData.flow);
+          return;
         }
       }
-    });
-  }
 
-  selectIsland(island, showCard = true) {
-    this.currentSelectedIsland = island;
-    this.currentIndex = DATA.islands.findIndex((isl) => isl.id === island.id);
-
-    const card = document.getElementById("detail-card");
-    document.getElementById("card-step-badge").innerText = `標準作業程序 ． ${island.step}`;
-    document.getElementById("card-title").innerText = island.name;
-    document.getElementById("card-purpose").innerText = island.purpose;
-    document.getElementById("card-process").innerText = island.process;
-    document.getElementById("card-standard").innerText = island.standard;
-
-    const statsGrid = document.getElementById("card-stats");
-    statsGrid.innerHTML = "";
-    island.items.forEach((it) => {
-      const box = document.createElement("div");
-      box.className = "stat-box";
-      box.innerHTML = `
-        <div class="stat-label">${it.name}</div>
-        <div class="stat-value">${it.spec}</div>
-      `;
-      statsGrid.appendChild(box);
-    });
-
-    if (showCard) {
-      card.classList.add("active");
-    }
-
-    const target = getIslandPos(island);
-    this.sceneMgr.flyToIsland(target);
-
-    // 在該站後方夜空施放專屬禮花
-    this.fireworks.launch({ x: target.x, z: target.z - 2.5 });
-
-    document.querySelectorAll(".island-label-pill").forEach((pill) => {
-      pill.classList.toggle("selected", pill.dataset.islandId === island.id);
-    });
-  }
-
-  setupUI() {
-    document.getElementById("card-close-btn").addEventListener("click", () => {
-      document.getElementById("detail-card").classList.remove("active");
-    });
-
-    document.getElementById("card-fire-btn").addEventListener("click", () => {
-      if (this.currentSelectedIsland) {
-        const p = getIslandPos(this.currentSelectedIsland);
-        this.fireworks.launch({ x: p.x, z: p.z });
+      const islHits = raycaster.intersectObjects(this.islandsBuilder.islandMeshes, false);
+      if (islHits.length > 0) {
+        this.selectIsland(islHits[0].object.userData.island);
       }
     });
 
-    // 上一站 / 下一站 導覽
-    document.getElementById("btn-prev-island").addEventListener("click", () => {
-      this.stopAutoTour();
-      this.currentIndex = (this.currentIndex - 1 + DATA.islands.length) % DATA.islands.length;
-      this.selectIsland(DATA.islands[this.currentIndex], true);
+    document.getElementById("card-close-btn").addEventListener("click", () => this.clearSelection());
+    document.getElementById("btn-panorama").addEventListener("click", () => {
+      this.clearSelection();
+      this.setPanoramaView(true);
+    });
+    document.getElementById("btn-toggle-sidebar").addEventListener("click", () => {
+      document.body.classList.toggle("sidebar-closed");
+    });
+    document.getElementById("btn-fire-now").addEventListener("click", () => {
+      this.fireworks.launchSalvo();
     });
 
-    document.getElementById("btn-next-island").addEventListener("click", () => {
-      this.stopAutoTour();
-      this.currentIndex = (this.currentIndex + 1) % DATA.islands.length;
-      this.selectIsland(DATA.islands[this.currentIndex], true);
-    });
-
-    // 自動巡島導覽開關
-    const btnTour = document.getElementById("btn-auto-tour");
-    btnTour.addEventListener("click", () => {
-      this.autoTour = !this.autoTour;
-      btnTour.classList.toggle("active", this.autoTour);
-      btnTour.innerText = this.autoTour ? "🎬 自動巡覽: 開" : "🎬 自動巡覽: 關";
-      this.tourTimer = 0;
-    });
-
-    // 全景俯瞰
-    document.getElementById("btn-overview").addEventListener("click", () => {
-      this.stopAutoTour();
-      document.getElementById("detail-card").classList.remove("active");
-      this.sceneMgr.setOverview();
-    });
-
-    // 時段切換
-    document.querySelectorAll(".hud-btn[data-time]").forEach((btn) => {
+    // 時段四鈕
+    document.querySelectorAll(".time-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        document.querySelectorAll(".hud-btn[data-time]").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".time-btn").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
-        const minutes = parseInt(btn.getAttribute("data-time"), 10);
-        this.env.setTime(minutes);
+        this.minutes = parseInt(btn.getAttribute("data-min"), 10);
+        if (this.minutes >= 1080) {
+          this.fireworks.launchSalvo();
+        }
       });
     });
 
-    document.getElementById("btn-launch-firework").addEventListener("click", () => {
-      const p = this.currentSelectedIsland ? getIslandPos(this.currentSelectedIsland) : { x: 0, z: 9.5 };
-      this.fireworks.launch(p);
+    // 六個 HUD 開關
+    const bindSwitch = (id, fn) => {
+      const el = document.getElementById(id);
+      el.addEventListener("click", () => {
+        const active = el.classList.toggle("active");
+        fn(active);
+      });
+    };
+
+    bindSwitch("sw-badges", (v) => this.walkersMgr.setSwitches({ badges: v }));
+    bindSwitch("sw-cargo", (v) => this.walkersMgr.setSwitches({ cargo: v }));
+    bindSwitch("sw-flows", (v) => {
+      this.walkersMgr.setSwitches({ flows: v });
+      document.getElementById("flow-legend").classList.toggle("hidden", !v);
+    });
+    bindSwitch("sw-pause", (v) => { this.isPaused = v; });
+    bindSwitch("sw-topdown", (v) => {
+      this.isTopDown = v;
+      if (v) {
+        this.flyTo(new THREE.Vector3(-4, 0, 0), new THREE.Vector3(0.05, 145, 18));
+      } else {
+        this.setPanoramaView(true);
+      }
+    });
+    bindSwitch("sw-log", (v) => {
+      document.getElementById("live-log-panel").style.display = v ? "block" : "none";
     });
 
-    document.getElementById("btn-launch-barrage").addEventListener("click", () => {
-      this.fireworks.launchBarrage();
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") this.clearSelection();
     });
+  }
+
+  formatClock(min) {
+    const m = Math.floor(((min % 1440) + 1440) % 1440);
+    const hh = String(Math.floor(m / 60)).padStart(2, "0");
+    const mm = String(m % 60).padStart(2, "0");
+    return `${hh}:${mm}`;
+  }
+
+  getActiveDayCycleItems(min) {
+    const m = ((min % 1440) + 1440) % 1440;
+    for (let dc of DATA.dayCycle) {
+      if (m >= dc.start && m < dc.end) return dc.activeItems;
+    }
+    return [];
   }
 
   animate() {
     requestAnimationFrame(() => this.animate());
 
-    this.frameCount++;
-    const now = performance.now();
-    if (now - this.lastFpsUpdate >= 1000) {
-      if (this.fpsBadge) {
-        this.fpsBadge.innerText = `${this.frameCount} FPS`;
-      }
-      this.frameCount = 0;
-      this.lastFpsUpdate = now;
+    const dt = Math.min(this.clock.getDelta(), 0.08);
+    const elapsed = this.clock.getElapsedTime();
+
+    if (!this.isPaused) {
+      // 時鐘：每秒 10 分鐘 (一天 144 秒)
+      this.minutes = (this.minutes + dt * 10) % 1440;
+      document.getElementById("clock-display").innerText = this.formatClock(this.minutes);
     }
 
-    const dt = Math.min(this.clock.getDelta(), 0.05);
-    const time = this.clock.getElapsedTime();
-
-    // 方案 A 自動巡島導覽 (每 6.5 秒平滑飛往下一座工藝島)
-    if (this.autoTour) {
-      this.tourTimer += dt;
-      if (this.tourTimer >= 6.5) {
-        this.tourTimer = 0;
-        this.currentIndex = (this.currentIndex + 1) % DATA.islands.length;
-        this.selectIsland(DATA.islands[this.currentIndex], false);
-      }
+    // 相機 800ms easeInOutCubic 飛行插值
+    if (this.flyState.active) {
+      const p = Math.min((performance.now() - this.flyState.t0) / this.flyState.dur, 1.0);
+      const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      this.camera.position.lerpVectors(this.flyState.sPos, this.flyState.ePos, ease);
+      this.controls.target.lerpVectors(this.flyState.sTar, this.flyState.eTar, ease);
+      if (p >= 1.0) this.flyState.active = false;
     }
 
-    this.sceneMgr.update();
-    this.env.update(time);
-    this.buildingsMgr.update(time);
-    this.workerCrowd.update(time, dt);
-    this.fireworks.update();
-    this.sceneMgr.render();
+    this.controls.update();
+
+    const nightFactor = this.env.updateByMinutes(this.minutes, elapsed);
+    this.kitBuilder.updateNightGlow(nightFactor);
+
+    const cycleItems = this.getActiveDayCycleItems(this.minutes);
+    this.kitBuilder.updateHighlights(this.selectedOwnerId, cycleItems);
+
+    if (!this.isPaused) {
+      this.walkersMgr.update(elapsed, dt, this.camera.position);
+      this.fireworks.update();
+    }
+
+    this.ui.updateThumbAnimation();
+    this.renderer.render(this.scene, this.camera);
+    this.labelRenderer.render(this.scene, this.camera);
   }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  new App();
+  new HanabiPolicyIslandApp();
 });

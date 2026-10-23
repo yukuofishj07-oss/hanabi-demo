@@ -1,29 +1,51 @@
-export const GRID = {
-  R: 4.2,           // 放大兩倍的島嶼半徑，可容納完整微縮工廠園區、水車、步道與燈籠
-  TOP: 0.95,        // 厚實溫暖的黏土島面高度
-  WATER_Y: -0.25
+// 島嶼放大四倍 (原 R = 2.02 -> 4倍 R = 8.08, 原 SPACING = 2.28 -> 4倍 SPACING = 9.12)
+export const WORLD = {
+  SCALE: 4.0,
+  R: 8.08,          // 2.02 * 4
+  SPACING: 9.12,    // 2.28 * 4
+  TOP: 1.65,        // 島面高度按比例增厚，呈現厚實微縮模型感
+  WATER_Y: -0.45
 };
 
-// 高質感溫暖黏土色票 (Teal & Orange 冷暖對比美學)
-export const COLORS = {
-  wall: 0xf9f3eb,       // 暖白陶土牆
-  wallCream: 0xf3e4cf,  // 奶油杏色牆
-  roofCoral: 0xd95a32,  // 赤陶朱紅屋頂
-  roofDark: 0x2c3545,   // 日式黑瓦屋頂
-  roofTeal: 0x2a7b88,   // 青瓷色屋頂
-  wood: 0xb87b4b,       // 溫暖松木色
-  woodDark: 0x754829,   // 深胡桃木
-  brass: 0xf3a612,      // 亮黃銅機械
-  steel: 0x3d4654,      // 鍛造黑鐵
-  pine: 0x386646,       // 森林深綠
-  leafLight: 0x72a358,  // 嫩草綠
-  autumn: 0xe67e22,     // 楓葉橘
-  cherry: 0xf9a8b8,     // 櫻花粉
-  lanternRed: 0xe74c3c, // 祭典紅燈籠
-  lightGlow: 0xffd86b,  // 溫暖燈火金
-  pathway: 0xd8c1ad     // 石板小徑
+// 原版規格書第 5 節指定色票
+export const PALETTE = {
+  coral: 0xdb6a41,
+  ink: 0x211d1d,
+  cream: 0xfff8f4,
+  yellow: 0xfcea8b,
+  stone: 0xc5b5a7,
+  green: 0x71806a,
+  glass: 0x86a8a6,
+  wood: 0xb48560,
+  teal: 0x3e7c8c,
+  foliage1: 0x9cc27a,
+  foliage2: 0x8db86f,
+  foliage3: 0x728f5f,
+  pastelPink: 0xf2b5c6,
+  pastelCyan: 0x58a6a6,
+  pastelBlue: 0x6f7fb5,
+  wallWarm: 0xf4ebdd,
+  eaveRust: 0xa34e34,
+  windowGlass: 0xa8c4c2,
+  glowGold: 0xffc777
 };
 
+// 原版規格書第 4 節指定日夜 Keyframes
+// 欄位：min, skyTop, horizon, sunColor, sunI, hemiSky, hemiGround, hemiI, night, water
+export const DAY_KEYFRAMES = [
+  { min: 0,    skyTop: 0x1e2c58, horizon: 0x3f4f80, sunColor: 0xb4c2ff, sunI: 1.15, hemiSky: 0x94a2d8, hemiGround: 0x64566a, hemiI: 1.85, night: 1.0,  water: 0x5a88b2 },
+  { min: 300,  skyTop: 0x26365f, horizon: 0x4c5688, sunColor: 0xb8c4ff, sunI: 1.0,  hemiSky: 0x96a4da, hemiGround: 0x66586c, hemiI: 1.85, night: 1.0,  water: 0x5c8ab4 },
+  { min: 360,  skyTop: 0x7f8fc4, horizon: 0xf6c3a6, sunColor: 0xffb48a, sunI: 1.3,  hemiSky: 0xf3c6b5, hemiGround: 0x6b5a5a, hemiI: 1.1,  night: 0.55, water: 0x8fb7c4 },
+  { min: 450,  skyTop: 0xa9d1ea, horizon: 0xfbe6d3, sunColor: 0xffe2c4, sunI: 2.4,  hemiSky: 0xeaf2f6, hemiGround: 0x8a7a68, hemiI: 1.25, night: 0.0,  water: 0x9fcfd6 },
+  { min: 720,  skyTop: 0x9fd0ec, horizon: 0xf4eee3, sunColor: 0xfff1de, sunI: 2.9,  hemiSky: 0xeef6fa, hemiGround: 0x8f8270, hemiI: 1.35, night: 0.0,  water: 0xa9d8db },
+  { min: 960,  skyTop: 0xa6cfe6, horizon: 0xf8e7d2, sunColor: 0xffe3c0, sunI: 2.5,  hemiSky: 0xf1efe8, hemiGround: 0x8a7a66, hemiI: 1.25, night: 0.0,  water: 0x9fcbd2 },
+  { min: 1065, skyTop: 0x8b8fc4, horizon: 0xf7b98f, sunColor: 0xff9f6a, sunI: 1.8,  hemiSky: 0xf6d2bc, hemiGround: 0x7d6660, hemiI: 1.2,  night: 0.3,  water: 0x93a9bd },
+  { min: 1140, skyTop: 0x5a5e9e, horizon: 0xd99aa6, sunColor: 0xff9a7a, sunI: 1.3,  hemiSky: 0xc0b2e0, hemiGround: 0x655868, hemiI: 1.35, night: 0.75, water: 0x6a7cab },
+  { min: 1260, skyTop: 0x22325f, horizon: 0x445488, sunColor: 0xc0ccff, sunI: 1.2,  hemiSky: 0x98a8dc, hemiGround: 0x685a6e, hemiI: 1.9,  night: 1.0,  water: 0x5a88b2 },
+  { min: 1440, skyTop: 0x1e2c58, horizon: 0x3f4f80, sunColor: 0xb4c2ff, sunI: 1.15, hemiSky: 0x94a2d8, hemiGround: 0x64566a, hemiI: 1.85, night: 1.0,  water: 0x5a88b2 }
+];
+
+// mulberry32 固定種子隨機函式
 export function mulberry32(a) {
   return function() {
     let t = a += 0x6D2B79F5;
@@ -33,4 +55,4 @@ export function mulberry32(a) {
   };
 }
 
-export const rng = mulberry32(2026);
+export const rng = mulberry32(202608);
