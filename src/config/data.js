@@ -1,7 +1,7 @@
 export const DATA = {
   city: "花火工藝島",
   islands: [
-    // 第一排 (後排 r = -1，由左至右直線：01 -> 02 -> 03 -> 04)
+    // 第一排 (後排 r = -1，由左至右：01 -> 02 -> 03 -> 04)
     {
       id: "isl_01",
       num: "01",
@@ -149,7 +149,7 @@ export const DATA = {
       ]
     },
 
-    // 第三排 (前排 r = 1，由左至右直線：09 -> 10 -> 11 -> 12，結尾 12 直線回原點 01)
+    // 第三排 (前排 r = 1，由左至右直線：09 -> 10 -> 11 -> 12)
     {
       id: "isl_09",
       num: "09",
@@ -214,11 +214,11 @@ export const DATA = {
       pattern: "stripes",
       treeType: "cherry",
       mainModel: "command_yagura",
-      summary: "全島製程終點與新循環起點！雙層朱紅日式觀禮櫓內建微秒級電子點火台；盛典結束後，回收餘燼紙殼與觀禮數據直線回流至 01 配藥室。",
+      summary: "全島製程終點與新循環起點！雙層朱紅日式觀禮櫓內建微秒級電子點火台；盛典結束後，沿著東側與北側外海棧橋環島回流至 01 配藥室。",
       items: [
         { id: "i12_1", name: "微秒級電子編程點火台", model: "stage", desc: "與背景音樂同步之數位點火主機，精準控制每一發升空時機。", facts: ["同步誤差 < 1ms", "控制 512 迴路", "無線加密通訊"], phase: "第 4 階段" },
         { id: "i12_2", name: "高空風速雷達測候儀", model: "hopper_tower", desc: "即時監測 300 公尺高空風向與風速，動態微調發射仰角。", facts: ["安全風速 < 7m/s", "每秒更新 20 次"], phase: "第 4 階段" },
-        { id: "i12_3", name: "環保紙殼回收再生站", model: "canal_bridge", desc: "收集施放後落海之可降解牛皮紙殼與數據，直線送回 01 島循環再生。", facts: ["生物降解 100%", "12➔01 閉環回流"], phase: "第 4 階段" },
+        { id: "i12_3", name: "環保紙殼外海回收站", model: "canal_bridge", desc: "收集施放後落海之可降解牛皮紙殼與數據，沿外海環島棧橋送回 01 島循環再生。", facts: ["生物降解 100%", "外海環島回流"], phase: "第 4 階段" },
         { id: "i12_4", name: "花火祭典屋台廣場", model: "court", desc: "設有木造觀景座席與祭典燈籠，供市民仰望夜空璀璨花火。", facts: ["視野仰角 45°", "容納 2000 席"], phase: "第 4 階段" }
       ]
     }
@@ -234,7 +234,7 @@ export const DATA = {
     { id: "f07", from: "isl_07", to: "isl_08", cargo: "玉張48層高壓球", icon: "orb", role: "worker", level: "official", desc: "將交叉纏繞 48 道牛皮紙帶並陰乾的堅硬尺玉送往裝底組。" },
     { id: "f08", from: "isl_08", to: "isl_09", cargo: "帶推進底杯尺玉", icon: "rocket", role: "official", level: "thematic", desc: "第二排末端轉折：將裝妥發射藥杯與延遲引信的成品彈送往 X 光探傷站。" },
     { id: "f09", from: "isl_09", to: "isl_11", cargo: "安檢封箱尺玉彈", icon: "box", role: "cyclist", level: "official", desc: "經由 10 號充氮封箱島，將 100% 探傷合格之尺玉直送 11 號迫擊砲陣地裝填！" },
-    { id: "f10", from: "isl_12", to: "isl_01", cargo: "環保紙殼與觀測譜", icon: "recycle", role: "traveler", level: "pending", desc: "【結尾直線回到原點】將 12 號觀禮台收集之光譜數據與可降解紙殼，沿直線跨海長橋回流至 01 號火藥配研室，啟動新一輪工藝循環！" }
+    { id: "f10", from: "isl_12", to: "isl_01", cargo: "環保紙殼與觀測譜", icon: "recycle", role: "traveler", level: "pending", desc: "【沿島外圍外海環繞回原點】由 12 號觀禮台出發，沿著群島東側與北側外海的 5 座海上中繼木棧平台繞行回流至 01 號火藥配研室，完全不穿越中間島嶼！" }
   ],
 
   dayCycle: [

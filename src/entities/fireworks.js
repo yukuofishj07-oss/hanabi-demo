@@ -31,7 +31,7 @@ export class FireworksShow {
       px: 0, py: -9999, pz: 0,
       vx: 0, vy: 0, vz: 0,
       r: 1, g: 1, b: 1,
-      life: 0, decay: 0.011, gravity: 0.0042
+      life: 0, decay: 0.011, gravity: 0.0045
     }));
 
     const lineGeo = new THREE.BufferGeometry();
@@ -55,13 +55,13 @@ export class FireworksShow {
 
     this.heads = new THREE.Points(
       headGeo,
-      new THREE.PointsMaterial({ size: 1.65, map: createGlowStarTexture(), vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+      new THREE.PointsMaterial({ size: 2.1, map: createGlowStarTexture(), vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
     );
     this.heads.frustumCulled = false;
     this.scene.add(this.heads);
 
     this.rockets = [];
-    this.burstLight = new THREE.PointLight(0xffb84d, 0, 120, 1.2);
+    this.burstLight = new THREE.PointLight(0xffb84d, 0, 160, 1.2);
     this.scene.add(this.burstLight);
 
     this.palette = [
@@ -84,18 +84,18 @@ export class FireworksShow {
   }
 
   launchFromIsland(island = null) {
-    const targetIsl = island || this.islandsData[10]; // 11 號迫擊砲陣地
+    const targetIsl = island || this.islandsData[10];
     const { x, z } = axialToWorld(targetIsl.axial.q, targetIsl.axial.r);
     const col = this.palette[Math.floor(Math.random() * this.palette.length)];
 
     this.rockets.push({
-      x: x + (Math.random() - 0.5) * 2.5,
-      y: WORLD.TOP + 0.8,
-      z: z + (Math.random() - 0.5) * 2.5,
-      vx: (Math.random() - 0.5) * 0.10,
-      vy: 0.78 + Math.random() * 0.20,
-      vz: (Math.random() - 0.5) * 0.10,
-      targetY: 16 + Math.random() * 7,
+      x: x + (Math.random() - 0.5) * 3.5,
+      y: WORLD.TOP + 1.0,
+      z: z + (Math.random() - 0.5) * 3.5,
+      vx: (Math.random() - 0.5) * 0.12,
+      vy: 0.92 + Math.random() * 0.22,
+      vz: (Math.random() - 0.5) * 0.12,
+      targetY: 22 + Math.random() * 9,
       col
     });
   }
@@ -111,15 +111,15 @@ export class FireworksShow {
   explode(x, y, z, col) {
     this.burstLight.position.set(x, y, z);
     this.burstLight.color.setRGB(col.r, col.g, col.b);
-    this.burstLight.intensity = 10.0;
+    this.burstLight.intensity = 12.0;
 
-    const count = 220;
+    const count = 230;
     for (let i = 0; i < count; i++) {
       const s = this.alloc();
       if (!s) break;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(Math.random() * 2 - 1);
-      const spd = (i < 55 ? 0.22 : 0.48) * (0.8 + Math.random() * 0.35);
+      const spd = (i < 55 ? 0.25 : 0.55) * (0.8 + Math.random() * 0.35);
 
       s.x = s.px = x;
       s.y = s.py = y;
@@ -132,7 +132,7 @@ export class FireworksShow {
       s.b = i < 55 ? 0.8 : col.b;
       s.life = 1.0;
       s.decay = 0.010 + Math.random() * 0.005;
-      s.gravity = 0.0042;
+      s.gravity = 0.0045;
     }
   }
 
@@ -146,7 +146,7 @@ export class FireworksShow {
       const trail = this.alloc();
       if (trail) {
         trail.x = r.x; trail.y = r.y; trail.z = r.z;
-        trail.px = r.x; trail.py = r.y - 0.6; trail.pz = r.z;
+        trail.px = r.x; trail.py = r.y - 0.7; trail.pz = r.z;
         trail.vx = 0; trail.vy = -0.04; trail.vz = 0;
         trail.r = 1.0; trail.g = 0.85; trail.b = 0.45;
         trail.life = 0.42; trail.decay = 0.06; trail.gravity = 0.001;
@@ -179,9 +179,9 @@ export class FireworksShow {
         continue;
       }
 
-      s.px = s.x - s.vx * 2.8;
-      s.py = s.y - s.vy * 2.8;
-      s.pz = s.z - s.vz * 2.8;
+      s.px = s.x - s.vx * 3.0;
+      s.py = s.y - s.vy * 3.0;
+      s.pz = s.z - s.vz * 3.0;
 
       s.vy -= s.gravity;
       s.vx *= 0.98;

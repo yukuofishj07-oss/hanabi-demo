@@ -70,17 +70,26 @@ export class KitBuilder {
     });
   }
 
-  // 高密度微縮模型組件：每個模型不只有主體，還附帶木棧底座、圍欄、原料木桶、側屋與發光小燈籠！
   buildModelArchetype(modelKind, cx, cy, cz, scale, ownerId, mainColor) {
     const s = scale;
     const add = (kind, ox, oy, oz, sx, sy, sz, col, rx = 0, ry = 0, rz = 0) => {
       this.addPart(kind, cx + ox * s, cy + oy * s, cz + oz * s, sx * s, sy * s, sz * s, rx, ry, rz, col, ownerId);
     };
 
-    // 為每個微型園區鋪設精緻石板/木棧底墊與角落小木桶細節
-    add("rbox", 0, 0.03, 0, 1.32, 0.06, 1.12, PALETTE.stone);
-    add("cylinder", -0.52, 0.14, 0.42, 0.14, 0.18, 0.14, PALETTE.wood);
-    add("cylinder", -0.36, 0.12, 0.45, 0.12, 0.14, 0.12, PALETTE.wood);
+    add("rbox", 0, 0.03, 0, 1.65, 0.06, 1.45, PALETTE.stone);
+    add("rbox", 0, 0.07, 0, 1.42, 0.04, 1.22, PALETTE.wallWarm);
+
+    add("rbox", -0.76, 0.14, -0.66, 0.06, 0.22, 0.45, PALETTE.wood);
+    add("rbox", 0.76, 0.14, -0.66, 0.06, 0.22, 0.45, PALETTE.wood);
+    add("cylinder", -0.72, 0.18, 0.62, 0.10, 0.32, 0.10, PALETTE.stone);
+    add("glowsphere", -0.72, 0.36, 0.62, 0.12, 0.12, 0.12, PALETTE.glowGold);
+
+    add("cylinder", 0.62, 0.15, 0.52, 0.14, 0.20, 0.14, PALETTE.wood);
+    add("cylinder", 0.46, 0.15, 0.56, 0.14, 0.20, 0.14, PALETTE.wood);
+    add("cylinder", 0.54, 0.32, 0.54, 0.13, 0.18, 0.13, PALETTE.coral);
+    add("rbox", -0.52, 0.11, 0.54, 0.22, 0.10, 0.16, PALETTE.stone);
+    add("rbox", -0.30, 0.11, 0.54, 0.22, 0.10, 0.16, PALETTE.stone);
+    add("rbox", -0.41, 0.20, 0.54, 0.20, 0.10, 0.15, PALETTE.yellow);
 
     switch (modelKind) {
       case "mill_hall":
@@ -93,157 +102,155 @@ export class KitBuilder {
       case "hopper_hall":
       case "scanner_hall":
       case "logistics_hall": {
-        // 複合式主工坊園區：中央雙層主屋 + 左翼偏廳 + 右翼高塔煙囪 + 前庭門廊 + 6扇發光窗 + 屋頂通風氣樓
-        add("rbox", 0, 0.44, 0, 1.38, 0.82, 0.92, PALETTE.wallWarm);
-        add("rbox", 0, 0.87, 0, 1.50, 0.08, 1.04, PALETTE.eaveRust);
-        add("hip", 0, 1.22, 0, 1.56, 0.68, 1.12, mainColor);
-        // 屋頂氣樓
-        add("rbox", 0, 1.48, 0, 0.48, 0.28, 0.38, PALETTE.wallWarm);
-        add("hip", 0, 1.72, 0, 0.62, 0.25, 0.52, PALETTE.ink);
-        // 左翼附屬工坊
-        add("rbox", -0.82, 0.30, 0.12, 0.56, 0.54, 0.68, PALETTE.wallWarm);
-        add("hip", -0.82, 0.68, 0.12, 0.68, 0.34, 0.78, PALETTE.eaveRust);
-        // 右翼鐘塔與儲料槽
-        add("rbox", 0.75, 0.72, -0.18, 0.42, 1.38, 0.42, PALETTE.stone);
-        add("cone", 0.75, 1.56, -0.18, 0.52, 0.45, 0.52, PALETTE.ink);
-        add("glowsphere", 0.75, 1.15, 0.05, 0.16, 0.16, 0.08, PALETTE.glowGold);
-        // 發光窗格與門廊
-        for (let wx of [-0.38, 0, 0.38]) {
-          add("glowbox", wx, 0.55, 0.47, 0.22, 0.22, 0.04, PALETTE.glowGold);
+        add("rbox", 0, 0.46, 0, 1.45, 0.84, 0.96, PALETTE.wallWarm);
+        add("rbox", 0, 0.90, 0, 1.58, 0.08, 1.08, PALETTE.eaveRust);
+        add("hip", 0, 1.26, 0, 1.65, 0.70, 1.18, mainColor);
+        add("rbox", 0, 1.54, 0, 0.56, 0.30, 0.42, PALETTE.wallWarm);
+        add("hip", 0, 1.80, 0, 0.72, 0.28, 0.56, PALETTE.ink);
+        for (let side of [-1, 1]) {
+          add("rbox", side * 0.92, 0.32, 0.10, 0.58, 0.56, 0.72, PALETTE.wallWarm);
+          add("hip", side * 0.92, 0.72, 0.10, 0.72, 0.36, 0.84, PALETTE.eaveRust);
+          add("glowbox", side * 0.92, 0.34, 0.47, 0.22, 0.20, 0.04, PALETTE.glowGold);
         }
-        add("rbox", 0, 0.20, 0.52, 0.34, 0.36, 0.18, PALETTE.wood);
-        add("glowsphere", -0.22, 0.34, 0.60, 0.10, 0.12, 0.10, PALETTE.glowGold);
-        add("glowsphere", 0.22, 0.34, 0.60, 0.10, 0.12, 0.10, PALETTE.glowGold);
+        add("rbox", 0.65, 0.78, -0.42, 0.38, 1.48, 0.38, PALETTE.stone);
+        add("cone", 0.65, 1.68, -0.42, 0.48, 0.45, 0.48, PALETTE.ink);
+        add("cylinder", -0.65, 0.68, -0.42, 0.32, 1.28, 0.32, PALETTE.teal);
+        add("dome", -0.65, 1.32, -0.42, 0.34, 0.30, 0.34, PALETTE.yellow);
+        for (let wx of [-0.44, -0.15, 0.15, 0.44]) {
+          add("glowbox", wx, 0.58, 0.49, 0.18, 0.24, 0.04, PALETTE.glowGold);
+        }
+        add("rbox", 0, 0.22, 0.56, 0.42, 0.38, 0.22, PALETTE.wood);
+        add("glowsphere", -0.26, 0.36, 0.68, 0.11, 0.14, 0.11, PALETTE.glowGold);
+        add("glowsphere", 0.26, 0.36, 0.68, 0.11, 0.14, 0.11, PALETTE.glowGold);
         break;
       }
 
       case "mortar_battery": {
-        // 11號島重型迫擊砲陣地：雙層防爆掩體 + 8門高低口徑迫擊鋼砲 + 彈藥輸送軌
-        add("rbox", 0, 0.24, 0, 1.75, 0.42, 0.96, PALETTE.stone);
-        add("rbox", 0, 0.48, -0.22, 1.45, 0.24, 0.52, PALETTE.wood);
-        for (let m = -3; m <= 3; m++) {
-          add("cylinder", m * 0.22, 0.78, 0.14, 0.14, 0.88, 0.14, PALETTE.ink, 0.12, 0, 0);
-          add("torus", m * 0.22, 1.22, 0.19, 0.17, 0.17, 0.17, PALETTE.yellow, Math.PI / 2, 0, 0);
+        add("rbox", 0, 0.24, 0, 1.85, 0.42, 1.05, PALETTE.stone);
+        add("rbox", 0, 0.48, -0.25, 1.55, 0.26, 0.55, PALETTE.wood);
+        for (let m = -4; m <= 4; m++) {
+          add("cylinder", m * 0.19, 0.80, 0.16, 0.13, 0.92, 0.13, PALETTE.ink, 0.10, 0, 0);
+          add("torus", m * 0.19, 1.26, 0.20, 0.16, 0.16, 0.16, PALETTE.yellow, Math.PI / 2, 0, 0);
         }
         break;
       }
 
       case "command_yagura": {
-        // 12號島雙層朱紅日式觀禮指揮櫓 + 四角祭典燈籠柱
-        add("rbox", 0, 0.38, 0, 1.42, 0.70, 1.08, PALETTE.wallWarm);
-        add("hip", 0, 0.88, 0, 1.62, 0.46, 1.26, PALETTE.ink);
-        add("rbox", 0, 1.22, 0, 0.96, 0.62, 0.76, PALETTE.wallWarm);
-        add("hip", 0, 1.68, 0, 1.22, 0.48, 0.98, PALETTE.coral);
-        for (let lx of [-0.62, 0.62]) {
-          for (let lz of [-0.45, 0.45]) {
-            add("glowsphere", lx, 0.68, lz, 0.13, 0.16, 0.13, PALETTE.glowGold);
+        add("rbox", 0, 0.38, 0, 1.52, 0.72, 1.16, PALETTE.wallWarm);
+        add("hip", 0, 0.90, 0, 1.72, 0.48, 1.34, PALETTE.ink);
+        add("rbox", 0, 1.26, 0, 1.04, 0.64, 0.84, PALETTE.wallWarm);
+        add("hip", 0, 1.74, 0, 1.32, 0.50, 1.06, PALETTE.coral);
+        for (let lx of [-0.68, 0.68]) {
+          for (let lz of [-0.48, 0.48]) {
+            add("glowsphere", lx, 0.70, lz, 0.13, 0.16, 0.13, PALETTE.glowGold);
           }
         }
         break;
       }
 
       case "watermill": {
-        add("rbox", -0.22, 0.34, 0, 0.68, 0.60, 0.58, PALETTE.wallWarm);
-        add("hip", -0.22, 0.76, 0, 0.82, 0.38, 0.72, PALETTE.coral);
-        add("torus", 0.22, 0.40, 0, 0.62, 0.62, 0.32, PALETTE.wood, 0, Math.PI / 2, 0);
-        add("cylinder", 0.44, 0.22, 0.18, 0.28, 0.36, 0.28, PALETTE.wood);
-        add("cylinder", 0.44, 0.22, -0.18, 0.28, 0.36, 0.28, PALETTE.wood);
-        add("cylinder", 0.44, 0.52, 0.18, 0.08, 0.42, 0.08, PALETTE.ink);
-        add("cylinder", 0.44, 0.44, -0.18, 0.08, 0.42, 0.08, PALETTE.ink);
+        add("rbox", -0.25, 0.36, 0, 0.72, 0.64, 0.62, PALETTE.wallWarm);
+        add("hip", -0.25, 0.80, 0, 0.88, 0.40, 0.76, PALETTE.coral);
+        add("torus", 0.20, 0.42, 0, 0.65, 0.65, 0.34, PALETTE.wood, 0, Math.PI / 2, 0);
+        for (let m = -1; m <= 1; m++) {
+          add("cylinder", 0.48, 0.22, m * 0.25, 0.24, 0.34, 0.24, PALETTE.wood);
+          add("cylinder", 0.48, 0.52, m * 0.25, 0.07, 0.44, 0.07, PALETTE.ink);
+        }
         break;
       }
 
       case "color_vats": {
-        const cols = [0xdb6a41, 0x8db86f, 0x3e7c8c, 0xfcea8b, 0xf2b5c6];
+        const cols = [0xdb6a41, 0x8db86f, 0x3e7c8c, 0xfcea8b, 0xf2b5c6, 0x6f7fb5];
         cols.forEach((c, idx) => {
-          const ang = (idx / 5) * Math.PI * 2;
-          const ox = Math.cos(ang) * 0.34;
-          const oz = Math.sin(ang) * 0.30;
-          add("cylinder", ox, 0.32, oz, 0.28, 0.50, 0.28, c);
-          add("torus", ox, 0.56, oz, 0.30, 0.30, 0.20, PALETTE.ink, Math.PI / 2, 0, 0);
+          const ang = (idx / 6) * Math.PI * 2;
+          const ox = Math.cos(ang) * 0.40;
+          const oz = Math.sin(ang) * 0.34;
+          add("cylinder", ox, 0.32, oz, 0.26, 0.52, 0.26, c);
+          add("torus", ox, 0.58, oz, 0.28, 0.28, 0.20, PALETTE.ink, Math.PI / 2, 0, 0);
         });
-        add("cylinder", 0, 0.45, 0, 0.18, 0.75, 0.18, PALETTE.stone);
+        add("cylinder", 0, 0.48, 0, 0.22, 0.82, 0.22, PALETTE.stone);
         break;
       }
 
       case "rolling_drums": {
         for (let i = -1; i <= 1; i++) {
-          add("rbox", i * 0.36, 0.16, 0, 0.26, 0.26, 0.36, PALETTE.wood);
-          add("cylinder", i * 0.36, 0.42, 0, 0.30, 0.42, 0.30, PALETTE.yellow, 0, 0, Math.PI / 5);
-          add("torus", i * 0.36, 0.42, 0, 0.32, 0.32, 0.25, PALETTE.ink, 0, Math.PI / 2, 0);
+          add("rbox", i * 0.38, 0.16, -0.08, 0.28, 0.26, 0.38, PALETTE.wood);
+          add("cylinder", i * 0.38, 0.44, -0.08, 0.32, 0.44, 0.32, PALETTE.yellow, 0, 0, Math.PI / 5);
+          add("torus", i * 0.38, 0.44, -0.08, 0.34, 0.34, 0.25, PALETTE.ink, 0, Math.PI / 2, 0);
         }
         break;
       }
 
       case "drying_racks": {
         for (let r = -1; r <= 1; r++) {
-          add("rbox", 0, 0.16 + (r + 1) * 0.12, r * 0.28, 0.98, 0.07, 0.24, PALETTE.wood);
-          for (let c = -2; c <= 2; c++) {
-            const col = [PALETTE.coral, PALETTE.yellow, PALETTE.teal, PALETTE.pastelPink, PALETTE.foliage1][(c + 2) % 5];
-            add("sphere", c * 0.18, 0.23 + (r + 1) * 0.12, r * 0.28, 0.11, 0.08, 0.11, col);
+          add("rbox", 0, 0.16 + (r + 1) * 0.12, r * 0.30, 1.06, 0.07, 0.26, PALETTE.wood);
+          for (let c = -3; c <= 3; c++) {
+            const col = [PALETTE.coral, PALETTE.yellow, PALETTE.teal, PALETTE.pastelPink, PALETTE.foliage1][(c + 3) % 5];
+            add("sphere", c * 0.14, 0.23 + (r + 1) * 0.12, r * 0.30, 0.10, 0.08, 0.10, col);
           }
         }
         break;
       }
 
       case "windmill": {
-        add("cone", 0, 0.48, 0, 0.52, 0.90, 0.52, PALETTE.wallWarm);
-        add("cone", 0, 0.98, 0, 0.36, 0.32, 0.36, PALETTE.coral);
-        add("box", 0, 0.72, 0.26, 0.82, 0.10, 0.04, PALETTE.wood);
-        add("box", 0, 0.72, 0.26, 0.10, 0.82, 0.04, PALETTE.wood);
+        add("cone", 0, 0.50, 0, 0.54, 0.92, 0.54, PALETTE.wallWarm);
+        add("cone", 0, 1.02, 0, 0.38, 0.34, 0.38, PALETTE.coral);
+        add("box", 0, 0.74, 0.28, 0.88, 0.10, 0.04, PALETTE.wood);
+        add("box", 0, 0.74, 0.28, 0.10, 0.88, 0.04, PALETTE.wood);
         break;
       }
 
       case "hydraulic_press": {
-        add("rbox", -0.34, 0.50, 0, 0.16, 0.96, 0.42, PALETTE.ink);
-        add("rbox", 0.34, 0.50, 0, 0.16, 0.96, 0.42, PALETTE.ink);
-        add("rbox", 0, 0.92, 0, 0.90, 0.18, 0.48, PALETTE.coral);
-        add("cylinder", 0, 0.60, 0, 0.32, 0.42, 0.32, PALETTE.yellow);
-        add("dome", 0, 0.12, 0, 0.46, 0.38, 0.46, PALETTE.wood);
-        add("dome", 0.48, 0.08, 0.32, 0.28, 0.24, 0.28, PALETTE.wood);
+        add("rbox", -0.36, 0.52, 0, 0.16, 0.98, 0.44, PALETTE.ink);
+        add("rbox", 0.36, 0.52, 0, 0.16, 0.98, 0.44, PALETTE.ink);
+        add("rbox", 0, 0.96, 0, 0.94, 0.18, 0.50, PALETTE.coral);
+        add("cylinder", 0, 0.62, 0, 0.34, 0.44, 0.34, PALETTE.yellow);
+        for (let s = -1; s <= 1; s++) {
+          add("dome", s * 0.32, 0.10, 0.32, 0.28, 0.24, 0.28, PALETTE.wood);
+        }
         break;
       }
 
       case "cutaway_shell": {
-        add("cylinder", 0, 0.18, 0, 0.88, 0.30, 0.88, PALETTE.wood);
-        add("torus", 0, 0.36, 0, 0.82, 0.82, 0.45, PALETTE.coral, Math.PI / 2, 0, 0);
-        add("torus", 0, 0.38, 0, 0.52, 0.52, 0.45, PALETTE.yellow, Math.PI / 2, 0, 0);
-        add("torus", 0, 0.40, 0, 0.28, 0.28, 0.45, PALETTE.teal, Math.PI / 2, 0, 0);
+        add("cylinder", 0, 0.18, 0, 0.92, 0.30, 0.92, PALETTE.wood);
+        add("torus", 0, 0.36, 0, 0.86, 0.86, 0.45, PALETTE.coral, Math.PI / 2, 0, 0);
+        add("torus", 0, 0.38, 0, 0.56, 0.56, 0.45, PALETTE.yellow, Math.PI / 2, 0, 0);
+        add("torus", 0, 0.40, 0, 0.30, 0.30, 0.45, PALETTE.teal, Math.PI / 2, 0, 0);
         add("sphere", 0, 0.40, 0, 0.18, 0.18, 0.18, PALETTE.ink);
         break;
       }
 
       case "winder_machine":
       case "hanging_rack": {
-        add("rbox", -0.44, 0.48, 0, 0.10, 0.90, 0.10, PALETTE.wood);
-        add("rbox", 0.44, 0.48, 0, 0.10, 0.90, 0.10, PALETTE.wood);
-        add("rbox", 0, 0.88, 0, 1.02, 0.10, 0.10, PALETTE.wood);
+        add("rbox", -0.48, 0.48, 0, 0.10, 0.92, 0.10, PALETTE.wood);
+        add("rbox", 0.48, 0.48, 0, 0.10, 0.92, 0.10, PALETTE.wood);
+        add("rbox", 0, 0.90, 0, 1.08, 0.10, 0.10, PALETTE.wood);
         for (let b = -1; b <= 1; b++) {
-          add("sphere", b * 0.28, 0.48, 0, 0.26, 0.26, 0.26, b === 0 ? PALETTE.coral : PALETTE.stone);
+          add("sphere", b * 0.30, 0.50, 0, 0.26, 0.26, 0.26, b === 0 ? PALETTE.coral : PALETTE.stone);
         }
         break;
       }
 
       case "hopper_tower": {
-        add("rbox", -0.28, 0.35, 0, 0.08, 0.65, 0.48, PALETTE.ink);
-        add("rbox", 0.28, 0.35, 0, 0.08, 0.65, 0.48, PALETTE.ink);
-        add("cone", 0, 0.72, 0, 0.72, 0.78, 0.72, PALETTE.teal, Math.PI, 0, 0);
+        add("rbox", -0.30, 0.36, 0, 0.08, 0.68, 0.48, PALETTE.ink);
+        add("rbox", 0.30, 0.36, 0, 0.08, 0.68, 0.48, PALETTE.ink);
+        add("cone", 0, 0.74, 0, 0.74, 0.80, 0.74, PALETTE.teal, Math.PI, 0, 0);
         add("sphere", 0, 0.22, 0, 0.28, 0.28, 0.28, PALETTE.coral);
         break;
       }
 
       case "xray_dome": {
-        add("dome", 0, 0.06, 0, 0.88, 0.82, 0.88, PALETTE.wallWarm);
-        add("torus", 0, 0.48, 0, 0.92, 0.92, 0.40, PALETTE.pastelCyan, Math.PI / 2, 0, 0);
-        add("glowbox", 0, 0.34, 0.44, 0.40, 0.28, 0.08, PALETTE.glowGold);
+        add("dome", 0, 0.08, 0, 0.90, 0.84, 0.90, PALETTE.wallWarm);
+        add("torus", 0, 0.50, 0, 0.94, 0.94, 0.40, PALETTE.pastelCyan, Math.PI / 2, 0, 0);
+        add("glowbox", 0, 0.36, 0.46, 0.42, 0.28, 0.08, PALETTE.glowGold);
         break;
       }
 
       case "mortar_tubes":
       case "multi_launcher": {
-        add("rbox", 0, 0.12, 0, 1.02, 0.18, 0.64, PALETTE.wood);
-        for (let k = -2; k <= 2; k++) {
-          add("cylinder", k * 0.20, 0.48, 0, 0.16, 0.68, 0.16, PALETTE.ink, 0.1, 0, k * 0.06);
+        add("rbox", 0, 0.12, 0, 1.08, 0.18, 0.66, PALETTE.wood);
+        for (let k = -3; k <= 3; k++) {
+          add("cylinder", k * 0.15, 0.48, 0, 0.14, 0.68, 0.14, PALETTE.ink, 0.1, 0, k * 0.05);
         }
         break;
       }
@@ -252,55 +259,55 @@ export class KitBuilder {
       case "clinic":
       case "sieve_shed":
       case "boxer_machine": {
-        add("rbox", 0, 0.32, 0, 0.82, 0.56, 0.66, PALETTE.wallWarm);
-        add("hip", 0, 0.72, 0, 0.98, 0.42, 0.82, PALETTE.coral);
-        add("glowbox", -0.18, 0.34, 0.34, 0.20, 0.20, 0.04, PALETTE.glowGold);
-        add("glowbox", 0.18, 0.34, 0.34, 0.20, 0.20, 0.04, PALETTE.glowGold);
+        add("rbox", 0, 0.34, 0, 0.86, 0.58, 0.68, PALETTE.wallWarm);
+        add("hip", 0, 0.74, 0, 1.02, 0.44, 0.84, PALETTE.coral);
+        add("glowbox", -0.20, 0.36, 0.35, 0.20, 0.20, 0.04, PALETTE.glowGold);
+        add("glowbox", 0.20, 0.36, 0.35, 0.20, 0.20, 0.04, PALETTE.glowGold);
         break;
       }
 
       case "pavilion":
       case "booth":
       case "vat_station": {
-        add("rbox", 0, 0.18, 0, 0.78, 0.28, 0.62, PALETTE.wood);
-        add("cylinder", -0.32, 0.42, 0.24, 0.06, 0.48, 0.06, PALETTE.wood);
-        add("cylinder", 0.32, 0.42, 0.24, 0.06, 0.48, 0.06, PALETTE.wood);
-        add("cone", 0, 0.72, 0, 0.94, 0.42, 0.94, PALETTE.yellow);
+        add("rbox", 0, 0.18, 0, 0.82, 0.28, 0.64, PALETTE.wood);
+        add("cylinder", -0.34, 0.44, 0.24, 0.06, 0.48, 0.06, PALETTE.wood);
+        add("cylinder", 0.34, 0.44, 0.24, 0.06, 0.48, 0.06, PALETTE.wood);
+        add("cone", 0, 0.74, 0, 0.98, 0.44, 0.98, PALETTE.yellow);
         break;
       }
 
       case "canal_bridge": {
-        add("rbox", 0, 0.06, 0, 0.96, 0.08, 0.52, PALETTE.teal);
-        add("rbox", 0, 0.20, 0, 0.40, 0.10, 0.74, PALETTE.coral);
+        add("rbox", 0, 0.08, 0, 1.02, 0.08, 0.54, PALETTE.teal);
+        add("rbox", 0, 0.22, 0, 0.42, 0.10, 0.76, PALETTE.coral);
         break;
       }
 
       case "bus_stop":
       case "bike_rack": {
-        add("rbox", -0.24, 0.32, -0.18, 0.44, 0.56, 0.20, PALETTE.teal);
-        add("rbox", 0.16, 0.22, 0.14, 0.54, 0.32, 0.32, PALETTE.coral);
-        add("glowsphere", 0.44, 0.20, 0.14, 0.10, 0.10, 0.10, PALETTE.glowGold);
+        add("rbox", -0.24, 0.34, -0.18, 0.46, 0.58, 0.20, PALETTE.teal);
+        add("rbox", 0.18, 0.24, 0.14, 0.56, 0.34, 0.32, PALETTE.coral);
+        add("glowsphere", 0.46, 0.22, 0.14, 0.10, 0.10, 0.10, PALETTE.glowGold);
         break;
       }
 
       case "stage":
       case "court": {
-        add("rbox", 0, 0.10, 0, 1.02, 0.16, 0.84, PALETTE.stone);
-        add("rbox", 0, 0.44, -0.26, 0.84, 0.48, 0.12, PALETTE.coral);
-        add("glowsphere", -0.34, 0.42, 0.24, 0.14, 0.14, 0.14, PALETTE.glowGold);
-        add("glowsphere", 0.34, 0.42, 0.24, 0.14, 0.14, 0.14, PALETTE.glowGold);
+        add("rbox", 0, 0.12, 0, 1.06, 0.16, 0.86, PALETTE.stone);
+        add("rbox", 0, 0.46, -0.28, 0.86, 0.48, 0.12, PALETTE.coral);
+        add("glowsphere", -0.36, 0.44, 0.24, 0.14, 0.14, 0.14, PALETTE.glowGold);
+        add("glowsphere", 0.36, 0.44, 0.24, 0.14, 0.14, 0.14, PALETTE.glowGold);
         break;
       }
 
       default: {
-        add("cylinder", 0, 0.14, 0, 0.64, 0.22, 0.64, PALETTE.stone);
+        add("cylinder", 0, 0.14, 0, 0.66, 0.22, 0.66, PALETTE.stone);
         if (modelKind === "symbol_globe" || modelKind === "symbol_star") {
-          add("sphere", 0, 0.58, 0, 0.52, 0.52, 0.52, PALETTE.coral);
-          add("torus", 0, 0.58, 0, 0.72, 0.72, 0.32, PALETTE.yellow, 0.5, 0.3, 0);
+          add("sphere", 0, 0.60, 0, 0.54, 0.54, 0.54, PALETTE.coral);
+          add("torus", 0, 0.60, 0, 0.74, 0.74, 0.32, PALETTE.yellow, 0.5, 0.3, 0);
         } else if (modelKind === "symbol_clock" || modelKind === "symbol_coin") {
-          add("cylinder", 0, 0.58, 0, 0.56, 0.16, 0.56, PALETTE.yellow, Math.PI / 2, 0, 0);
+          add("cylinder", 0, 0.60, 0, 0.58, 0.16, 0.58, PALETTE.yellow, Math.PI / 2, 0, 0);
         } else {
-          add("rbox", 0, 0.48, 0, 0.56, 0.44, 0.38, mainColor);
+          add("rbox", 0, 0.50, 0, 0.58, 0.44, 0.38, mainColor);
         }
         break;
       }
@@ -324,31 +331,37 @@ export class KitBuilder {
   }
 
   composeAllIslands() {
-    const R = WORLD.R;       // 5.2
-    const TOP = WORLD.TOP;   // 0.95
+    const R = WORLD.R;       // 10.0
+    const TOP = WORLD.TOP;   // 1.25
     const hitGeo = new THREE.BoxGeometry(1, 1, 1);
     const hitMat = new THREE.MeshBasicMaterial({ visible: false });
 
-    // 大島上的 4 個寬敞園區交錯格子位置 (與中央主工坊拉開距離，不擁擠，細節清楚分明！)
     const slotOffsets = [
-      { x: -2.25, z: -0.15 },
-      { x: 2.25,  z: -0.15 },
-      { x: -1.45, z: 1.95 },
-      { x: 1.45,  z: 1.95 }
+      { x: -4.2, z: -0.4 },
+      { x: 4.2,  z: -0.4 },
+      { x: -2.8, z: 3.6 },
+      { x: 2.8,  z: 3.6 }
+    ];
+
+    const extraMicroZones = [
+      { x: -3.6, z: -3.6, model: "pavilion" },
+      { x: 3.6,  z: -3.6, model: "sieve_shed" },
+      { x: 0.0,  z: 1.4,  model: "canal_bridge" },
+      { x: -5.4, z: 2.0,  model: "bus_stop" },
+      { x: 5.4,  z: 2.0,  model: "booth" },
+      { x: 0.0,  z: 5.2,  model: "court" }
     ];
 
     this.islandsData.forEach((isl) => {
       const { x: ix, z: iz } = axialToWorld(isl.axial.q, isl.axial.r);
 
-      // 1. 島嶼北側主工坊園區 (尺寸適中精緻 1.85，留出庭院與步道空間)
-      this.buildModelArchetype(isl.mainModel, ix, TOP, iz - 1.85, 1.85, isl.id, isl.color);
+      this.buildModelArchetype(isl.mainModel, ix, TOP, iz - 3.6, 2.4, isl.id, isl.color);
 
-      // 2. 島內 4 個細項獨立園區模型
       isl.items.forEach((item, idx) => {
         const slot = slotOffsets[idx % slotOffsets.length];
         const bx = ix + slot.x;
         const bz = iz + slot.z;
-        const itemScale = 1.18;
+        const itemScale = 1.65;
 
         this.buildModelArchetype(item.model, bx, TOP, bz, itemScale, item.id, isl.color);
 
@@ -357,36 +370,41 @@ export class KitBuilder {
 
         const pick = new THREE.Mesh(hitGeo, hitMat);
         pick.position.set(bx, TOP + itemScale * 0.55, bz);
-        pick.scale.set(itemScale * 1.35, itemScale * 1.35, itemScale * 1.35);
+        pick.scale.set(itemScale * 1.5, itemScale * 1.4, itemScale * 1.5);
         pick.userData = { type: "item", item, island: isl };
         this.scene.add(pick);
         this.itemPickMeshes.push(pick);
       });
 
-      // 3. 島內豐富微縮街道家具：長椅、花圃、石燈籠、8 棵外圈錯落大樹與 6 盞路燈
+      extraMicroZones.forEach((ez) => {
+        this.buildModelArchetype(ez.model, ix + ez.x, TOP, iz + ez.z, 1.05, isl.id, isl.color);
+      });
+
       for (let k = 0; k < 6; k++) {
         const ang = (k * Math.PI) / 3 + Math.PI / 6;
-        const lx = ix + Math.cos(ang) * (R * 0.88);
-        const lz = iz + Math.sin(ang) * (R * 0.88);
 
-        // 精緻比例路燈 (不再巨大化)
-        this.addPart("cylinder", lx, TOP + 0.42, lz, 0.06, 0.84, 0.06, 0, 0, 0, PALETTE.ink);
-        this.addPart("glowsphere", lx, TOP + 0.86, lz, 0.18, 0.18, 0.18, 0, 0, 0, PALETTE.glowGold);
+        for (let rRatio of [0.88, 0.45]) {
+          const lx = ix + Math.cos(ang) * (R * rRatio);
+          const lz = iz + Math.sin(ang) * (R * rRatio);
+          this.addPart("cylinder", lx, TOP + 0.48, lz, 0.07, 0.96, 0.07, 0, 0, 0, PALETTE.ink);
+          this.addPart("glowsphere", lx, TOP + 0.98, lz, 0.20, 0.20, 0.20, 0, 0, 0, PALETTE.glowGold);
+        }
 
-        // 步道內側花圃與長椅
-        const bx = ix + Math.cos(ang + 0.5) * (R * 0.72);
-        const bz = iz + Math.sin(ang + 0.5) * (R * 0.72);
-        this.addPart("rbox", bx, TOP + 0.09, bz, 0.45, 0.14, 0.18, 0, -ang, 0, PALETTE.wood);
+        const bx = ix + Math.cos(ang + 0.45) * (R * 0.74);
+        const bz = iz + Math.sin(ang + 0.45) * (R * 0.74);
+        this.addPart("rbox", bx, TOP + 0.11, bz, 0.58, 0.16, 0.22, 0, -ang, 0, PALETTE.wood);
+        this.addPart("rbox", bx + Math.cos(ang) * 0.55, TOP + 0.12, bz + Math.sin(ang) * 0.55, 0.42, 0.18, 0.42, 0, 0, 0, PALETTE.stone);
+        this.addPart("sphere", bx + Math.cos(ang) * 0.55, TOP + 0.26, bz + Math.sin(ang) * 0.55, 0.34, 0.22, 0.34, 0, 0, 0, PALETTE.pastelPink);
 
-        // 外圈高低錯落樹群
         if (k !== 1) {
-          const tx = ix + Math.cos(ang + 0.22) * (R * 0.76);
-          const tz = iz + Math.sin(ang + 0.22) * (R * 0.76);
-          this.buildTree(isl.treeType, tx, TOP, tz, 1.05);
-
-          const tx2 = ix + Math.cos(ang - 0.18) * (R * 0.78);
-          const tz2 = iz + Math.sin(ang - 0.18) * (R * 0.78);
-          this.buildTree(k % 2 === 0 ? "cherry" : isl.treeType, tx2, TOP, tz2, 0.78);
+          const tAngles = [ang + 0.16, ang - 0.16, ang + 0.32];
+          const tRadii = [R * 0.76, R * 0.79, R * 0.64];
+          const tScales = [1.28, 0.96, 0.82];
+          tAngles.forEach((ta, ti) => {
+            const tx = ix + Math.cos(ta) * tRadii[ti];
+            const tz = iz + Math.sin(ta) * tRadii[ti];
+            this.buildTree(ti === 1 ? "cherry" : isl.treeType, tx, TOP, tz, tScales[ti]);
+          });
         }
       }
     });

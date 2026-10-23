@@ -14,12 +14,11 @@ class HanabiPolicyIslandApp {
   constructor() {
     try {
       this.container = document.getElementById("canvas-container");
-      this.minutes = 600; // 從白天 10:00 開始
+      this.minutes = 600;
       this.isPaused = false;
       this.isTopDown = false;
       this.selectedOwnerId = null;
 
-      // 導覽狀態
       this.currentStepIndex = 0;
       this.autoTour = false;
       this.tourTimer = 0;
@@ -60,16 +59,14 @@ class HanabiPolicyIslandApp {
       this.ui.pushLiveLog("handoff", DATA.flows[9]);
 
       this.bindEvents();
+      this.setPanoramaView(false);
 
-      // 開場採用近距離微距斜視角（先聚焦前段 01~02 島群，讓拉開的水道與島上高密度細節一眼可見！）
-      this.setInitialCloseView();
-
-      // 減少煙火施放頻率：改為每隔 6.5 秒（約 5~8 秒區間）從容施放一次！
+      // 每隔 6.8 秒施放一次煙火
       setInterval(() => {
         if (!this.isPaused) {
           this.fireworks.launchFromIsland(DATA.islands[10]);
         }
-      }, 6500);
+      }, 6800);
 
       document.getElementById("loading-overlay").classList.add("hidden");
 
@@ -89,7 +86,7 @@ class HanabiPolicyIslandApp {
     this.height = window.innerHeight;
 
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(32, this.width / this.height, 0.5, 550);
+    this.camera = new THREE.PerspectiveCamera(32, this.width / this.height, 0.5, 850);
 
     const isMobile = this.width <= 800;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -115,8 +112,8 @@ class HanabiPolicyIslandApp {
     this.controls.enablePan = true;
     this.controls.minPolarAngle = THREE.MathUtils.degToRad(18);
     this.controls.maxPolarAngle = THREE.MathUtils.degToRad(70);
-    this.controls.minDistance = 6;
-    this.controls.maxDistance = 165;
+    this.controls.minDistance = 8;
+    this.controls.maxDistance = 260;
 
     this.flyState = { active: false, t0: 0, dur: 850, sPos: new THREE.Vector3(), ePos: new THREE.Vector3(), sTar: new THREE.Vector3(), eTar: new THREE.Vector3() };
 
@@ -145,21 +142,10 @@ class HanabiPolicyIslandApp {
     this.flyState.active = true;
   }
 
-  // 開場黃金微距視角：讓使用者一進來就看到拉開的寬闊海道、修長拱橋與島上細緻入微的物件與小人
-  setInitialCloseView() {
-    const p1 = axialToWorld(DATA.islands[0].axial.q, DATA.islands[0].axial.r);
-    const p2 = axialToWorld(DATA.islands[5].axial.q, DATA.islands[5].axial.r);
-    const center = new THREE.Vector3((p1.x + p2.x) * 0.5, WORLD.TOP, (p1.z + p2.z) * 0.5);
-    const offset = new THREE.Vector3(10, 22, 34);
-    this.controls.target.copy(center);
-    this.camera.position.copy(center).add(offset);
-    this.controls.update();
-  }
-
   setPanoramaView(animate = true) {
-    const dir = new THREE.Vector3(0.22, 0.38, 0.86).normalize();
-    const dist = this.width / this.height > 1.3 ? 68 : 88;
-    const center = new THREE.Vector3(-3, 0, 0);
+    const dir = new THREE.Vector3(0.20, 0.42, 0.85).normalize();
+    const dist = this.width / this.height > 1.3 ? 132 : 165;
+    const center = new THREE.Vector3(-4, 0, 0);
 
     if (!animate) {
       this.controls.target.copy(center);
@@ -185,11 +171,10 @@ class HanabiPolicyIslandApp {
     this.walkersMgr.highlightRelatedFlows(island.id, null);
 
     const { x, z } = axialToWorld(island.axial.q, island.axial.r);
-    const deskShift = this.width > 860 ? 1.8 : 0;
-    // 近距離飛行對焦，完美呈現大島內部的 4 個細項園區與小人
+    const deskShift = this.width > 860 ? 2.5 : 0;
     this.flyTo(
       new THREE.Vector3(x - deskShift, WORLD.TOP, z),
-      new THREE.Vector3(6.5, 11.5, 14.5),
+      new THREE.Vector3(11.0, 19.5, 24.5),
       850
     );
 
@@ -207,8 +192,8 @@ class HanabiPolicyIslandApp {
     const anchor = this.kitBuilder.itemAnchors[item.id];
     if (anchor) {
       this.flyTo(
-        new THREE.Vector3(anchor.x, WORLD.TOP + 0.4, anchor.z),
-        new THREE.Vector3(3.6, 5.2, 6.8),
+        new THREE.Vector3(anchor.x, WORLD.TOP + 0.5, anchor.z),
+        new THREE.Vector3(5.5, 8.2, 10.5),
         800
       );
     }
@@ -228,7 +213,7 @@ class HanabiPolicyIslandApp {
       const pB = axialToWorld(islB.axial.q, islB.axial.r);
       this.flyTo(
         new THREE.Vector3((pA.x + pB.x) * 0.5, WORLD.TOP, (pA.z + pB.z) * 0.5),
-        new THREE.Vector3(6.5, 13.5, 16.5),
+        new THREE.Vector3(12.0, 24.0, 28.0),
         850
       );
     }
@@ -284,7 +269,6 @@ class HanabiPolicyIslandApp {
       }
     });
 
-    // 導覽按鈕：◀ 上一站 / 🎬 自動導覽 / 下一站 ▶
     document.getElementById("btn-prev-step").addEventListener("click", () => {
       this.stopAutoTour();
       this.currentStepIndex = (this.currentStepIndex - 1 + DATA.islands.length) % DATA.islands.length;
@@ -322,7 +306,6 @@ class HanabiPolicyIslandApp {
       this.fireworks.launchSalvo();
     });
 
-    // 時段四鈕
     document.querySelectorAll(".time-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".time-btn").forEach((b) => b.classList.remove("active"));
@@ -352,7 +335,7 @@ class HanabiPolicyIslandApp {
     bindSwitch("sw-topdown", (v) => {
       this.isTopDown = v;
       if (v) {
-        this.flyTo(new THREE.Vector3(-3, 0, 0), new THREE.Vector3(0.05, 95, 12));
+        this.flyTo(new THREE.Vector3(-4, 0, 0), new THREE.Vector3(0.05, 165, 18));
       } else {
         this.setPanoramaView(true);
       }
@@ -402,7 +385,6 @@ class HanabiPolicyIslandApp {
       this.minutes = (this.minutes + dt * 10) % 1440;
       document.getElementById("clock-display").innerText = this.formatClock(this.minutes);
 
-      // 自動巡島導覽計時 (每 5.5 秒前往下一站)
       if (this.autoTour) {
         this.tourTimer += dt;
         if (this.tourTimer >= 5.5) {

@@ -22,10 +22,9 @@
     <div class="glass-panel" id="brand-card">
       <div class="eyebrow">HANABI CRAFT ISLAND</div>
       <h1>花火工藝島</h1>
-      <p class="subtitle">傳統尺玉煙火從火藥配研、星珠造粒到高空綻放的十二道 S 型閉環工藝巡禮</p>
+      <p class="subtitle">傳統尺玉煙火從火藥配研、星珠造粒到高空綻放的十二道 S 型外海閉環工藝巡禮</p>
     </div>
 
-    <!-- 導覽與視角控制列 (補回完整導覽功能！) -->
     <div class="glass-panel" id="quick-toolbar">
       <button class="icon-pill-btn nav-accent" id="btn-prev-step" title="上一站工序">◀ <span>上一站</span></button>
       <button class="icon-pill-btn nav-accent" id="btn-auto-tour" title="自動巡島導覽">🎬 <span id="tour-label">導覽: 關</span></button>
@@ -37,7 +36,7 @@
     </div>
   </div>
 
-  <!-- 左側詳細卡片 (島卡 / 細項卡 160² 離屏縮圖 / 協作線卡) -->
+  <!-- 左側詳細卡片 -->
   <div class="glass-panel" id="detail-card">
     <button class="card-close" id="card-close-btn" aria-label="關閉">&times;</button>
     <div id="detail-card-body"></div>
@@ -68,7 +67,7 @@
     <div class="sidebar-scroll hidden" id="tab-flows"></div>
   </aside>
 
-  <!-- 底部 HUD pill 工具列 -->
+  <!-- 底部 HUD pill 工具列 (名牌預設關閉，不再遮擋畫面！) -->
   <div class="glass-panel" id="hud-toolbar">
     <div class="hud-time-group">
       <span class="clock-readout" id="clock-display">10:00</span>
@@ -79,7 +78,7 @@
     </div>
     <div class="hud-divider"></div>
     <div class="hud-switch-group">
-      <button class="hud-switch active" id="sw-badges"><span class="sw-ico">💬</span><span class="sw-txt">名牌</span></button>
+      <button class="hud-switch" id="sw-badges"><span class="sw-ico">💬</span><span class="sw-txt">名牌</span></button>
       <button class="hud-switch active" id="sw-cargo"><span class="sw-ico">📦</span><span class="sw-txt">搬運</span></button>
       <button class="hud-switch active" id="sw-flows"><span class="sw-ico">➰</span><span class="sw-txt">協作線</span></button>
       <button class="hud-switch" id="sw-pause"><span class="sw-ico">⏸️</span><span class="sw-txt">暫停</span></button>
@@ -92,7 +91,7 @@
   <div class="glass-panel" id="flow-legend">
     <span class="legend-item"><i class="line-sample solid"></i> 主幹製程 (實線)</span>
     <span class="legend-item"><i class="line-sample dashed"></i> 跨排轉折 (虛線)</span>
-    <span class="legend-item"><i class="line-sample dotted"></i> 循環回流 12➔01 (點線)</span>
+    <span class="legend-item"><i class="line-sample dotted"></i> 外海回流 12➔01 (點線)</span>
   </div>
 
   <!-- 3步驟操作說明彈窗 -->
@@ -103,18 +102,18 @@
       <div class="steps-grid">
         <div class="step-card">
           <div class="step-num">1</div>
-          <h3>逐島導覽與自由旋轉</h3>
-          <p>點擊左上角「◀ 上一站 / 🎬 導覽 / 下一站 ▶」可沿 S 型工序逐島巡禮，或用滑鼠左鍵旋轉、滾輪縮放微距細節。</p>
+          <h3>逐島導覽與微距鑑賞</h3>
+          <p>點擊左上角「◀ 上一站 / 🎬 導覽 / 下一站 ▶」可沿 S 型工序逐島巡禮，欣賞每座 R=10 巨型工島上 6 倍密度的微縮園區細節。</p>
         </div>
         <div class="step-card">
           <div class="step-num">2</div>
-          <h3>點擊島嶼與 ①②③④ 細項</h3>
-          <p>點擊任一六角島或细項模型，自動展開 ①②③④ 珊瑚紅圖釘與左側 160² 3D 旋轉模型縮圖卡。</p>
+          <h3>外海環島回流與 ①②③④ 細項</h3>
+          <p>第 12 島結束後，沿著東側與北側外海棧橋優雅回到第 01 島；點擊島嶼可展開 ①②③④ 圖釘與 3D 旋轉縮圖卡。</p>
         </div>
         <div class="step-card">
           <div class="step-num">3</div>
           <h3>日夜光影與從容煙火</h3>
-          <p>每隔約 6~7 秒自動施放一輪高空尺玉煙火；亦可切換至「黃昏 18 / 夜晚 21」欣賞暖黃燈火與璀璨花火。</p>
+          <p>每隔約 6.5 秒自動施放一輪高空尺玉煙火；切換至「黃昏 18 / 夜晚 21」可欣賞全島暖黃燈火與璀璨花火。</p>
         </div>
       </div>
       <button class="primary-btn" id="btn-close-onboarding">開始探索花火工藝島</button>
@@ -126,7 +125,7 @@
     <div class="loader-box">
       <div class="loader-spinner"></div>
       <h2 id="loading-title">正在組合花火工藝島…</h2>
-      <p id="loading-sub">拉開寬闊海道距離、雕刻高密度微縮園區細節與精緻小人比例</p>
+      <p id="loading-sub">建構 R=10 巨型六角島、6 倍高密度微縮園區與外海環繞回流長橋</p>
     </div>
   </div>
 

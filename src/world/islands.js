@@ -51,7 +51,7 @@ function createPatternTexture(kind) {
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(4, 4);
+  tex.repeat.set(6, 6);
   return tex;
 }
 
@@ -79,7 +79,7 @@ function createRimBandTexture(hexColor) {
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(6, 1);
+  tex.repeat.set(8, 1);
   return tex;
 }
 
@@ -99,7 +99,7 @@ export class IslandsBuilder {
     };
 
     this.buildIslands();
-    this.buildSBridgesAndReturnLoop();
+    this.buildSBridgesAndOuterPerimeterReturn();
   }
 
   addNode(id, x, z) {
@@ -117,8 +117,8 @@ export class IslandsBuilder {
   }
 
   buildIslands() {
-    const R = WORLD.R;       // 5.2
-    const TOP = WORLD.TOP;   // 0.95
+    const R = WORLD.R;       // 10.0
+    const TOP = WORLD.TOP;   // 1.25
 
     const cliffMat = new THREE.MeshStandardMaterial({
       color: 0x89c2cb,
@@ -174,7 +174,7 @@ export class IslandsBuilder {
       this.islandMeshes.push(bodyMesh);
 
       // 2. 島面
-      const topGeo = new THREE.CircleGeometry(R - 0.16, 6);
+      const topGeo = new THREE.CircleGeometry(R - 0.25, 6);
       topGeo.rotateZ(Math.PI / 6);
       topGeo.rotateX(-Math.PI / 2);
       const topMat = new THREE.MeshStandardMaterial({
@@ -191,31 +191,31 @@ export class IslandsBuilder {
       group.add(topMesh);
       this.islandMeshes.push(topMesh);
 
-      // 3. 外圈步道環 + 內部十字支線石板步道 (增添地面豐富細節！)
-      const walkInner = R * 0.80;
-      const walkOuter = R * 0.90;
-      const walkGeo = new THREE.RingGeometry(walkInner, walkOuter, 6);
-      walkGeo.rotateZ(Math.PI / 6);
-      walkGeo.rotateX(-Math.PI / 2);
-      const walkMesh = new THREE.Mesh(walkGeo, walkMat);
-      walkMesh.position.y = TOP + 0.02;
-      walkMesh.receiveShadow = true;
-      group.add(walkMesh);
+      // 3. 外圈與內圈雙層六角步道環 + 放射狀石板路網
+      const walkGeo1 = new THREE.RingGeometry(R * 0.80, R * 0.89, 6);
+      walkGeo1.rotateZ(Math.PI / 6);
+      walkGeo1.rotateX(-Math.PI / 2);
+      const walkMesh1 = new THREE.Mesh(walkGeo1, walkMat);
+      walkMesh1.position.y = TOP + 0.02;
+      walkMesh1.receiveShadow = true;
+      group.add(walkMesh1);
 
-      // 島內中央圓形廣場與十字步道
-      const centerPlaza = new THREE.Mesh(new THREE.RingGeometry(0.6, 1.4, 24).rotateX(-Math.PI / 2), walkMat);
-      centerPlaza.position.y = TOP + 0.02;
-      group.add(centerPlaza);
+      const walkGeo2 = new THREE.RingGeometry(R * 0.36, R * 0.44, 6);
+      walkGeo2.rotateZ(Math.PI / 6);
+      walkGeo2.rotateX(-Math.PI / 2);
+      const walkMesh2 = new THREE.Mesh(walkGeo2, walkMat);
+      walkMesh2.position.y = TOP + 0.02;
+      group.add(walkMesh2);
 
       for (let a = 0; a < 3; a++) {
-        const pathStrip = new THREE.Mesh(new THREE.PlaneGeometry(0.45, R * 1.55).rotateX(-Math.PI / 2), walkMat);
+        const pathStrip = new THREE.Mesh(new THREE.PlaneGeometry(0.75, R * 1.65).rotateX(-Math.PI / 2), walkMat);
         pathStrip.rotation.y = (a * Math.PI) / 3;
         pathStrip.position.y = TOP + 0.018;
         group.add(pathStrip);
       }
 
       // 4. 頂緣彩色圖案帶
-      const bandH = 0.28;
+      const bandH = 0.42;
       const bandGeo = new THREE.CylinderGeometry(R + 0.02, R + 0.02, bandH, 6, 1, true);
       bandGeo.rotateY(Math.PI / 6);
       const bandMat = new THREE.MeshStandardMaterial({
@@ -227,14 +227,14 @@ export class IslandsBuilder {
       group.add(bandMesh);
 
       // 5. 外圈淺水環與白色泡沫環
-      const shGeo = new THREE.RingGeometry(R * 0.98, R + 1.15, 6);
+      const shGeo = new THREE.RingGeometry(R * 0.98, R + 1.8, 6);
       shGeo.rotateZ(Math.PI / 6);
       shGeo.rotateX(-Math.PI / 2);
       const shMesh = new THREE.Mesh(shGeo, shallowMat);
       shMesh.position.y = WORLD.WATER_Y + 0.02;
       group.add(shMesh);
 
-      const fmGeo = new THREE.RingGeometry(R + 0.04, R + 0.32, 6);
+      const fmGeo = new THREE.RingGeometry(R + 0.06, R + 0.48, 6);
       fmGeo.rotateZ(Math.PI / 6);
       fmGeo.rotateX(-Math.PI / 2);
       const fmMesh = new THREE.Mesh(fmGeo, foamMat);
@@ -244,7 +244,7 @@ export class IslandsBuilder {
       this.scene.add(group);
 
       // 6. 行人路網：每島 12 個節點
-      const walkMidR = R * 0.85;
+      const walkMidR = R * 0.845;
       const verts = [];
       for (let k = 0; k < 6; k++) {
         const ang = (k * Math.PI) / 3 + Math.PI / 6;
@@ -271,13 +271,50 @@ export class IslandsBuilder {
     });
   }
 
-  buildSBridgesAndReturnLoop() {
-    // 島與島之間距離拉開後，修長的 11 片甲板拱橋跨越寬闊水道！
-    const deckMat = new THREE.MeshStandardMaterial({ color: PALETTE.wood, roughness: 0.78 });
-    const railMat = new THREE.MeshStandardMaterial({ color: PALETTE.coral, roughness: 0.7 });
+  buildBridgeSpan(p1, p2, planks = 13, archHeight = 0.48, isReturn = false) {
+    const deckMat = new THREE.MeshStandardMaterial({ color: isReturn ? PALETTE.coral : PALETTE.wood, roughness: 0.78 });
     const postMat = new THREE.MeshStandardMaterial({ color: PALETTE.ink, roughness: 0.8 });
 
-    const connectPair = (idA, idB, isLongReturn = false) => {
+    const midX = (p1.x + p2.x) * 0.5;
+    const midZ = (p1.z + p2.z) * 0.5;
+    const len = Math.hypot(p2.x - p1.x, p2.z - p1.z);
+
+    const bridgeGroup = new THREE.Group();
+    bridgeGroup.position.set(midX, WORLD.TOP, midZ);
+    bridgeGroup.lookAt(p2.x, WORLD.TOP, p2.z);
+
+    const pLen = len / planks;
+    const width = isReturn ? 0.95 : 1.25;
+
+    for (let k = 0; k < planks; k++) {
+      const t = (k + 0.5) / planks;
+      const yOff = Math.sin(t * Math.PI) * archHeight;
+      const zOff = (t - 0.5) * len;
+
+      const deck = new THREE.Mesh(
+        new THREE.BoxGeometry(width, 0.12, pLen * 0.90),
+        deckMat
+      );
+      deck.position.set(0, yOff + 0.05, zOff);
+      deck.castShadow = true;
+      deck.receiveShadow = true;
+      bridgeGroup.add(deck);
+
+      if (k % 2 === 0) {
+        for (let sx of [-width * 0.45, width * 0.45]) {
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.28, 6), postMat);
+          post.position.set(sx, yOff + 0.18, zOff);
+          bridgeGroup.add(post);
+        }
+      }
+    }
+
+    this.scene.add(bridgeGroup);
+  }
+
+  buildSBridgesAndOuterPerimeterReturn() {
+    // 1. 沿著 01 -> 02 -> ... -> 12 建置 S 型拱橋
+    const connectIslands = (idA, idB) => {
       let bestU = null;
       let bestV = null;
       let minDist = Infinity;
@@ -299,58 +336,73 @@ export class IslandsBuilder {
 
       if (!bestU || !bestV) return;
       this.addEdge(bestU, bestV);
-
-      const p1 = this.nodes[bestU];
-      const p2 = this.nodes[bestV];
-      const midX = (p1.x + p2.x) * 0.5;
-      const midZ = (p1.z + p2.z) * 0.5;
-      const len = Math.hypot(p2.x - p1.x, p2.z - p1.z);
-
-      const bridgeGroup = new THREE.Group();
-      bridgeGroup.position.set(midX, WORLD.TOP, midZ);
-      bridgeGroup.lookAt(p2.x, WORLD.TOP, p2.z);
-
-      const planks = isLongReturn ? 23 : 11;
-      const archHeight = isLongReturn ? 0.55 : 0.32;
-      const pLen = len / planks;
-      const width = isLongReturn ? 0.65 : 0.78;
-
-      for (let k = 0; k < planks; k++) {
-        const t = (k + 0.5) / planks;
-        const yOff = Math.sin(t * Math.PI) * archHeight;
-        const zOff = (t - 0.5) * len;
-
-        const deck = new THREE.Mesh(
-          new THREE.BoxGeometry(width, 0.08, pLen * 0.90),
-          isLongReturn ? railMat : deckMat
-        );
-        deck.position.set(0, yOff + 0.04, zOff);
-        deck.castShadow = true;
-        deck.receiveShadow = true;
-        bridgeGroup.add(deck);
-
-        // 橋側精緻微縮欄杆柱
-        if (k % 2 === 0) {
-          for (let sx of [-width * 0.45, width * 0.45]) {
-            const post = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.22, 6), postMat);
-            post.position.set(sx, yOff + 0.15, zOff);
-            bridgeGroup.add(post);
-          }
-        }
-      }
-
-      this.scene.add(bridgeGroup);
+      this.buildBridgeSpan(this.nodes[bestU], this.nodes[bestV], 13, 0.52, false);
     };
 
     for (let i = 0; i < this.islandsData.length - 1; i++) {
-      connectPair(this.islandsData[i].id, this.islandsData[i + 1].id, false);
+      connectIslands(this.islandsData[i].id, this.islandsData[i + 1].id);
     }
 
-    // 12 觀禮台 直線回到原點 01 火藥配研室！
-    connectPair("isl_12", "isl_01", true);
+    // 2. 【核心修正】12 觀禮台 -> 01 火藥配研：沿著島嶼「外圍外海」繞行回去，絕不穿過中間島嶼！
+    const c12 = this.islandCenters["isl_12"];
+    const c04 = this.islandCenters["isl_04"];
+    const c01 = this.islandCenters["isl_01"];
+
+    const outerWaypoints = [
+      { id: "outer_wp1", x: c12.x + 18.5, z: c12.z + 2.0 },
+      { id: "outer_wp2", x: c04.x + 15.5, z: 0.0 },
+      { id: "outer_wp3", x: c04.x + 12.0, z: c04.z - 14.5 },
+      { id: "outer_wp4", x: (c04.x + c01.x) * 0.5, z: c01.z - 15.5 },
+      { id: "outer_wp5", x: c01.x - 4.0,  z: c01.z - 13.5 }
+    ];
+
+    const pierMat = new THREE.MeshStandardMaterial({ color: PALETTE.stone, roughness: 0.85 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: PALETTE.wood, roughness: 0.8 });
+    const glowMat = new THREE.MeshStandardMaterial({ color: PALETTE.glowGold, emissive: PALETTE.glowGold, emissiveIntensity: 1.5 });
+
+    outerWaypoints.forEach((wp) => {
+      this.addNode(wp.id, wp.x, wp.z);
+
+      const pierGroup = new THREE.Group();
+      pierGroup.position.set(wp.x, 0, wp.z);
+
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.6, WORLD.TOP - WORLD.WATER_Y, 8), pierMat);
+      base.position.y = (WORLD.TOP + WORLD.WATER_Y) * 0.5;
+      pierGroup.add(base);
+
+      const deck = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 0.16, 8), woodMat);
+      deck.position.y = WORLD.TOP + 0.05;
+      pierGroup.add(deck);
+
+      const lanternPost = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 1.6, 8), woodMat);
+      lanternPost.position.set(0, WORLD.TOP + 0.8, 0);
+      pierGroup.add(lanternPost);
+
+      const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 10), glowMat);
+      beacon.position.set(0, WORLD.TOP + 1.7, 0);
+      pierGroup.add(beacon);
+
+      this.scene.add(pierGroup);
+    });
+
+    const startNodeId = "isl_12_m0";
+    const endNodeId = "isl_01_m4";
+    const chainIds = [startNodeId, ...outerWaypoints.map((w) => w.id), endNodeId];
+
+    for (let i = 0; i < chainIds.length - 1; i++) {
+      const u = chainIds[i];
+      const v = chainIds[i + 1];
+      this.addEdge(u, v);
+      this.buildBridgeSpan(this.nodes[u], this.nodes[v], 15, 0.35, true);
+    }
   }
 
   findShortestPath(islandFromId, islandToId) {
+    if (islandFromId === "isl_12" && islandToId === "isl_01") {
+      const chainIds = ["isl_12_m0", "outer_wp1", "outer_wp2", "outer_wp3", "outer_wp4", "outer_wp5", "isl_01_m4"];
+      return chainIds.map((id) => this.nodes[id]);
+    }
+
     const startId = `${islandFromId}_m0`;
     const targetPrefix = `${islandToId}_`;
 

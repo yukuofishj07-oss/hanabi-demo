@@ -69,7 +69,8 @@ export class WalkersAndFlowsManager {
     this.walkers = [];
     this.walkerPickMeshes = [];
 
-    this.showBadges = true;
+    // 預設關閉文字名牌，避免滿畫面黑字！
+    this.showBadges = false;
     this.showCargo = true;
     this.showFlows = true;
 
@@ -77,7 +78,6 @@ export class WalkersAndFlowsManager {
   }
 
   createChibiWalkerMesh(role, flow) {
-    // 保持精緻小巧的微縮比例 (身高約 0.38)，讓大島嶼顯得真正寬廣宏偉！
     const S = WORLD.WALKER_SCALE;
     const group = new THREE.Group();
 
@@ -143,12 +143,13 @@ export class WalkersAndFlowsManager {
       new THREE.SpriteMaterial({ map: createBadgeTexture(flow.icon), transparent: true })
     );
     badgeSprite.position.set(0, 0.68 * S, 0);
-    badgeSprite.scale.set(0.26 * S, 0.26 * S, 1);
+    badgeSprite.scale.set(0.28 * S, 0.28 * S, 1);
     group.add(badgeSprite);
 
     const speechDiv = document.createElement("div");
     speechDiv.className = "walker-speech-tag";
-    speechDiv.innerText = `正在搬 ${flow.cargo}`;
+    speechDiv.innerText = flow.cargo;
+    speechDiv.style.display = "none";
     const speechObj = new CSS2DObject(speechDiv);
     speechObj.position.set(0, 0.88 * S, 0);
     group.add(speechObj);
@@ -162,12 +163,12 @@ export class WalkersAndFlowsManager {
       const pathNodes = this.islandsBuilder.findShortestPath(flow.from, flow.to);
       if (!pathNodes || pathNodes.length < 2) return;
 
-      const curvePoints = pathNodes.map((n) => new THREE.Vector3(n.x, WORLD.TOP + 0.06, n.z));
+      const curvePoints = pathNodes.map((n) => new THREE.Vector3(n.x, WORLD.TOP + 0.08, n.z));
       const curve = new THREE.CatmullRomCurve3(curvePoints);
       const totalLen = curve.getLength();
 
       const modeInt = flow.level === "official" ? 0 : (flow.level === "thematic" ? 1 : 2);
-      const tubeGeo = new THREE.TubeGeometry(curve, 64, 0.055, 8, false);
+      const tubeGeo = new THREE.TubeGeometry(curve, 96, 0.085, 8, false);
       const mat = new THREE.ShaderMaterial({
         transparent: true,
         depthWrite: false,
@@ -191,7 +192,7 @@ export class WalkersAndFlowsManager {
           uniform vec3 uColor;
           varying vec2 vUv;
           void main() {
-            float u = vUv.x * uLen * 0.85 - uTime * 1.4;
+            float u = vUv.x * uLen * 0.55 - uTime * 1.4;
             float f = fract(u);
             if (uMode == 1 && f > 0.6) discard;
             if (uMode == 2 && f > 0.3) discard;
@@ -207,8 +208,8 @@ export class WalkersAndFlowsManager {
       this.flowMeshes.push(tubeMesh);
       this.flowMaterials.push(mat);
 
-      // 每條協作線配 4 位小人在路線兩端來回走
-      for (let w = 0; w < 4; w++) {
+      // 每座島（每條路線）嚴格只配 2 位職人小人！
+      for (let w = 0; w < 2; w++) {
         const mesh = this.createChibiWalkerMesh(flow.role, flow);
         this.scene.add(mesh);
         this.walkerPickMeshes.push(mesh);
@@ -218,11 +219,11 @@ export class WalkersAndFlowsManager {
           flow,
           curve,
           totalLen,
-          t: (w + 0.15) / 4,
-          dir: w % 2 === 0 ? 1 : -1,
-          speed: (flow.role === "cyclist" ? 1.65 : 0.95) + (w * 0.1),
+          t: w === 0 ? 0.22 : 0.72,
+          dir: w === 0 ? 1 : -1,
+          speed: (flow.role === "cyclist" ? 2.8 : 1.75) + (w * 0.15),
           waitTimer: 0,
-          phase: fIdx * 3.1 + w * 2.1
+          phase: fIdx * 3.1 + w * 2.5
         });
       }
     });
@@ -260,12 +261,11 @@ export class WalkersAndFlowsManager {
       const ud = w.mesh.userData;
       const distToCam = cameraPos.distanceTo(w.mesh.position);
 
-      // 小人維持精緻微縮比例，拉遠時僅微幅補償 1.0 ~ 1.25 倍，絕不變成巨人！
-      const distScale = THREE.MathUtils.clamp(distToCam / 48, 1.0, 1.25);
+      const distScale = THREE.MathUtils.clamp(distToCam / 65, 1.0, 1.3);
       w.mesh.scale.setScalar(WORLD.WALKER_SCALE * distScale);
 
-      ud.badgeSprite.visible = this.showCargo && (distToCam < 52);
-      ud.speechDiv.style.display = (this.showBadges && distToCam < 36) ? "block" : "none";
+      ud.badgeSprite.visible = this.showCargo && (distToCam < 85);
+      ud.speechDiv.style.display = (this.showBadges && distToCam < 45) ? "block" : "none";
 
       if (w.waitTimer > 0) {
         w.waitTimer -= dt;
@@ -295,7 +295,7 @@ export class WalkersAndFlowsManager {
       w.curve.getPointAt(nextT, lookTarget);
 
       const ph = elapsedTime * 9.0 + w.phase * 20.0;
-      const hop = Math.abs(Math.sin(ph)) * 0.035;
+      const hop = Math.abs(Math.sin(ph)) * 0.04;
 
       w.mesh.position.set(pos.x, pos.y + hop, pos.z);
       w.mesh.lookAt(lookTarget.x, w.mesh.position.y, lookTarget.z);

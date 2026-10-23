@@ -89,7 +89,7 @@ export class UIController {
       });
 
       const obj = new CSS2DObject(div);
-      obj.position.set(x, WORLD.TOP + 0.25, z + WORLD.R * 0.88);
+      obj.position.set(x, WORLD.TOP + 0.35, z + WORLD.R * 0.88);
       this.scene.add(obj);
       this.islandPills[isl.id] = div;
     });
@@ -105,7 +105,7 @@ export class UIController {
       const anchor = this.kitBuilder.itemAnchors[item.id];
       if (!anchor) return;
 
-      const pinY = anchor.y + 1.35;
+      const pinY = anchor.y + 1.85;
       const pts = [new THREE.Vector3(anchor.x, anchor.y, anchor.z), new THREE.Vector3(anchor.x, pinY, anchor.z)];
       const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
       const line = new THREE.Line(lineGeo, lineMat);
@@ -246,7 +246,7 @@ export class UIController {
     const levelNames = {
       official: "主幹製程專線 (實線)",
       thematic: "跨排轉折調配 (虛線)",
-      pending: "12➔01 閉環回流原點 (點線)"
+      pending: "外海環繞回流 12➔01 (點線)"
     };
 
     body.innerHTML = `

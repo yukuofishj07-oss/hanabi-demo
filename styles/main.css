@@ -647,7 +647,6 @@ details.island-acc summary:hover {
   background: repeating-linear-gradient(90deg, #db6a41 0 3px, transparent 3px 7px);
 }
 
-/* 輕巧精緻的島嶼標籤（不遮擋放大後的島內豐富細節） */
 .island-pill-tag {
   background: rgba(255, 248, 244, 0.94);
   border: 1.5px solid #e4d6c3;
@@ -708,16 +707,18 @@ details.island-acc summary:hover {
   background: #211d1d;
 }
 
+/* 改為溫和奶油白底細框小標籤，不再是刺眼黑底白字！ */
 .walker-speech-tag {
-  background: rgba(33, 29, 29, 0.86);
-  color: #fff8f4;
+  background: rgba(255, 248, 244, 0.92);
+  color: #211d1d;
+  border: 1px solid #db6a41;
   padding: 2px 7px;
   border-radius: 999px;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
   pointer-events: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(74, 42, 20, 0.12);
 }
 
 .modal-backdrop {
