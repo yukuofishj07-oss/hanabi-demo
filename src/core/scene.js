@@ -12,7 +12,6 @@ export class SceneManager {
     this.camera = new THREE.PerspectiveCamera(32, this.width / this.height, 0.3, 320);
     this.camera.position.set(22, 28, 44);
 
-    // 渲染器設定 (極速抗鋸齒與低開銷陰影)
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
     this.renderer.setSize(this.width, this.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.6));
@@ -22,7 +21,6 @@ export class SceneManager {
     this.renderer.toneMappingExposure = 1.0;
     this.container.appendChild(this.renderer.domElement);
 
-    // CSS2D 標籤渲染器
     this.labelRenderer = new CSS2DRenderer();
     this.labelRenderer.setSize(this.width, this.height);
     this.labelRenderer.domElement.style.position = "absolute";
@@ -31,7 +29,6 @@ export class SceneManager {
     this.labelRenderer.domElement.style.pointerEvents = "none";
     this.container.appendChild(this.labelRenderer.domElement);
 
-    // 視角控制器
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
@@ -42,7 +39,6 @@ export class SceneManager {
     this.controls.maxDistance = 68;
     this.controls.target.set(0, 0, 0);
 
-    // 相機平滑插值 (easeInOutCubic)
     this.isFlying = false;
     this.flyStartTime = 0;
     this.flyDuration = 750;

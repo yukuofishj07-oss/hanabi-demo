@@ -1,9 +1,11 @@
 import * as THREE from "three";
 import { SceneManager } from "./core/scene.js";
 import { Environment } from "./core/environment.js";
+import { AudioManager } from "./core/audio.js";
 import { DATA } from "./config/data.js";
 import { buildHexIslands, axialToWorld } from "./island/grid.js";
 import { buildBridges } from "./island/bridges.js";
+import { NetworkGraph } from "./logistics/pathfinding.js";
 import { AssetKit } from "./assets/kit.js";
 import { buildAllBuildings } from "./assets/buildings.js";
 import { FlowLinesManager } from "./logistics/flows.js";
@@ -17,8 +19,10 @@ class App {
     try {
       this.sceneMgr = new SceneManager(this.container);
       this.env = new Environment(this.sceneMgr.scene);
+      this.audio = new AudioManager();
       this.kit = new AssetKit();
 
+      // 1. 六角島與標籤
       const { islandMeshes } = buildHexIslands(
         this.sceneMgr.scene,
         DATA.islands,
@@ -26,23 +30,43 @@ class App {
       );
       this.islandMeshes = islandMeshes;
 
-      buildBridges(this.sceneMgr.scene, DATA.islands);
+      // 2. 橋樑建構與真實路網拓撲圖
+      const bridgeList = buildBridges(this.sceneMgr.scene, DATA.islands);
+      this.graph = new NetworkGraph(DATA.islands, bridgeList);
+
+      // 3. 實例化建築
       buildAllBuildings(this.sceneMgr.scene, this.kit, DATA.islands);
 
+      // 4. 物料輸送流光線
       this.flowMgr = new FlowLinesManager(this.sceneMgr.scene, DATA.islands, DATA.flowLines);
-      this.workerCrowd = new WorkerCrowd(this.sceneMgr.scene, DATA.islands);
-      this.fireworks = new FireworksEngine(this.sceneMgr.scene);
+
+      // 5. 真實工作環節工人（尋路跨橋、搬運與交接）
+      this.workerCrowd = new WorkerCrowd(
+        this.sceneMgr.scene,
+        DATA.islands,
+        DATA.flowLines,
+        this.graph,
+        (flow, action) => {
+          this.addLiveLog(`📦 [${flow.cargo}] 於工島間${action}完畢（物料：${flow.material}）`);
+        }
+      );
+
+      // 6. 煙火粒子物理引擎
+      this.fireworks = new FireworksEngine(this.sceneMgr.scene, this.audio);
 
       this.setupRaycast();
       this.setupUI();
       this.setupAutoFireworks();
 
-      // FPS 計數器
       this.fpsBadge = document.getElementById("fps-badge");
       this.frameCount = 0;
       this.lastFpsUpdate = performance.now();
 
-      document.getElementById("loading-overlay").classList.add("hidden");
+      document.getElementById("btn-start").addEventListener("click", () => {
+        this.audio.init();
+        document.getElementById("loading-overlay").classList.add("hidden");
+      });
+
       this.clock = new THREE.Clock();
       this.animate();
     } catch (err) {
@@ -110,7 +134,7 @@ class App {
       }
     });
 
-    this.addLiveLog(`🔍 聚焦工島：${island.name}`);
+    this.addLiveLog(`🔍 聚焦工島：${island.name}（工序執行狀態正常）`);
   }
 
   addLiveLog(msg) {
@@ -125,6 +149,15 @@ class App {
   }
 
   setupUI() {
+    const btnAudio = document.getElementById("btn-audio");
+    btnAudio.addEventListener("click", () => {
+      this.audio.init();
+      const enabled = this.audio.toggleMute();
+      btnAudio.innerText = enabled ? "🔊 音效: 開" : "🔇 音效: 關";
+      btnAudio.classList.toggle("active", enabled);
+      this.addLiveLog(enabled ? "🔊 聲景系統已啟用" : "🔇 聲景系統已靜音");
+    });
+
     document.getElementById("card-close-btn").addEventListener("click", () => {
       document.getElementById("detail-card").classList.remove("active");
       document.querySelectorAll(".island-label-pill").forEach((p) => p.classList.remove("selected"));
@@ -186,7 +219,6 @@ class App {
   animate() {
     requestAnimationFrame(() => this.animate());
 
-    // FPS 計算
     this.frameCount++;
     const now = performance.now();
     if (now - this.lastFpsUpdate >= 1000) {

@@ -115,16 +115,17 @@ export const DATA = {
       ]
     }
   ],
+  // 真實協作線與搬運工種定義
   flowLines: [
-    { from: "island_01", to: "island_03", material: "純化黑火藥", color: 0x444444 },
-    { from: "island_02", to: "island_03", material: "五彩金屬鹽", color: 0xe74c3c },
-    { from: "island_03", to: "island_04", material: "濕式星珠", color: 0xf39c12 },
-    { from: "island_05", to: "island_06", material: "半球牛皮紙殼", color: 0xd35400 },
-    { from: "island_04", to: "island_06", material: "乾燥星體", color: 0x2ecc71 },
-    { from: "island_06", to: "island_07", material: "半成品彈體", color: 0x9b59b6 },
-    { from: "island_07", to: "island_08", material: "紮緊球體", color: 0x34495e },
-    { from: "island_08", to: "island_09", material: "組裝完成彈", color: 0xe67e22 },
-    { from: "island_09", to: "island_10", material: "安檢合格彈", color: 0x1abc9c },
-    { from: "island_10", to: "island_11", material: "成品花火箱", color: 0xc0392b }
+    { from: "island_01", to: "island_03", material: "純化黑火藥", cargo: "火藥桶", color: 0x444444 },
+    { from: "island_02", to: "island_03", material: "五彩金屬鹽", cargo: "顯色藥箱", color: 0xe74c3c },
+    { from: "island_03", to: "island_04", material: "濕式星珠", cargo: "星體曬盤", color: 0xf39c12 },
+    { from: "island_05", to: "island_06", material: "半球牛皮紙殼", cargo: "模壓紙殼", color: 0xd35400 },
+    { from: "island_04", to: "island_06", material: "乾燥星體", cargo: "乾燥星盒", color: 0x2ecc71 },
+    { from: "island_06", to: "island_07", material: "半成品彈體", cargo: "裸裝花火球", color: 0x9b59b6 },
+    { from: "island_07", to: "island_08", material: "紮緊球體", cargo: "糊緊彈體", color: 0x34495e },
+    { from: "island_08", to: "island_09", material: "組裝完成彈", cargo: "帶底座花火彈", color: 0xe67e22 },
+    { from: "island_09", to: "island_10", material: "安檢合格彈", cargo: "防爆合格品", color: 0x1abc9c },
+    { from: "island_10", to: "island_11", material: "成品花火箱", cargo: "密封花火箱", color: 0xc0392b }
   ]
 };

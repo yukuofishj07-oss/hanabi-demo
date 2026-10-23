@@ -5,6 +5,7 @@ import { axialToWorld } from "./grid.js";
 export function buildBridges(scene, islandDataList) {
   const bridgeGroup = new THREE.Group();
   const deckMat = new THREE.MeshStandardMaterial({ color: 0xb48560, roughness: 0.75 });
+  const bridgeMap = [];
 
   for (let i = 0; i < islandDataList.length; i++) {
     for (let j = i + 1; j < islandDataList.length; j++) {
@@ -28,10 +29,13 @@ export function buildBridges(scene, islandDataList) {
           bridge.lookAt(p2.x, GRID.TOP + 0.02, p2.z);
           bridge.receiveShadow = true;
           bridgeGroup.add(bridge);
+
+          bridgeMap.push({ from: a.id, to: b.id, mid: { x: midX, z: midZ } });
         }
       }
     }
   }
 
   scene.add(bridgeGroup);
+  return bridgeMap;
 }

@@ -30,7 +30,7 @@ export class FlowLinesManager {
       const v3 = new THREE.Vector3(pB.x, GRID.TOP + 0.12, pB.z);
 
       const curve = new THREE.QuadraticBezierCurve3(v1, v2, v3);
-      const tubeGeo = new THREE.TubeGeometry(curve, 20, 0.04, 6, false); // 精簡分段數
+      const tubeGeo = new THREE.TubeGeometry(curve, 20, 0.04, 6, false);
 
       const mat = new THREE.ShaderMaterial({
         transparent: true,

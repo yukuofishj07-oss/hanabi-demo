@@ -11,7 +11,7 @@ export class Environment {
 
     this.dirLight = new THREE.DirectionalLight(0xc0ccff, 1.2);
     this.dirLight.castShadow = true;
-    this.dirLight.shadow.mapSize.width = 1024; // 1024 平衡效能與黏土投影質感
+    this.dirLight.shadow.mapSize.width = 1024;
     this.dirLight.shadow.mapSize.height = 1024;
     this.dirLight.shadow.camera.near = 1;
     this.dirLight.shadow.camera.far = 85;

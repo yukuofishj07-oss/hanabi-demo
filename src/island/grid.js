@@ -65,7 +65,6 @@ export function buildHexIslands(scene, islandDataList, onIslandClick) {
     group.add(mesh);
     islandMeshes.push(mesh);
 
-    // 外緣路緣裝飾環
     const rimGeo = new THREE.RingGeometry(GRID.R - 0.12, GRID.R, 6);
     rimGeo.rotateX(-Math.PI / 2);
     rimGeo.rotateY(Math.PI / 6);
@@ -74,7 +73,6 @@ export function buildHexIslands(scene, islandDataList, onIslandClick) {
     rim.position.set(x, GRID.TOP + 0.005, z);
     group.add(rim);
 
-    // 白色海水泡沫環
     const foamGeo = new THREE.RingGeometry(GRID.R + 0.06, GRID.R + 0.22, 6);
     foamGeo.rotateX(-Math.PI / 2);
     foamGeo.rotateY(Math.PI / 6);
@@ -83,7 +81,6 @@ export function buildHexIslands(scene, islandDataList, onIslandClick) {
     foam.position.set(x, GRID.WATER_Y + 0.01, z);
     group.add(foam);
 
-    // CSS2D 膠囊標籤
     const pill = document.createElement("div");
     pill.className = "island-label-pill";
     pill.innerText = data.name;

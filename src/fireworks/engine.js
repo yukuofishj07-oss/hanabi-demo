@@ -1,10 +1,10 @@
 import * as THREE from "three";
 
 export class FireworksEngine {
-  constructor(scene) {
+  constructor(scene, audioManager) {
     this.scene = scene;
+    this.audio = audioManager;
 
-    // 固定粒子物件池 (避免記憶體碎片化引起的卡頓)
     this.MAX_PARTICLES = 3600;
     this.pool = new Array(this.MAX_PARTICLES);
     for (let i = 0; i < this.MAX_PARTICLES; i++) {
@@ -20,7 +20,6 @@ export class FireworksEngine {
       };
     }
 
-    // 發射中的火箭隊列
     this.MAX_ROCKETS = 16;
     this.rockets = [];
 
@@ -46,16 +45,15 @@ export class FireworksEngine {
     this.points = new THREE.Points(pGeo, pMat);
     this.scene.add(this.points);
 
-    // 夜晚地面動態反光
     this.burstLight = new THREE.PointLight(0xffa044, 0, 45, 1.2);
     this.scene.add(this.burstLight);
 
     this.palette = [
-      { r: 1.0, g: 0.28, b: 0.35 }, // 鍶紅
-      { r: 0.18, g: 0.85, b: 0.45 }, // 鋇綠
-      { r: 0.12, g: 0.65, b: 1.0 },  // 銅藍
-      { r: 1.0, g: 0.72, b: 0.1 },   // 鈉金
-      { r: 0.95, g: 0.35, b: 0.85 }  // 櫻粉
+      { r: 1.0, g: 0.28, b: 0.35 },
+      { r: 0.18, g: 0.85, b: 0.45 },
+      { r: 0.12, g: 0.65, b: 1.0 },
+      { r: 1.0, g: 0.72, b: 0.1 },
+      { r: 0.95, g: 0.35, b: 0.85 }
     ];
   }
 
@@ -84,6 +82,10 @@ export class FireworksEngine {
       col,
       type
     });
+
+    if (this.audio) {
+      this.audio.playLaunch(0.9 + Math.random() * 0.25);
+    }
   }
 
   explode(x, y, z, col, type) {
@@ -95,7 +97,7 @@ export class FireworksEngine {
     if (type === "willow") {
       count = 240;
       speedBase = 0.11;
-      decayBase = 0.007; // 垂柳滯空久
+      decayBase = 0.007;
       gravity = 0.0035;
     } else if (type === "chrysanthemum") {
       count = 220;
@@ -106,6 +108,10 @@ export class FireworksEngine {
     this.burstLight.position.set(x, y, z);
     this.burstLight.color.setRGB(col.r, col.g, col.b);
     this.burstLight.intensity = 8.0;
+
+    if (this.audio) {
+      this.audio.playExplosion(type);
+    }
 
     for (let i = 0; i < count; i++) {
       const p = this.allocParticle();
@@ -145,14 +151,12 @@ export class FireworksEngine {
   }
 
   update() {
-    // 1. 火箭物理迭代
     for (let i = this.rockets.length - 1; i >= 0; i--) {
       const r = this.rockets[i];
       r.x += r.vx;
       r.y += r.vy;
       r.z += r.vz;
 
-      // 產生發射尾跡火星
       if (Math.random() > 0.25) {
         const tp = this.allocParticle();
         if (tp) {
@@ -174,7 +178,6 @@ export class FireworksEngine {
       }
     }
 
-    // 2. 粒子物理迭代與顯存直接映射
     const pos = this.positions;
     const col = this.colors;
     let needsPosUpdate = false;
@@ -224,7 +227,6 @@ export class FireworksEngine {
       this.points.geometry.attributes.color.needsUpdate = true;
     }
 
-    // 3. 爆炸反光漸弱
     if (this.burstLight.intensity > 0) {
       this.burstLight.intensity -= 0.32;
       if (this.burstLight.intensity < 0) this.burstLight.intensity = 0;
