@@ -11,7 +11,7 @@ body, html {
   height: 100%;
   overflow: hidden;
   font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-  background: #07111e;
+  background: #070d19;
   color: #211d1d;
 }
 
@@ -24,95 +24,93 @@ body, html {
   z-index: 1;
 }
 
-/* CSS2D 膠囊標籤 */
+/* 極簡 4 字深色毛玻璃懸浮小標籤 (不遮擋島嶼細節) */
 .island-label-pill {
   position: absolute;
-  background: rgba(255, 250, 242, 0.96);
-  border: 2px solid #e06d48;
-  color: #2b221e;
-  font-size: 11.5px;
-  font-weight: 800;
-  padding: 5px 12px;
+  background: rgba(20, 26, 38, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.2px solid rgba(255, 180, 120, 0.55);
+  color: #fff6ec;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
   border-radius: 999px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
   pointer-events: auto;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.island-label-pill .step-num {
+  color: #ff9f68;
+  font-family: ui-monospace, monospace;
+  font-weight: 800;
+  margin-right: 4px;
 }
 
 .island-label-pill:hover, .island-label-pill.selected {
-  background: #e06d48;
+  background: #d95a32;
+  border-color: #ffe0b2;
   color: #ffffff;
   transform: scale(1.16) translateY(-4px);
-  box-shadow: 0 8px 24px rgba(224, 109, 72, 0.65);
+  box-shadow: 0 6px 20px rgba(217, 90, 50, 0.7);
+}
+
+.island-label-pill:hover .step-num, .island-label-pill.selected .step-num {
+  color: #fff8e7;
 }
 
 .glass-panel {
   position: absolute;
   z-index: 10;
-  background: rgba(255, 250, 245, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 250, 244, 0.90);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.35);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .eyebrow {
   font-family: ui-monospace, monospace;
   font-size: 10px;
-  letter-spacing: 2px;
+  letter-spacing: 2.2px;
   font-weight: 800;
-  color: #e06d48;
+  color: #d95a32;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
 
 #brand-card {
-  top: 20px;
-  left: 20px;
-  padding: 18px 22px;
+  top: 22px;
+  left: 22px;
+  padding: 18px 24px;
   border-radius: 22px;
-  max-width: 370px;
+  max-width: 340px;
 }
 
 #brand-card h1 {
-  font-size: 22px;
+  font-size: 23px;
   font-weight: 900;
-  letter-spacing: 0.5px;
-  margin-bottom: 5px;
-  color: #2b221e;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  color: #241c18;
 }
 
 #brand-card .subtitle {
-  font-size: 12px;
+  font-size: 12.5px;
   color: #5c4d47;
-  line-height: 1.5;
-  margin-bottom: 12px;
-}
-
-.badge-row {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.chip {
-  background: #ffffff;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #e06d48;
-  padding: 3px 9px;
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(224, 109, 72, 0.12);
-  border: 1px solid rgba(224, 109, 72, 0.28);
+  line-height: 1.55;
+  margin: 0;
 }
 
 #live-log-panel {
-  top: 20px;
-  right: 20px;
-  width: 340px;
+  top: 22px;
+  right: 22px;
+  width: 330px;
   padding: 14px 18px;
   border-radius: 20px;
 }
@@ -138,7 +136,7 @@ body, html {
   font-family: ui-monospace, monospace;
   font-size: 10px;
   font-weight: 800;
-  background: #211d1d;
+  background: #241c18;
   color: #2ecc71;
   padding: 2px 8px;
   border-radius: 6px;
@@ -154,11 +152,11 @@ body, html {
   flex-direction: column;
   gap: 5px;
   font-size: 11.5px;
-  color: #4b3e3e;
+  color: #3b302c;
 }
 
 .log-item {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.82);
   padding: 6px 10px;
   border-radius: 9px;
   white-space: nowrap;
@@ -174,9 +172,9 @@ body, html {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 18px;
+  padding: 9px 16px;
   border-radius: 999px;
-  max-width: 95vw;
+  max-width: 96vw;
 }
 
 .hud-group {
@@ -187,22 +185,22 @@ body, html {
 .hud-divider {
   width: 1px;
   height: 24px;
-  background: rgba(197, 181, 167, 0.6);
+  background: rgba(197, 181, 167, 0.65);
 }
 
 .hud-btn {
   background: #fff8f4;
-  border: 1px solid #c5b5a7;
-  padding: 8px 15px;
-  font-size: 12.5px;
+  border: 1px solid #d2c2b4;
+  padding: 8px 14px;
+  font-size: 12px;
   font-weight: 700;
-  color: #2b221e;
+  color: #241c18;
   border-radius: 999px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   white-space: nowrap;
 }
 
@@ -212,16 +210,20 @@ body, html {
 }
 
 .hud-btn.active {
-  background: #2b221e;
+  background: #241c18;
   color: #fff8f4;
-  border-color: #2b221e;
+  border-color: #241c18;
+}
+
+.hud-btn.nav-btn {
+  border-color: #e09f7d;
 }
 
 .hud-btn.fire-action {
-  background: #e06d48;
+  background: #d95a32;
   color: #fff;
-  border-color: #e06d48;
-  box-shadow: 0 4px 14px rgba(224, 109, 72, 0.45);
+  border-color: #d95a32;
+  box-shadow: 0 4px 14px rgba(217, 90, 50, 0.45);
 }
 
 .hud-btn.fire-action:hover {
@@ -241,14 +243,14 @@ body, html {
   transform: scale(1.05) translateY(-2px);
 }
 
-/* 詳細卡片 */
+/* 詳細說明卡片 */
 #detail-card {
-  top: 195px;
-  left: 20px;
-  width: 390px;
-  max-height: calc(100vh - 280px);
+  top: 155px;
+  left: 22px;
+  width: 395px;
+  max-height: calc(100vh - 245px);
   overflow-y: auto;
-  padding: 20px 22px;
+  padding: 22px 24px;
   border-radius: 24px;
   display: none;
 }
@@ -267,13 +269,13 @@ body, html {
 }
 
 .card-close:hover {
-  color: #e06d48;
+  color: #d95a32;
 }
 
 #card-title {
   font-size: 20px;
   margin-bottom: 12px;
-  color: #2b221e;
+  color: #241c18;
 }
 
 .card-section {
@@ -281,16 +283,16 @@ body, html {
 }
 
 .section-title {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 800;
-  color: #e06d48;
+  color: #d95a32;
   margin-bottom: 3px;
 }
 
 .section-body {
   font-size: 12.5px;
-  color: #4b3e3e;
-  line-height: 1.58;
+  color: #382e2a;
+  line-height: 1.62;
 }
 
 .stats-grid {
@@ -301,7 +303,7 @@ body, html {
 }
 
 .stat-box {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
   padding: 9px 12px;
   border-radius: 12px;
   border: 1px solid rgba(235, 218, 207, 0.95);
@@ -310,7 +312,7 @@ body, html {
 .stat-label {
   font-size: 10px;
   font-weight: 700;
-  color: #8a736f;
+  color: #7a6863;
   margin-bottom: 2px;
 }
 
@@ -319,13 +321,13 @@ body, html {
   font-family: Georgia, serif;
   font-style: italic;
   font-weight: bold;
-  color: #e06d48;
+  color: #d95a32;
 }
 
 .card-action-btn {
   width: 100%;
   padding: 11px;
-  background: #e06d48;
+  background: #d95a32;
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -333,7 +335,7 @@ body, html {
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(224, 109, 72, 0.35);
+  box-shadow: 0 4px 12px rgba(217, 90, 50, 0.35);
 }
 
 .card-action-btn:hover {
@@ -350,7 +352,7 @@ body, html {
   justify-content: center;
   align-items: center;
   text-align: center;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.45s ease;
 }
 
 #loading-overlay.hidden {
@@ -362,7 +364,7 @@ body, html {
   width: 48px;
   height: 48px;
   border: 4px solid #f1ded2;
-  border-top-color: #e06d48;
+  border-top-color: #d95a32;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 16px auto;
@@ -372,26 +374,27 @@ body, html {
   to { transform: rotate(360deg); }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   #brand-card {
     top: 10px;
     left: 10px;
     right: 10px;
     max-width: none;
+    padding: 14px 18px;
   }
   #live-log-panel {
     display: none;
   }
   #detail-card {
     top: auto;
-    bottom: 84px;
+    bottom: 82px;
     right: 10px;
     left: 10px;
     width: auto;
-    max-height: 48vh;
+    max-height: 46vh;
   }
   #hud-toolbar {
-    bottom: 12px;
+    bottom: 10px;
     overflow-x: auto;
   }
 }

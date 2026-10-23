@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>花火島 HANABI ISLAND — 4-4-2 S型微縮工藝與璀璨盛典</title>
+  <title>花火工藝島 — 傳統尺玉煙火十道工藝巡禮</title>
   <link rel="stylesheet" href="./styles/main.css">
   <script type="importmap">
     {
@@ -17,80 +17,80 @@
 <body>
   <div id="canvas-container"></div>
 
-  <!-- 左上品牌與導覽面板 -->
+  <!-- 左上極簡品牌卡 -->
   <div class="glass-panel" id="brand-card">
-    <div class="eyebrow">HANABI CRAFT & FESTIVAL ISLET</div>
-    <h1>示範市．花火工藝島</h1>
-    <p class="subtitle">標準 4-4-2 S型蛇行工藝鏈：放大版精緻黏土工坊、二頭身工匠沿橋搬運與 3D 實體璀璨花火！</p>
-    <div class="badge-row">
-      <span class="chip">🐍 4-4-2 標準 S 型蛇行</span>
-      <span class="chip">👷 內建二頭身工匠範本</span>
-      <span class="chip">🎆 100% 必現 3D 實體煙火</span>
-    </div>
+    <div class="eyebrow">HANABI CRAFT & FESTIVAL</div>
+    <h1>花火工藝島</h1>
+    <p class="subtitle">傳統尺玉煙火從火藥配研、星珠造粒到高空綻放的十道工藝巡禮。</p>
   </div>
 
-  <!-- 右上即時工藝狀態 -->
+  <!-- 右上製程即時監控 -->
   <div class="glass-panel" id="live-log-panel">
     <div class="log-header">
       <span class="live-dot"></span>
-      <span class="eyebrow" style="margin:0;">WORKSHOP LIVE LOG</span>
+      <span class="eyebrow" style="margin:0;">CRAFT TELEMETRY</span>
       <span id="fps-badge">60 FPS</span>
     </div>
     <div id="log-list">
-      <div class="log-item">🎆 10 盛典陣地：尺玉花火於島嶼正上方璀璨綻放！</div>
-      <div class="log-item">👷 工匠作業：沿 4-4-2 S型拱橋運送五彩星珠與彈體</div>
-      <div class="log-item">🏮 01~09 工坊：全島微縮機械與乾燥曬架運作中</div>
+      <div class="log-item">🏮 01 配藥：水車動力木臼無靜電舂搗作業中</div>
+      <div class="log-item">✨ 03 滾珠：黃銅滾筒進行 24 層同心包衣製程</div>
+      <div class="log-item">🎆 10 施放台：10 吋錦冠尺玉高空流線綻放中</div>
     </div>
   </div>
 
-  <!-- 底部 HUD 工具列 -->
+  <!-- 底部導覽與控制工具列 (方案 A 巡島導覽系統) -->
   <div class="glass-panel" id="hud-toolbar">
     <div class="hud-group">
-      <button class="hud-btn" data-time="360">🌅 清晨</button>
-      <button class="hud-btn" data-time="720">☀️ 正午</button>
-      <button class="hud-btn" data-time="1065">🌇 霞暮</button>
-      <button class="hud-btn active" data-time="1260">🎆 盛典夜</button>
+      <button class="hud-btn nav-btn" id="btn-prev-island" title="上一站">◀ 上一站</button>
+      <button class="hud-btn nav-btn active" id="btn-auto-tour">🎬 自動巡覽: 開</button>
+      <button class="hud-btn nav-btn" id="btn-next-island" title="下一站">下一站 ▶</button>
+      <button class="hud-btn" id="btn-overview">🔭 全景俯瞰</button>
     </div>
     <div class="hud-divider"></div>
     <div class="hud-group">
-      <button class="hud-btn toggle-btn active" id="toggle-workers">👷 工匠: 開</button>
-      <button class="hud-btn" id="btn-reset-cam">🎯 最佳花火視角</button>
-      <button class="hud-btn fire-action" id="btn-launch-firework">🎇 立即發射尺玉</button>
-      <button class="hud-btn fire-action-combo" id="btn-launch-barrage">🎆 全島萬彈齊發</button>
+      <button class="hud-btn" data-time="360">🌅 晨曦</button>
+      <button class="hud-btn" data-time="720">☀️ 晝間</button>
+      <button class="hud-btn" data-time="1065">🌇 暮靄</button>
+      <button class="hud-btn active" data-time="1260">🎆 夜景</button>
+    </div>
+    <div class="hud-divider"></div>
+    <div class="hud-group">
+      <button class="hud-btn fire-action" id="btn-launch-firework">🎇 單發試射</button>
+      <button class="hud-btn fire-action-combo" id="btn-launch-barrage">🎆 盛典齊射</button>
     </div>
   </div>
 
-  <!-- 左側詳細工序資訊卡片 (繁體中文完整詳解) -->
+  <!-- 左側官方標準作業程序說明卡 -->
   <div class="glass-panel" id="detail-card">
     <div class="card-close" id="card-close-btn">&times;</div>
-    <div class="eyebrow" id="card-step-badge">第 01 道工序 ． 傳統尺玉古法</div>
+    <div class="eyebrow" id="card-step-badge">標準作業程序 ． SOP-01</div>
     <h2 id="card-title">01 黑火藥配研室</h2>
     
     <div class="card-section">
-      <div class="section-title">【工藝核心目的】</div>
+      <div class="section-title">【核心製程概述】</div>
       <p id="card-purpose" class="section-body"></p>
     </div>
 
     <div class="card-section">
-      <div class="section-title">【傳統古法操作流程】</div>
+      <div class="section-title">【標準作業流程說明】</div>
       <p id="card-process" class="section-body"></p>
     </div>
 
     <div class="card-section">
-      <div class="section-title">【嚴格檢驗與科學標準】</div>
+      <div class="section-title">【品質管制與安全規範】</div>
       <p id="card-standard" class="section-body"></p>
     </div>
 
     <div class="stats-grid" id="card-stats"></div>
-    <button class="card-action-btn" id="card-fire-btn">🚀 在此工島正上方施放專屬煙火</button>
+    <button class="card-action-btn" id="card-fire-btn">🚀 於本展區上空執行煙火試射</button>
   </div>
 
-  <!-- 載入層 -->
+  <!-- 載入畫面 -->
   <div id="loading-overlay">
     <div class="loader-content">
       <div class="loader-spinner"></div>
-      <h2>花火工藝微縮世界組裝中...</h2>
-      <p>正在雕刻 10 座大型六角工坊、組裝二頭身黏土工匠與預熱 3D 煙火引擎</p>
+      <h2>花火工藝島建構中...</h2>
+      <p>正在組裝十座大型微縮機械工坊、暖光祭典燈籠與流線煙火系統</p>
     </div>
   </div>
 

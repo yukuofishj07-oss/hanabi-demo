@@ -1,27 +1,27 @@
 export const GRID = {
-  R: 2.85,          // 放大島嶼半徑 (原 2.02 -> 2.85)，面積擴大近 2 倍，容納精緻建築與步道
-  SPACING: 6.4,     // 島心距
-  TOP: 0.78,        // 島面高度
-  WATER_Y: -0.22
+  R: 4.2,           // 放大兩倍的島嶼半徑，可容納完整微縮工廠園區、水車、步道與燈籠
+  TOP: 0.95,        // 厚實溫暖的黏土島面高度
+  WATER_Y: -0.25
 };
 
-// 溫暖黏土玩具模型色票
+// 高質感溫暖黏土色票 (Teal & Orange 冷暖對比美學)
 export const COLORS = {
-  wall: 0xf7f0e6,       // 暖白黏土牆
-  wallCream: 0xf2e3ce,  // 奶油米色牆
-  roofCoral: 0xd95a32,  // 赤陶紅屋頂
-  roofDark: 0x383e4c,   // 日式黑瓦屋頂
-  roofTeal: 0x3b7a8c,   // 青瓷色屋頂
-  wood: 0xb57849,       // 溫暖松木色
-  woodDark: 0x7d4e2d,   // 深胡桃木
-  brass: 0xf39c12,      // 黃銅/金黃色機械
-  steel: 0x3d4451,      // 黑鐵迫擊砲管
-  pine: 0x3d6b48,       // 翠綠針葉松
-  leafLight: 0x76a05e,  // 嫩綠闊葉
+  wall: 0xf9f3eb,       // 暖白陶土牆
+  wallCream: 0xf3e4cf,  // 奶油杏色牆
+  roofCoral: 0xd95a32,  // 赤陶朱紅屋頂
+  roofDark: 0x2c3545,   // 日式黑瓦屋頂
+  roofTeal: 0x2a7b88,   // 青瓷色屋頂
+  wood: 0xb87b4b,       // 溫暖松木色
+  woodDark: 0x754829,   // 深胡桃木
+  brass: 0xf3a612,      // 亮黃銅機械
+  steel: 0x3d4654,      // 鍛造黑鐵
+  pine: 0x386646,       // 森林深綠
+  leafLight: 0x72a358,  // 嫩草綠
+  autumn: 0xe67e22,     // 楓葉橘
   cherry: 0xf9a8b8,     // 櫻花粉
-  lampPost: 0x2c3e50,   // 路燈柱
-  lightGlow: 0xffe066,  // 暖黃燈光
-  pathway: 0xd8c2af     // 淺磚色步道
+  lanternRed: 0xe74c3c, // 祭典紅燈籠
+  lightGlow: 0xffd86b,  // 溫暖燈火金
+  pathway: 0xd8c1ad     // 石板小徑
 };
 
 export function mulberry32(a) {
@@ -33,4 +33,4 @@ export function mulberry32(a) {
   };
 }
 
-export const rng = mulberry32(1337);
+export const rng = mulberry32(2026);

@@ -9,10 +9,13 @@ export class SceneManager {
     this.height = window.innerHeight;
 
     this.scene = new THREE.Scene();
-    // 視角設為 38 度，兼顧微縮模型質感與高空煙火視野
-    this.camera = new THREE.PerspectiveCamera(38, this.width / this.height, 0.5, 400);
-    // 預設最佳觀賞點：正對 4-4-2 島鏈，視線中心抬高至 y = 3.5，讓島嶼在下半部、煙火在上半部完美同框！
-    this.camera.position.set(0, 22, 38);
+    // 加上柔和夜空深藍紫環境霧氣，創造「近清遠濛」的微縮景深感 (Diorama Depth)
+    this.scene.fog = new THREE.FogExp2(0x0b1528, 0.0085);
+
+    // 窄視角 30 度長焦鏡頭，徹底消除廣角變形，呈現純正微縮模型攝影質感
+    this.camera = new THREE.PerspectiveCamera(30, this.width / this.height, 0.5, 450);
+    // 開場預設聚焦於前段島嶼 (方案 A 微距斜視角)
+    this.camera.position.set(-18, 12.5, 16);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
     this.renderer.setSize(this.width, this.height);
@@ -20,7 +23,7 @@ export class SceneManager {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMappingExposure = 1.22;
     this.container.appendChild(this.renderer.domElement);
 
     this.labelRenderer = new CSS2DRenderer();
@@ -33,42 +36,49 @@ export class SceneManager {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.08;
+    this.controls.dampingFactor = 0.06;
     this.controls.enablePan = true;
-    this.controls.minPolarAngle = THREE.MathUtils.degToRad(15);
-    this.controls.maxPolarAngle = THREE.MathUtils.degToRad(78);
-    this.controls.minDistance = 6;
-    this.controls.maxDistance = 85;
-    // 目標中心設在 (0, 3.2, 0)，如此一來高度 8~13 的煙火剛好在畫面正上方！
-    this.controls.target.set(0, 3.2, 0);
+    this.controls.minPolarAngle = THREE.MathUtils.degToRad(18);
+    this.controls.maxPolarAngle = THREE.MathUtils.degToRad(76);
+    this.controls.minDistance = 7;
+    this.controls.maxDistance = 95;
+    this.controls.target.set(-8, 1.8, -4);
 
     this.isFlying = false;
     this.flyStartTime = 0;
-    this.flyDuration = 750;
+    this.flyDuration = 1100;
     this.flyStartCam = new THREE.Vector3();
     this.flyEndCam = new THREE.Vector3();
     this.flyStartTarget = new THREE.Vector3();
     this.flyEndTarget = new THREE.Vector3();
 
     window.addEventListener("resize", () => this.onResize());
-    this.renderer.domElement.addEventListener("pointerdown", () => {
-      this.isFlying = false;
-    });
   }
 
-  flyTo(targetPos, offset = new THREE.Vector3(2.8, 5.2, 8.5)) {
+  // 飛往指定島嶼的微距特寫斜視角 (同時能看到後方夜空煙火)
+  flyToIsland(targetPos) {
+    this.flyTo(
+      new THREE.Vector3(targetPos.x, 1.6, targetPos.z),
+      new THREE.Vector3(4.5, 6.2, 13.5),
+      1100
+    );
+  }
+
+  flyTo(targetPos, offset = new THREE.Vector3(4.5, 6.2, 13.5), duration = 1000) {
     this.flyStartCam.copy(this.camera.position);
     this.flyStartTarget.copy(this.controls.target);
 
     this.flyEndTarget.copy(targetPos);
     this.flyEndCam.copy(targetPos).add(offset);
 
+    this.flyDuration = duration;
     this.flyStartTime = performance.now();
     this.isFlying = true;
   }
 
-  resetOverview() {
-    this.flyTo(new THREE.Vector3(0, 3.2, 0), new THREE.Vector3(0, 18.8, 38));
+  // 全景俯瞰視角
+  setOverview() {
+    this.flyTo(new THREE.Vector3(0, 2.5, 0), new THREE.Vector3(0, 32, 54), 1200);
   }
 
   onResize() {
@@ -84,6 +94,7 @@ export class SceneManager {
     if (this.isFlying) {
       const elapsed = performance.now() - this.flyStartTime;
       const progress = Math.min(elapsed / this.flyDuration, 1.0);
+      // 絲滑 easeInOutCubic
       const t = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
 
       this.camera.position.lerpVectors(this.flyStartCam, this.flyEndCam, t);

@@ -4,36 +4,42 @@ import { Environment } from "./core/environment.js";
 import { DATA } from "./config/data.js";
 import { buildHexIslands, getIslandPos } from "./island/grid.js";
 import { buildBridges } from "./island/bridges.js";
-import { buildAllBuildings } from "./assets/buildings.js";
+import { BuildingsManager } from "./assets/buildings.js";
 import { WorkerCrowd } from "./logistics/workers.js";
 import { FireworksEngine } from "./fireworks/engine.js";
 
 class App {
   constructor() {
     this.container = document.getElementById("canvas-container");
+    this.currentIndex = 0;
+    this.autoTour = true;
+    this.tourTimer = 0;
 
     try {
       this.sceneMgr = new SceneManager(this.container);
       this.env = new Environment(this.sceneMgr.scene);
 
-      // 1. 建立 4-4-2 標準 S 型放大版六角島
+      // 1. 建立放大兩倍的六角島群與極簡 4 字小標籤
       const { islandMeshes } = buildHexIslands(
         this.sceneMgr.scene,
         DATA.islands,
-        (island) => this.selectIsland(island)
+        (island) => {
+          this.stopAutoTour();
+          this.selectIsland(island);
+        }
       );
       this.islandMeshes = islandMeshes;
 
-      // 2. 建立 S 型日式朱紅欄杆拱橋
+      // 2. 建立日式太鼓橋與橋頭燈籠
       buildBridges(this.sceneMgr.scene, DATA.islands);
 
-      // 3. 建立 10 座高細緻度專屬工坊建築與樹木景觀
-      buildAllBuildings(this.sceneMgr.scene, DATA.islands);
+      // 3. 建立 10 座動態微縮機關工坊與蓬鬆樹簇
+      this.buildingsMgr = new BuildingsManager(this.sceneMgr.scene, DATA.islands);
 
-      // 4. 建立內建二頭身黏土工匠範本群 (沿 S 型路線搬運物料)
+      // 4. 建立二頭身黏土工匠群
       this.workerCrowd = new WorkerCrowd(this.sceneMgr.scene, DATA.islands);
 
-      // 5. 建立 100% 必現 3D 實體發光煙火引擎
+      // 5. 建立流線型金絲拖尾煙火系統
       this.fireworks = new FireworksEngine(this.sceneMgr.scene);
 
       this.setupRaycast();
@@ -44,10 +50,11 @@ class App {
       this.frameCount = 0;
       this.lastFpsUpdate = performance.now();
 
-      // 一進入畫面立刻施放第一波迎賓煙火，讓使用者馬上看到！
-      this.fireworks.launch({ x: 0.0, z: 6.2 }, "chrysanthemum");
-      setTimeout(() => this.fireworks.launch({ x: -3.4, z: 0.0 }, "peony"), 400);
-      setTimeout(() => this.fireworks.launch({ x: 3.4, z: 0.0 }, "willow"), 800);
+      // 開場聚焦第 01 站，並於背景夜空施放三枚迎賓流線煙火
+      this.selectIsland(DATA.islands[0], false);
+      this.fireworks.launch({ x: -5.1, z: -9.5 }, "chrysanthemum");
+      setTimeout(() => this.fireworks.launch({ x: 5.1, z: -9.5 }, "willow"), 450);
+      setTimeout(() => this.fireworks.launch({ x: 0.0, z: 9.5 }, "peony"), 900);
 
       document.getElementById("loading-overlay").classList.add("hidden");
 
@@ -63,10 +70,18 @@ class App {
   }
 
   setupAutoFireworks() {
-    // 每 2.2 秒自動發射，保持夜空熱鬧璀璨
     setInterval(() => {
       this.fireworks.launch();
     }, 2200);
+  }
+
+  stopAutoTour() {
+    this.autoTour = false;
+    const btn = document.getElementById("btn-auto-tour");
+    if (btn) {
+      btn.classList.remove("active");
+      btn.innerText = "🎬 自動巡覽: 關";
+    }
   }
 
   setupRaycast() {
@@ -90,16 +105,20 @@ class App {
 
       if (intersects.length > 0) {
         const item = intersects[0].object.userData.data;
-        if (item) this.selectIsland(item);
+        if (item) {
+          this.stopAutoTour();
+          this.selectIsland(item, true);
+        }
       }
     });
   }
 
-  selectIsland(island) {
+  selectIsland(island, showCard = true) {
     this.currentSelectedIsland = island;
-    const card = document.getElementById("detail-card");
+    this.currentIndex = DATA.islands.findIndex((isl) => isl.id === island.id);
 
-    document.getElementById("card-step-badge").innerText = `第 ${island.step} 道工序 ． 傳統尺玉古法`;
+    const card = document.getElementById("detail-card");
+    document.getElementById("card-step-badge").innerText = `標準作業程序 ． ${island.step}`;
     document.getElementById("card-title").innerText = island.name;
     document.getElementById("card-purpose").innerText = island.purpose;
     document.getElementById("card-process").innerText = island.process;
@@ -117,27 +136,24 @@ class App {
       statsGrid.appendChild(box);
     });
 
-    card.classList.add("active");
+    if (showCard) {
+      card.classList.add("active");
+    }
 
     const target = getIslandPos(island);
-    this.sceneMgr.flyTo(new THREE.Vector3(target.x, 1.8, target.z), new THREE.Vector3(3.2, 6.5, 11.5));
+    this.sceneMgr.flyToIsland(target);
 
-    // 點選島嶼時，順便在該島上方放一顆慶祝煙火！
-    this.fireworks.launch({ x: target.x, z: target.z });
+    // 在該站後方夜空施放專屬禮花
+    this.fireworks.launch({ x: target.x, z: target.z - 2.5 });
 
     document.querySelectorAll(".island-label-pill").forEach((pill) => {
-      if (pill.innerText === island.name) {
-        pill.classList.add("selected");
-      } else {
-        pill.classList.remove("selected");
-      }
+      pill.classList.toggle("selected", pill.dataset.islandId === island.id);
     });
   }
 
   setupUI() {
     document.getElementById("card-close-btn").addEventListener("click", () => {
       document.getElementById("detail-card").classList.remove("active");
-      document.querySelectorAll(".island-label-pill").forEach((p) => p.classList.remove("selected"));
     });
 
     document.getElementById("card-fire-btn").addEventListener("click", () => {
@@ -147,6 +163,36 @@ class App {
       }
     });
 
+    // 上一站 / 下一站 導覽
+    document.getElementById("btn-prev-island").addEventListener("click", () => {
+      this.stopAutoTour();
+      this.currentIndex = (this.currentIndex - 1 + DATA.islands.length) % DATA.islands.length;
+      this.selectIsland(DATA.islands[this.currentIndex], true);
+    });
+
+    document.getElementById("btn-next-island").addEventListener("click", () => {
+      this.stopAutoTour();
+      this.currentIndex = (this.currentIndex + 1) % DATA.islands.length;
+      this.selectIsland(DATA.islands[this.currentIndex], true);
+    });
+
+    // 自動巡島導覽開關
+    const btnTour = document.getElementById("btn-auto-tour");
+    btnTour.addEventListener("click", () => {
+      this.autoTour = !this.autoTour;
+      btnTour.classList.toggle("active", this.autoTour);
+      btnTour.innerText = this.autoTour ? "🎬 自動巡覽: 開" : "🎬 自動巡覽: 關";
+      this.tourTimer = 0;
+    });
+
+    // 全景俯瞰
+    document.getElementById("btn-overview").addEventListener("click", () => {
+      this.stopAutoTour();
+      document.getElementById("detail-card").classList.remove("active");
+      this.sceneMgr.setOverview();
+    });
+
+    // 時段切換
     document.querySelectorAll(".hud-btn[data-time]").forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".hud-btn[data-time]").forEach((b) => b.classList.remove("active"));
@@ -156,20 +202,9 @@ class App {
       });
     });
 
-    let workersOn = true;
-    document.getElementById("toggle-workers").addEventListener("click", (e) => {
-      workersOn = !workersOn;
-      e.target.classList.toggle("active", workersOn);
-      e.target.innerText = workersOn ? "👷 工匠: 開" : "👷 工匠: 關";
-      this.workerCrowd.toggle(workersOn);
-    });
-
-    document.getElementById("btn-reset-cam").addEventListener("click", () => {
-      this.sceneMgr.resetOverview();
-    });
-
     document.getElementById("btn-launch-firework").addEventListener("click", () => {
-      this.fireworks.launch({ x: 0.0, z: 6.2 });
+      const p = this.currentSelectedIsland ? getIslandPos(this.currentSelectedIsland) : { x: 0, z: 9.5 };
+      this.fireworks.launch(p);
     });
 
     document.getElementById("btn-launch-barrage").addEventListener("click", () => {
@@ -193,8 +228,19 @@ class App {
     const dt = Math.min(this.clock.getDelta(), 0.05);
     const time = this.clock.getElapsedTime();
 
+    // 方案 A 自動巡島導覽 (每 6.5 秒平滑飛往下一座工藝島)
+    if (this.autoTour) {
+      this.tourTimer += dt;
+      if (this.tourTimer >= 6.5) {
+        this.tourTimer = 0;
+        this.currentIndex = (this.currentIndex + 1) % DATA.islands.length;
+        this.selectIsland(DATA.islands[this.currentIndex], false);
+      }
+    }
+
     this.sceneMgr.update();
     this.env.update(time);
+    this.buildingsMgr.update(time);
     this.workerCrowd.update(time, dt);
     this.fireworks.update();
     this.sceneMgr.render();
