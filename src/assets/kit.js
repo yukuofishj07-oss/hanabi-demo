@@ -17,12 +17,6 @@ export class AssetKit {
       vertexColors: true
     });
 
-    this.glowMaterial = new THREE.MeshStandardMaterial({
-      emissive: new THREE.Color(0xffc777),
-      emissiveIntensity: 2.0,
-      roughness: 0.5
-    });
-
     this.instances = [];
   }
 

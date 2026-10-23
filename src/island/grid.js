@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import { GRID } from "../config/constants.js";
 
 export function axialToWorld(q, r) {
@@ -13,14 +14,26 @@ export function createGroundTexture() {
   canvas.height = 256;
   const ctx = canvas.getContext("2d");
 
+  // 溫暖黏土陶土底色
   ctx.fillStyle = "#ede0cc";
   ctx.fillRect(0, 0, 256, 256);
 
+  // 斑駁點綴雜色
   ctx.fillStyle = "#dfd0bc";
-  for (let i = 0; i < 400; i++) {
+  for (let i = 0; i < 500; i++) {
     const rx = Math.random() * 256;
     const ry = Math.random() * 256;
     ctx.fillRect(rx, ry, 2, 2);
+  }
+
+  // 黏土幾何防潮磚紋
+  ctx.strokeStyle = "rgba(180, 160, 140, 0.25)";
+  ctx.lineWidth = 2;
+  for (let x = 0; x < 256; x += 32) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, 256);
+    ctx.stroke();
   }
 
   const texture = new THREE.CanvasTexture(canvas);
@@ -30,7 +43,7 @@ export function createGroundTexture() {
   return texture;
 }
 
-export function buildHexIslands(scene, islandDataList) {
+export function buildHexIslands(scene, islandDataList, onIslandClick) {
   const group = new THREE.Group();
   const groundTex = createGroundTexture();
 
@@ -63,6 +76,28 @@ export function buildHexIslands(scene, islandDataList) {
     const rim = new THREE.Mesh(rimGeo, rimMat);
     rim.position.set(x, GRID.TOP + 0.005, z);
     group.add(rim);
+
+    // 白色海水泡沫環
+    const foamGeo = new THREE.RingGeometry(GRID.R + 0.08, GRID.R + 0.24, 6);
+    foamGeo.rotateX(-Math.PI / 2);
+    foamGeo.rotateY(Math.PI / 6);
+    const foamMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.45 });
+    const foam = new THREE.Mesh(foamGeo, foamMat);
+    foam.position.set(x, GRID.WATER_Y + 0.01, z);
+    group.add(foam);
+
+    // CSS2D 膠囊標籤
+    const pill = document.createElement("div");
+    pill.className = "island-label-pill";
+    pill.innerText = data.name;
+    pill.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (onIslandClick) onIslandClick(data);
+    });
+
+    const c2dObj = new CSS2DObject(pill);
+    c2dObj.position.set(x, GRID.TOP + 0.65, z + GRID.R * 0.7);
+    group.add(c2dObj);
   });
 
   scene.add(group);

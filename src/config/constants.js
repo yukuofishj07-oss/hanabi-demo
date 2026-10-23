@@ -14,7 +14,10 @@ export const COLORS = {
   green: 0x71806a,
   glass: 0x86a8a6,
   wood: 0xb48560,
-  teal: 0x3e7c8c
+  teal: 0x3e7c8c,
+  gold: 0xffb830,
+  purple: 0x9b59b6,
+  sky: 0x3498db
 };
 
 export function mulberry32(a) {
