@@ -2,9 +2,10 @@ import * as THREE from "three";
 import { SceneManager } from "./core/scene.js";
 import { Environment } from "./core/environment.js";
 import { DATA } from "./config/data.js";
-import { buildHexIslands, axialToWorld } from "./island/grid.js";
+import { buildHexIslands, getIslandPos } from "./island/grid.js";
 import { buildBridges } from "./island/bridges.js";
 import { buildAllBuildings } from "./assets/buildings.js";
+import { WorkerCrowd } from "./logistics/workers.js";
 import { FireworksEngine } from "./fireworks/engine.js";
 
 class App {
@@ -15,7 +16,7 @@ class App {
       this.sceneMgr = new SceneManager(this.container);
       this.env = new Environment(this.sceneMgr.scene);
 
-      // 1. 六角島 (S 型蛇狀佈局)
+      // 1. 建立 4-4-2 標準 S 型放大版六角島
       const { islandMeshes } = buildHexIslands(
         this.sceneMgr.scene,
         DATA.islands,
@@ -23,13 +24,16 @@ class App {
       );
       this.islandMeshes = islandMeshes;
 
-      // 2. S 型小拱橋
+      // 2. 建立 S 型日式朱紅欄杆拱橋
       buildBridges(this.sceneMgr.scene, DATA.islands);
 
-      // 3. 實例化溫暖彩色黏土工坊、植栽樹木、長椅與路燈 (修復黑剪影問題)
+      // 3. 建立 10 座高細緻度專屬工坊建築與樹木景觀
       buildAllBuildings(this.sceneMgr.scene, DATA.islands);
 
-      // 4. 璀璨煙火物理引擎
+      // 4. 建立內建二頭身黏土工匠範本群 (沿 S 型路線搬運物料)
+      this.workerCrowd = new WorkerCrowd(this.sceneMgr.scene, DATA.islands);
+
+      // 5. 建立 100% 必現 3D 實體發光煙火引擎
       this.fireworks = new FireworksEngine(this.sceneMgr.scene);
 
       this.setupRaycast();
@@ -40,10 +44,11 @@ class App {
       this.frameCount = 0;
       this.lastFpsUpdate = performance.now();
 
-      // 預設選取第 1 島展示詳細流程
-      this.selectIsland(DATA.islands[0]);
+      // 一進入畫面立刻施放第一波迎賓煙火，讓使用者馬上看到！
+      this.fireworks.launch({ x: 0.0, z: 6.2 }, "chrysanthemum");
+      setTimeout(() => this.fireworks.launch({ x: -3.4, z: 0.0 }, "peony"), 400);
+      setTimeout(() => this.fireworks.launch({ x: 3.4, z: 0.0 }, "willow"), 800);
 
-      // 隱藏載入層
       document.getElementById("loading-overlay").classList.add("hidden");
 
       this.clock = new THREE.Clock();
@@ -51,24 +56,32 @@ class App {
     } catch (err) {
       console.error("Initialization Failed:", err);
       const errBox = document.createElement("div");
-      errBox.style.cssText = "color:red;padding:20px;position:absolute;top:0;z-index:9999;";
+      errBox.style.cssText = "color:red;padding:20px;position:absolute;top:0;z-index:9999;background:#fff;";
       errBox.innerText = "無法載入 3D 渲染系統：" + err.message;
       document.body.appendChild(errBox);
     }
   }
 
   setupAutoFireworks() {
-    // 每隔 2.5 秒自動由發射陣地升空一枚璀璨煙火
+    // 每 2.2 秒自動發射，保持夜空熱鬧璀璨
     setInterval(() => {
       this.fireworks.launch();
-    }, 2500);
+    }, 2200);
   }
 
   setupRaycast() {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
+    let downPos = { x: 0, y: 0 };
+
+    window.addEventListener("pointerdown", (e) => {
+      downPos.x = e.clientX;
+      downPos.y = e.clientY;
+    });
 
     window.addEventListener("pointerup", (e) => {
+      if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 6) return;
+
       mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
@@ -106,11 +119,14 @@ class App {
 
     card.classList.add("active");
 
-    const target = axialToWorld(island.axial.q, island.axial.r);
-    this.sceneMgr.flyTo(new THREE.Vector3(target.x, 0.68, target.z));
+    const target = getIslandPos(island);
+    this.sceneMgr.flyTo(new THREE.Vector3(target.x, 1.8, target.z), new THREE.Vector3(3.2, 6.5, 11.5));
+
+    // 點選島嶼時，順便在該島上方放一顆慶祝煙火！
+    this.fireworks.launch({ x: target.x, z: target.z });
 
     document.querySelectorAll(".island-label-pill").forEach((pill) => {
-      if (pill.innerText.includes(island.name.split(" ")[1])) {
+      if (pill.innerText === island.name) {
         pill.classList.add("selected");
       } else {
         pill.classList.remove("selected");
@@ -124,17 +140,15 @@ class App {
       document.querySelectorAll(".island-label-pill").forEach((p) => p.classList.remove("selected"));
     });
 
-    // 於指定島嶼上空發射
     document.getElementById("card-fire-btn").addEventListener("click", () => {
       if (this.currentSelectedIsland) {
-        const p = axialToWorld(this.currentSelectedIsland.axial.q, this.currentSelectedIsland.axial.r);
-        this.fireworks.launch(new THREE.Vector3(p.x, 0.68, p.z));
+        const p = getIslandPos(this.currentSelectedIsland);
+        this.fireworks.launch({ x: p.x, z: p.z });
       }
     });
 
-    // 時段切換
     document.querySelectorAll(".hud-btn[data-time]").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
+      btn.addEventListener("click", () => {
         document.querySelectorAll(".hud-btn[data-time]").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         const minutes = parseInt(btn.getAttribute("data-time"), 10);
@@ -142,23 +156,22 @@ class App {
       });
     });
 
-    // 全景鳥瞰模式切換
-    let topdown = false;
-    document.getElementById("btn-topdown").addEventListener("click", () => {
-      topdown = !topdown;
-      if (topdown) {
-        this.sceneMgr.setTopdownView();
-      } else {
-        this.sceneMgr.flyTo(new THREE.Vector3(0, 0, 1.0), new THREE.Vector3(0, 24, 46));
-      }
+    let workersOn = true;
+    document.getElementById("toggle-workers").addEventListener("click", (e) => {
+      workersOn = !workersOn;
+      e.target.classList.toggle("active", workersOn);
+      e.target.innerText = workersOn ? "👷 工匠: 開" : "👷 工匠: 關";
+      this.workerCrowd.toggle(workersOn);
     });
 
-    // 單發發射
+    document.getElementById("btn-reset-cam").addEventListener("click", () => {
+      this.sceneMgr.resetOverview();
+    });
+
     document.getElementById("btn-launch-firework").addEventListener("click", () => {
-      this.fireworks.launch();
+      this.fireworks.launch({ x: 0.0, z: 6.2 });
     });
 
-    // 萬彈齊發
     document.getElementById("btn-launch-barrage").addEventListener("click", () => {
       this.fireworks.launchBarrage();
     });
@@ -177,10 +190,12 @@ class App {
       this.lastFpsUpdate = now;
     }
 
+    const dt = Math.min(this.clock.getDelta(), 0.05);
     const time = this.clock.getElapsedTime();
 
     this.sceneMgr.update();
     this.env.update(time);
+    this.workerCrowd.update(time, dt);
     this.fireworks.update();
     this.sceneMgr.render();
   }
