@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>花火工坊 - 3D 黏土微縮展示</title>
+  <style>
+    :root {
+      --coral: #db6a41;
+      --ink: #211d1d;
+      --cream: #fff8f4;
+      --yellow: #fcea8b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: radial-gradient(circle at 50% 50%, #fffdf9 0%, #edddcf 100%);
+    }
+    #webgl-canvas, #css-canvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    }
+    #css-canvas { pointer-events: none; z-index: 2; }
+    #webgl-canvas { z-index: 1; }
+
+    .ui-layer {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 10; pointer-events: none; display: flex; flex-direction: column;
+      justify-content: space-between; padding: 20px;
+    }
+    .brand-card {
+      pointer-events: auto;
+      background: rgba(255, 248, 244, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      padding: 12px 20px;
+      border-radius: 16px;
+      width: fit-content;
+      box-shadow: 0 6px 20px rgba(74, 42, 20, 0.08);
+    }
+    .brand-eyebrow {
+      font-family: monospace; font-size: 10px; font-weight: 700;
+      color: var(--coral); letter-spacing: 2px;
+    }
+    .brand-title { font-size: 18px; font-weight: 800; color: var(--ink); }
+
+    .bottom-hud {
+      pointer-events: auto; align-self: center; display: flex; align-items: center;
+      gap: 10px; background: rgba(255, 248, 244, 0.9);
+      backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.8);
+      padding: 8px 16px; border-radius: 999px;
+      box-shadow: 0 8px 24px rgba(74, 42, 20, 0.12);
+    }
+    .time-badge {
+      font-family: monospace; font-weight: 700; font-size: 13px;
+      color: var(--ink); padding: 4px 8px; background: rgba(219, 106, 65, 0.12);
+      border-radius: 6px;
+    }
+    .hud-btn {
+      min-height: 34px; padding: 4px 12px; border-radius: 999px; border: none;
+      background: #fff; color: var(--ink); font-size: 12px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: 0.2s;
+    }
+    .hud-btn:hover { background: var(--yellow); transform: translateY(-1px); }
+    .hud-btn.active { background: var(--coral); color: #fff; }
+
+    .island-pill {
+      pointer-events: auto; cursor: pointer; background: rgba(255, 248, 244, 0.95);
+      border: 1px solid rgba(219, 106, 65, 0.35); padding: 5px 12px;
+      border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--ink);
+      white-space: nowrap; box-shadow: 0 4px 12px rgba(74, 42, 20, 0.15);
+      transform: translate(-50%, -50%); transition: all 0.2s ease;
+    }
+    .island-pill:hover {
+      background: var(--yellow); border-color: var(--coral);
+      transform: translate(-50%, -55%) scale(1.06);
+    }
+    .island-pill.selected {
+      background: var(--ink); color: #fff; border-color: var(--yellow);
+    }
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="ui-layer">
+    <div class="brand-card">
+      <div class="brand-eyebrow">HANABI WORKSHOP 3D</div>
+      <div class="brand-title">花火三部曲：包裝・曝曬・施放</div>
+    </div>
+    <div class="bottom-hud">
+      <div class="time-badge" id="hud-clock">12:00</div>
+      <button class="hud-btn active" data-time="720">日間製程</button>
+      <button class="hud-btn" data-time="1140">夕陽霞光</button>
+      <button class="hud-btn" data-time="1260">夜間施放</button>
+      <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1); margin: 0 4px;"></div>
+      <button class="hud-btn" id="btn-reset">重置全景</button>
+    </div>
+  </div>
+
+  <div id="css-canvas"></div>
+  <canvas id="webgl-canvas"></canvas>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    // 核心資料：3 座工序島
+    const ISLANDS_DATA = [
+      { id: "pack",  name: "01 裝填包裝", q: -1, r: 0, theme: "#db6a41", desc: "半球裝星、割藥充填與和紙玉掛" },
+      { id: "dry",   name: "02 陽光曝曬", q: 0,  r: 0, theme: "#e09f3e", desc: "通風乾燥棚架、天然陽光固化" },
+      { id: "fire",  name: "03 砲陣施放", q: 1,  r: 0, theme: "#466f7f", desc: "迫擊砲排架、電子點火與水上砲台" }
+    ];
+
+    const R = 2.02, SPACING = 2.3, TOP = 0.65, WATER_Y = -0.18;
+
+    function axialToWorld(q, r) {
+      return new THREE.Vector3(Math.sqrt(3) * SPACING * (q + r / 2), TOP, 1.5 * SPACING * r);
+    }
+
+    const canvas = document.getElementById('webgl-canvas');
+    const cssContainer = document.getElementById('css-canvas');
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+    const labelRenderer = new CSS2DRenderer({ element: cssContainer });
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+
+    const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.3, 200);
+    const defaultDir = new THREE.Vector3(0.2, 0.36, 0.88).normalize();
+    camera.position.copy(defaultDir.clone().multiplyScalar(22));
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.07;
+    controls.enablePan = false;
+    controls.minPolarAngle = THREE.MathUtils.degToRad(25);
+    controls.maxPolarAngle = THREE.MathUtils.degToRad(70);
+    controls.minDistance = 4;
+    controls.maxDistance = 50;
+    controls.target.set(0, 0.2, 0);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0xf4eee3, 30, 90);
+
+    // 光源
+    const hemiLight = new THREE.HemisphereLight(0xeef6fa, 0x8f8270, 1.3);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff1de, 2.6);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(2048, 2048);
+    sunLight.shadow.camera.left = -15;
+    sunLight.shadow.camera.right = 15;
+    sunLight.shadow.camera.top = 15;
+    sunLight.shadow.camera.bottom = -15;
+    sunLight.shadow.bias = -0.0006;
+    scene.add(sunLight);
+
+    // 程序水面
+    const waterGeo = new THREE.CircleGeometry(80, 48);
+    const waterMat = new THREE.ShaderMaterial({
+      fog: true,
+      uniforms: {
+        uTime: { value: 0 },
+        uColorA: { value: new THREE.Color(0xa4d4da) },
+        uColorB: { value: new THREE.Color(0x6fa9b8) },
+        fogColor: { value: scene.fog.color },
+        fogNear: { value: scene.fog.near },
+        fogFar: { value: scene.fog.far }
+      },
+      vertexShader: `
+        varying vec3 vWorldPos;
+        void main() {
+          vec4 wp = modelMatrix * vec4(position, 1.0);
+          vWorldPos = wp.xyz;
+          gl_Position = projectionMatrix * viewMatrix * wp;
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uColorA, uColorB, fogColor;
+        uniform float fogNear, fogFar;
+        varying vec3 vWorldPos;
+        void main() {
+          float wave = sin(vWorldPos.x * 0.4 + uTime) * cos(vWorldPos.z * 0.4 + uTime * 0.8);
+          vec3 col = mix(uColorA, uColorB, wave * 0.25 + 0.5);
+          float d = length(vWorldPos - cameraPosition);
+          float f = smoothstep(fogNear, fogFar, d);
+          gl_FragColor = vec4(mix(col, fogColor, f), 0.95);
+        }
+      `,
+      transparent: true
+    });
+    const water = new THREE.Mesh(waterGeo, waterMat);
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = WATER_Y;
+    scene.add(water);
+
+    // 六角底座材質
+    const hexGeo = new THREE.CircleGeometry(R - 0.05, 6).rotateZ(Math.PI / 6).rotateX(-Math.PI / 2);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0xf3eee3, roughness: 0.9 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0xb48560, roughness: 0.75 });
+    const ironMat = new THREE.MeshStandardMaterial({ color: 0x3d4349, roughness: 0.5, metalness: 0.3 });
+    const ballMat = new THREE.MeshStandardMaterial({ color: 0xdb6a41, roughness: 0.7 });
+    const sandMat = new THREE.MeshStandardMaterial({ color: 0xd6c498, roughness: 0.9 });
+
+    const pills = [];
+
+    // 建立 3 座島與專屬微縮模型
+    ISLANDS_DATA.forEach((isle) => {
+      const pos = axialToWorld(isle.q, isle.r);
+      const group = new THREE.Group();
+      group.position.set(pos.x, 0, pos.z);
+
+      // 島面與路緣石
+      const top = new THREE.Mesh(hexGeo, groundMat);
+      top.position.y = TOP;
+      top.receiveShadow = true;
+      group.add(top);
+
+      const decoGeo = new THREE.CylinderGeometry(R, R - 0.02, 0.14, 6).rotateY(Math.PI / 6);
+      const decoMat = new THREE.MeshStandardMaterial({ color: isle.theme, roughness: 0.7 });
+      const deco = new THREE.Mesh(decoGeo, decoMat);
+      deco.position.y = TOP - 0.07;
+      group.add(deco);
+
+      const cliff = new THREE.Mesh(
+        new THREE.CylinderGeometry(R - 0.02, R * 0.94, TOP - WATER_Y, 6).rotateY(Math.PI / 6),
+        new THREE.MeshStandardMaterial({ color: 0x937f6d, roughness: 0.95 })
+      );
+      cliff.position.y = (TOP + WATER_Y) / 2;
+      group.add(cliff);
+
+      // --- 島上模型 ---
+      if (isle.id === "pack") {
+        // 01 包裝島：木製合球桌 + 半球模具 + 花火球
+        const table = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 0.8), woodMat);
+        table.position.set(0, TOP + 0.15, 0);
+        table.castShadow = true;
+        group.add(table);
+
+        const shellA = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 8, 0, Math.PI), ballMat);
+        shellA.rotation.x = Math.PI / 2;
+        shellA.position.set(-0.3, TOP + 0.36, 0);
+        group.add(shellA);
+
+        const shellB = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), ballMat);
+        shellB.position.set(0.3, TOP + 0.44, 0);
+        shellB.castShadow = true;
+        group.add(shellB);
+      } 
+      else if (isle.id === "dry") {
+        // 02 曝曬島：通風木棚架 + 晾曬花火球陣列
+        const rackPost1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.8), woodMat);
+        rackPost1.position.set(-0.6, TOP + 0.4, -0.4);
+        const rackPost2 = rackPost1.clone(); rackPost2.position.set(0.6, TOP + 0.4, -0.4);
+        const rackPost3 = rackPost1.clone(); rackPost3.position.set(-0.6, TOP + 0.4, 0.4);
+        const rackPost4 = rackPost1.clone(); rackPost4.position.set(0.6, TOP + 0.4, 0.4);
+        group.add(rackPost1, rackPost2, rackPost3, rackPost4);
+
+        const bar1 = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.04, 0.04), woodMat);
+        bar1.position.set(0, TOP + 0.78, -0.4);
+        const bar2 = bar1.clone(); bar2.position.set(0, TOP + 0.78, 0.4);
+        group.add(bar1, bar2);
+
+        // 晾曬球陣列
+        for (let x = -0.4; x <= 0.4; x += 0.26) {
+          for (let z = -0.2; z <= 0.2; z += 0.26) {
+            const ball = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 12), ballMat);
+            ball.position.set(x, TOP + 0.1, z);
+            ball.castShadow = true;
+            group.add(ball);
+          }
+        }
+      } 
+      else if (isle.id === "fire") {
+        // 03 施放島：防爆沙包環 + 三門傾斜發射迫擊筒
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+          const sand = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.16, 0.18), sandMat);
+          sand.position.set(Math.cos(a) * 0.9, TOP + 0.08, Math.sin(a) * 0.9);
+          sand.rotation.y = -a;
+          sand.castShadow = true;
+          group.add(sand);
+        }
+        // 3 門發射筒
+        [-0.32, 0, 0.32].forEach((offset, idx) => {
+          const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.11, 0.8, 16), ironMat);
+          tube.position.set(offset, TOP + 0.38, 0);
+          tube.rotation.z = (idx - 1) * 0.12;
+          tube.castShadow = true;
+          group.add(tube);
+        });
+      }
+
+      // CSS2D 懸浮標籤
+      const pillDiv = document.createElement('div');
+      pillDiv.className = 'island-pill';
+      pillDiv.textContent = isle.name;
+      pillDiv.dataset.id = isle.id;
+
+      const pillObj = new CSS2DObject(pillDiv);
+      pillObj.position.set(0, TOP + 0.35, 1.55);
+      group.add(pillObj);
+      pills.push(pillDiv);
+
+      pillDiv.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        flyTo(pos, 800, new THREE.Vector3(1.8, 3.2, 4.2));
+        pills.forEach(p => p.classList.toggle('selected', p.dataset.id === isle.id));
+      });
+
+      scene.add(group);
+    });
+
+    // 兩座橋連接 1-2 與 2-3
+    function addBridge(posA, posB) {
+      const bridge = new THREE.Group();
+      for (let i = 0; i < 7; i++) {
+        const t = (i + 0.5) / 7;
+        const p = new THREE.Vector3().lerpVectors(posA, posB, t);
+        const y = Math.sin(t * Math.PI) * 0.12 + TOP - 0.02;
+        const deck = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.04, 0.12), woodMat);
+        deck.position.set(p.x, y, p.z);
+        deck.rotation.y = Math.PI / 2;
+        deck.castShadow = true;
+        bridge.add(deck);
+      }
+      scene.add(bridge);
+    }
+    addBridge(axialToWorld(-1, 0), axialToWorld(0, 0));
+    addBridge(axialToWorld(0, 0), axialToWorld(1, 0));
+
+    // 相機平滑過渡
+    let isFlying = false, flyStart = 0, flyDur = 800;
+    const startCam = new THREE.Vector3(), endCam = new THREE.Vector3();
+    const startTar = new THREE.Vector3(), endTar = new THREE.Vector3();
+
+    function flyTo(target, duration = 800, offset = new THREE.Vector3(2.5, 4.5, 5.5)) {
+      isFlying = true;
+      flyStart = performance.now();
+      flyDur = duration;
+      startCam.copy(camera.position);
+      endCam.copy(target).add(offset);
+      startTar.copy(controls.target);
+      endTar.copy(target);
+    }
+
+    controls.addEventListener('start', () => { isFlying = false; });
+
+    // 日夜切換配置
+    function setLighting(mins) {
+      let sunCol = 0xfff1de, sunI = 2.6, hemiCol = 0xeef6fa, night = 0.0;
+      if (mins === 720) { // 日正
+        sunLight.position.set(15, 25, 20);
+        scene.fog.color.set(0xf4eee3);
+        renderer.setClearColor(0xf4eee3, 1);
+      } else if (mins === 1140) { // 傍晚
+        sunCol = 0xff9a7a; sunI = 1.6; hemiCol = 0xc0b2e0;
+        sunLight.position.set(30, 8, 12);
+        scene.fog.color.set(0xd99aa6);
+      } else if (mins === 1260) { // 夜間施放
+        sunCol = 0xb4c2ff; sunI = 0.6; hemiCol = 0x5a6a9d; night = 1.0;
+        sunLight.position.set(-15, 12, 15);
+        scene.fog.color.set(0x22325f);
+      }
+      sunLight.color.set(sunCol);
+      sunLight.intensity = sunI;
+      hemiLight.color.set(hemiCol);
+      document.getElementById('hud-clock').textContent = mins === 720 ? "12:00" : mins === 1140 ? "19:00" : "21:00";
+    }
+
+    document.querySelectorAll('.bottom-hud .hud-btn[data-time]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.bottom-hud .hud-btn[data-time]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        setLighting(parseInt(btn.dataset.time, 10));
+      });
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      flyTo(new THREE.Vector3(0, 0.2, 0), 800, defaultDir.clone().multiplyScalar(22));
+      pills.forEach(p => p.classList.remove('selected'));
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // 渲染循環
+    let last = performance.now();
+    function render(now) {
+      requestAnimationFrame(render);
+      const dt = Math.min((now - last) / 1000, 0.08);
+      last = now;
+
+      waterMat.uniforms.uTime.value += dt;
+
+      if (isFlying) {
+        const p = Math.min((now - flyStart) / flyDur, 1.0);
+        const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+        camera.position.lerpVectors(startCam, endCam, ease);
+        controls.target.lerpVectors(startTar, endTar, ease);
+        if (p >= 1.0) isFlying = false;
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>
