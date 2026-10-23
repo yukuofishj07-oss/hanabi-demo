@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>花火島 HANABI ISLAND - 3D 微縮工藝與夜空盛典</title>
+  <link rel="stylesheet" href="./styles/main.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- 左上品牌與說明 -->
+  <div class="glass-panel" id="brand-card">
+    <div class="eyebrow">HANABI ARTISAN ISLE</div>
+    <h1>示範市．花火島</h1>
+    <p>12座工藝島嶼連動：配方純化、星體造粒、紙帶糊緊到夜空盛典</p>
+    <div class="badge-row">
+      <span class="chip">⚡ 60FPS 零GC</span>
+      <span class="chip">🎆 物理粒子火花</span>
+      <span class="chip">🧸 黏土微縮景觀</span>
+    </div>
+  </div>
+
+  <!-- 右上即時工藝動態 -->
+  <div class="glass-panel" id="live-log-panel">
+    <div class="log-header">
+      <span class="live-dot"></span>
+      <span class="eyebrow" style="margin:0;">FACTORY LIVE LOG</span>
+      <span id="fps-badge">60 FPS</span>
+    </div>
+    <div id="log-list">
+      <div class="log-item">🟢 01 精煉所：硝石結晶純度 99.8% 達標</div>
+      <div class="log-item">🚚 輸送線：紅色鍶鹽正流向 03造粒滾筒</div>
+      <div class="log-item">✨ 11 砲台：10 吋尺玉錦冠彈填裝待發</div>
+    </div>
+  </div>
+
+  <!-- 底部 HUD 工具列 -->
+  <div class="glass-panel" id="hud-toolbar">
+    <div class="hud-group">
+      <button class="hud-btn" data-time="360">🌅 清晨 06</button>
+      <button class="hud-btn" data-time="720">☀️ 正午 12</button>
+      <button class="hud-btn" data-time="1065">🌇 霞暮 18</button>
+      <button class="hud-btn active" data-time="1260">🎆 盛典 21</button>
+    </div>
+    <div class="hud-divider"></div>
+    <div class="hud-group">
+      <button class="hud-btn toggle-btn active" id="toggle-flow">⚡ 輸送流光</button>
+      <button class="hud-btn toggle-btn active" id="toggle-workers">👷 工匠活動</button>
+      <button class="hud-btn" id="btn-topdown">🔭 鳥瞰模式</button>
+      <button class="hud-btn fire-action" id="btn-launch-firework">🎇 點火發射</button>
+      <button class="hud-btn fire-action-combo" id="btn-launch-barrage">🎆 萬彈齊發</button>
+    </div>
+  </div>
+
+  <!-- 左側詳細工序卡片 -->
+  <div class="glass-panel" id="detail-card">
+    <div class="card-close" id="card-close-btn">&times;</div>
+    <div class="eyebrow" id="card-type">工序島嶼</div>
+    <h2 id="card-title">請點選六角島嶼</h2>
+    <div id="card-desc">在 3D 黏土微縮地圖中選擇工坊，查看專屬配方工序與即時數據。</div>
+    <div class="stats-grid" id="card-stats"></div>
+    <button class="card-action-btn" id="card-fire-btn">🚀 於此島試射專屬花火</button>
+  </div>
+
+  <!-- 載入層 -->
+  <div id="loading-overlay">
+    <div class="loader-content">
+      <div class="loader-spinner"></div>
+      <h2>花火工藝模型建構中...</h2>
+      <p>採用 GPU InstancedMesh 幾何合併與預熱粒子池，暢享絲滑體驗</p>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
