@@ -7,7 +7,6 @@ export function axialToWorld(q, r) {
   return { x, z };
 }
 
-// 256² Canvas 程序地面貼圖（磚紋 / 斑點 / 條紋三種）
 function createPatternTexture(kind) {
   const canvas = document.createElement("canvas");
   canvas.width = 256;
@@ -19,44 +18,43 @@ function createPatternTexture(kind) {
 
   if (kind === "brick") {
     ctx.strokeStyle = "rgba(180, 155, 130, 0.38)";
-    ctx.lineWidth = 3;
-    for (let y = 0; y < 256; y += 32) {
+    ctx.lineWidth = 2;
+    for (let y = 0; y < 256; y += 24) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(256, y);
       ctx.stroke();
-      const offset = (y / 32) % 2 === 0 ? 0 : 32;
-      for (let x = offset; x < 256; x += 64) {
+      const offset = (y / 24) % 2 === 0 ? 0 : 24;
+      for (let x = offset; x < 256; x += 48) {
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.lineTo(x, y + 32);
+        ctx.lineTo(x, y + 24);
         ctx.stroke();
       }
     }
   } else if (kind === "dots") {
     ctx.fillStyle = "rgba(190, 165, 140, 0.42)";
-    for (let y = 16; y < 256; y += 32) {
-      for (let x = 16; x < 256; x += 32) {
+    for (let y = 12; y < 256; y += 24) {
+      for (let x = 12; x < 256; x += 24) {
         ctx.beginPath();
-        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
         ctx.fill();
       }
     }
   } else {
     ctx.fillStyle = "rgba(195, 172, 148, 0.30)";
-    for (let x = 0; x < 256; x += 32) {
-      ctx.fillRect(x, 0, 14, 256);
+    for (let x = 0; x < 256; x += 24) {
+      ctx.fillRect(x, 0, 10, 256);
     }
   }
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(3, 3);
+  tex.repeat.set(4, 4);
   return tex;
 }
 
-// 頂緣一圈彩色圖案帶貼圖
 function createRimBandTexture(hexColor) {
   const canvas = document.createElement("canvas");
   canvas.width = 256;
@@ -119,24 +117,20 @@ export class IslandsBuilder {
   }
 
   buildIslands() {
-    const S = WORLD.SCALE;
-    const R = WORLD.R;
-    const TOP = WORLD.TOP;
+    const R = WORLD.R;       // 5.2
+    const TOP = WORLD.TOP;   // 0.95
 
-    // 島側壁材質（與淺海色調呼應，看起來像浮在淺海上）
     const cliffMat = new THREE.MeshStandardMaterial({
       color: 0x89c2cb,
       roughness: 0.72,
       metalness: 0.05
     });
 
-    // 外緣路緣 #e4d6c3
     const curbMat = new THREE.MeshStandardMaterial({
       color: 0xe4d6c3,
       roughness: 0.85
     });
 
-    // 步道環（淺磚色）
     const walkMat = new THREE.MeshStandardMaterial({
       color: 0xdcc3ab,
       roughness: 0.88,
@@ -145,7 +139,6 @@ export class IslandsBuilder {
       polygonOffsetUnits: -1
     });
 
-    // 外圈淺水環與白色泡沫環
     const shallowMat = new THREE.MeshBasicMaterial({
       color: 0xb5e2e6,
       transparent: true,
@@ -180,8 +173,8 @@ export class IslandsBuilder {
       group.add(bodyMesh);
       this.islandMeshes.push(bodyMesh);
 
-      // 2. 島面 CircleGeometry(R - 0.2, 6)
-      const topGeo = new THREE.CircleGeometry(R - 0.22, 6);
+      // 2. 島面
+      const topGeo = new THREE.CircleGeometry(R - 0.16, 6);
       topGeo.rotateZ(Math.PI / 6);
       topGeo.rotateX(-Math.PI / 2);
       const topMat = new THREE.MeshStandardMaterial({
@@ -198,19 +191,31 @@ export class IslandsBuilder {
       group.add(topMesh);
       this.islandMeshes.push(topMesh);
 
-      // 3. 半徑 1.8 * S 的六角形步道環
-      const walkInner = 1.64 * S;
-      const walkOuter = 1.92 * S;
+      // 3. 外圈步道環 + 內部十字支線石板步道 (增添地面豐富細節！)
+      const walkInner = R * 0.80;
+      const walkOuter = R * 0.90;
       const walkGeo = new THREE.RingGeometry(walkInner, walkOuter, 6);
       walkGeo.rotateZ(Math.PI / 6);
       walkGeo.rotateX(-Math.PI / 2);
       const walkMesh = new THREE.Mesh(walkGeo, walkMat);
-      walkMesh.position.y = TOP + 0.025;
+      walkMesh.position.y = TOP + 0.02;
       walkMesh.receiveShadow = true;
       group.add(walkMesh);
 
-      // 4. 頂緣一圈高 0.16 * S 的彩色圖案帶
-      const bandH = 0.42;
+      // 島內中央圓形廣場與十字步道
+      const centerPlaza = new THREE.Mesh(new THREE.RingGeometry(0.6, 1.4, 24).rotateX(-Math.PI / 2), walkMat);
+      centerPlaza.position.y = TOP + 0.02;
+      group.add(centerPlaza);
+
+      for (let a = 0; a < 3; a++) {
+        const pathStrip = new THREE.Mesh(new THREE.PlaneGeometry(0.45, R * 1.55).rotateX(-Math.PI / 2), walkMat);
+        pathStrip.rotation.y = (a * Math.PI) / 3;
+        pathStrip.position.y = TOP + 0.018;
+        group.add(pathStrip);
+      }
+
+      // 4. 頂緣彩色圖案帶
+      const bandH = 0.28;
       const bandGeo = new THREE.CylinderGeometry(R + 0.02, R + 0.02, bandH, 6, 1, true);
       bandGeo.rotateY(Math.PI / 6);
       const bandMat = new THREE.MeshStandardMaterial({
@@ -222,24 +227,24 @@ export class IslandsBuilder {
       group.add(bandMesh);
 
       // 5. 外圈淺水環與白色泡沫環
-      const shGeo = new THREE.RingGeometry(R * 0.98, R + 1.8, 6);
+      const shGeo = new THREE.RingGeometry(R * 0.98, R + 1.15, 6);
       shGeo.rotateZ(Math.PI / 6);
       shGeo.rotateX(-Math.PI / 2);
       const shMesh = new THREE.Mesh(shGeo, shallowMat);
       shMesh.position.y = WORLD.WATER_Y + 0.02;
       group.add(shMesh);
 
-      const fmGeo = new THREE.RingGeometry(R + 0.05, R + 0.48, 6);
+      const fmGeo = new THREE.RingGeometry(R + 0.04, R + 0.32, 6);
       fmGeo.rotateZ(Math.PI / 6);
       fmGeo.rotateX(-Math.PI / 2);
       const fmMesh = new THREE.Mesh(fmGeo, foamMat);
-      fmMesh.position.y = WORLD.WATER_Y + 0.04;
+      fmMesh.position.y = WORLD.WATER_Y + 0.035;
       group.add(fmMesh);
 
       this.scene.add(group);
 
-      // 6. 建立行人路網：每島 12 個節點（步道六角形的 6 頂點 + 6 邊中點）連成環
-      const walkMidR = 1.78 * S;
+      // 6. 行人路網：每島 12 個節點
+      const walkMidR = R * 0.85;
       const verts = [];
       for (let k = 0; k < 6; k++) {
         const ang = (k * Math.PI) / 3 + Math.PI / 6;
@@ -267,12 +272,12 @@ export class IslandsBuilder {
   }
 
   buildSBridgesAndReturnLoop() {
-    // 1. 沿著 01 -> 02 -> ... -> 12 的直線 S 型工序建立 9 片甲板小拱橋
+    // 島與島之間距離拉開後，修長的 11 片甲板拱橋跨越寬闊水道！
     const deckMat = new THREE.MeshStandardMaterial({ color: PALETTE.wood, roughness: 0.78 });
     const railMat = new THREE.MeshStandardMaterial({ color: PALETTE.coral, roughness: 0.7 });
+    const postMat = new THREE.MeshStandardMaterial({ color: PALETTE.ink, roughness: 0.8 });
 
     const connectPair = (idA, idB, isLongReturn = false) => {
-      // 找出兩島最接近的邊中點節點
       let bestU = null;
       let bestV = null;
       let minDist = Infinity;
@@ -305,9 +310,10 @@ export class IslandsBuilder {
       bridgeGroup.position.set(midX, WORLD.TOP, midZ);
       bridgeGroup.lookAt(p2.x, WORLD.TOP, p2.z);
 
-      const planks = isLongReturn ? 21 : 9;
-      const archHeight = isLongReturn ? 0.65 : 0.34;
+      const planks = isLongReturn ? 23 : 11;
+      const archHeight = isLongReturn ? 0.55 : 0.32;
       const pLen = len / planks;
+      const width = isLongReturn ? 0.65 : 0.78;
 
       for (let k = 0; k < planks; k++) {
         const t = (k + 0.5) / planks;
@@ -315,28 +321,35 @@ export class IslandsBuilder {
         const zOff = (t - 0.5) * len;
 
         const deck = new THREE.Mesh(
-          new THREE.BoxGeometry(isLongReturn ? 1.15 : 1.45, 0.14, pLen * 0.92),
+          new THREE.BoxGeometry(width, 0.08, pLen * 0.90),
           isLongReturn ? railMat : deckMat
         );
-        deck.position.set(0, yOff + 0.06, zOff);
+        deck.position.set(0, yOff + 0.04, zOff);
         deck.castShadow = true;
         deck.receiveShadow = true;
         bridgeGroup.add(deck);
+
+        // 橋側精緻微縮欄杆柱
+        if (k % 2 === 0) {
+          for (let sx of [-width * 0.45, width * 0.45]) {
+            const post = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.22, 6), postMat);
+            post.position.set(sx, yOff + 0.15, zOff);
+            bridgeGroup.add(post);
+          }
+        }
       }
 
       this.scene.add(bridgeGroup);
     };
 
-    // S 型依序串聯 01 -> 02 -> ... -> 12
     for (let i = 0; i < this.islandsData.length - 1; i++) {
       connectPair(this.islandsData[i].id, this.islandsData[i + 1].id, false);
     }
 
-    // 額外連接 S 型結尾：12 觀禮台 直線回到原點 01 火藥配研室！
+    // 12 觀禮台 直線回到原點 01 火藥配研室！
     connectPair("isl_12", "isl_01", true);
   }
 
-  // Dijkstra 尋路演算法
   findShortestPath(islandFromId, islandToId) {
     const startId = `${islandFromId}_m0`;
     const targetPrefix = `${islandToId}_`;

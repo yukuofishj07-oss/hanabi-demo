@@ -17,18 +17,23 @@
 <body>
   <div id="canvas-container"></div>
 
-  <!-- 左上品牌卡 + 工具列 -->
+  <!-- 左上品牌卡 + 導覽與快捷工具列 -->
   <div id="top-left-stack">
     <div class="glass-panel" id="brand-card">
-      <div class="eyebrow" data-en="HANABI CRAFT ISLAND">HANABI CRAFT ISLAND</div>
-      <h1 data-en="Fireworks Craft Island">花火工藝島</h1>
-      <p class="subtitle" data-en="12-step traditional fireworks manufacturing & launch cycle">傳統尺玉煙火從火藥配研、星珠造粒到高空綻放的十二道S型閉環工藝巡禮</p>
+      <div class="eyebrow">HANABI CRAFT ISLAND</div>
+      <h1>花火工藝島</h1>
+      <p class="subtitle">傳統尺玉煙火從火藥配研、星珠造粒到高空綻放的十二道 S 型閉環工藝巡禮</p>
     </div>
+
+    <!-- 導覽與視角控制列 (補回完整導覽功能！) -->
     <div class="glass-panel" id="quick-toolbar">
-      <button class="icon-pill-btn" id="btn-panorama" title="全景視角">🌍 <span data-en="Panorama">全景</span></button>
-      <button class="icon-pill-btn" id="btn-toggle-sidebar" title="開啟/收合清單">📋 <span data-en="Directory">清單</span></button>
-      <button class="icon-pill-btn" id="btn-help" title="操作說明">❓ <span data-en="Guide">說明</span></button>
-      <button class="icon-pill-btn fire-highlight" id="btn-fire-now" title="立即施放煙火">🎆 <span data-en="Launch">點火施放</span></button>
+      <button class="icon-pill-btn nav-accent" id="btn-prev-step" title="上一站工序">◀ <span>上一站</span></button>
+      <button class="icon-pill-btn nav-accent" id="btn-auto-tour" title="自動巡島導覽">🎬 <span id="tour-label">導覽: 關</span></button>
+      <button class="icon-pill-btn nav-accent" id="btn-next-step" title="下一站工序"><span>下一站</span> ▶</button>
+      <button class="icon-pill-btn" id="btn-panorama" title="全景視角">🌍 <span>全景</span></button>
+      <button class="icon-pill-btn" id="btn-toggle-sidebar" title="開啟/收合清單">📋 <span>清單</span></button>
+      <button class="icon-pill-btn" id="btn-help" title="操作說明">❓</button>
+      <button class="icon-pill-btn fire-highlight" id="btn-fire-now" title="手動點火施放">🎆 <span>施放</span></button>
     </div>
   </div>
 
@@ -42,7 +47,7 @@
   <div class="glass-panel" id="live-log-panel">
     <div class="log-header">
       <span class="live-dot"></span>
-      <span class="eyebrow" style="margin:0;" data-en="CRAFT LIVE LOG">工藝即時日誌 LIVE</span>
+      <span class="eyebrow" style="margin:0;">工藝即時日誌 LIVE</span>
       <select id="log-filter" aria-label="篩選協作線">
         <option value="all">全部工序協作線</option>
       </select>
@@ -55,8 +60,8 @@
     <div class="sidebar-top">
       <input type="search" id="search-input" placeholder="🔍 搜尋工序島、設備或原料..." />
       <div class="tab-bar">
-        <button class="tab-btn active" data-tab="tab-islands" data-en="12 Craft Islands">十二工序主題</button>
-        <button class="tab-btn" data-tab="tab-flows" data-en="Logistics Flows">協作運送線</button>
+        <button class="tab-btn active" data-tab="tab-islands">十二工序主題</button>
+        <button class="tab-btn" data-tab="tab-flows">協作運送線</button>
       </div>
     </div>
     <div class="sidebar-scroll" id="tab-islands"></div>
@@ -86,7 +91,7 @@
   <!-- 協作線證據等級圖例 -->
   <div class="glass-panel" id="flow-legend">
     <span class="legend-item"><i class="line-sample solid"></i> 主幹製程 (實線)</span>
-    <span class="legend-item"><i class="line-sample dashed"></i> 輔助調配 (虛線)</span>
+    <span class="legend-item"><i class="line-sample dashed"></i> 跨排轉折 (虛線)</span>
     <span class="legend-item"><i class="line-sample dotted"></i> 循環回流 12➔01 (點線)</span>
   </div>
 
@@ -98,18 +103,18 @@
       <div class="steps-grid">
         <div class="step-card">
           <div class="step-num">1</div>
-          <h3>拖曳旋轉與縮放</h3>
-          <p>按住滑鼠左鍵旋轉視角、滾輪縮放，欣賞放大 4 倍的直線 S 型十二道花火工坊與外圍梯田山脈。</p>
+          <h3>逐島導覽與自由旋轉</h3>
+          <p>點擊左上角「◀ 上一站 / 🎬 導覽 / 下一站 ▶」可沿 S 型工序逐島巡禮，或用滑鼠左鍵旋轉、滾輪縮放微距細節。</p>
         </div>
         <div class="step-card">
           <div class="step-num">2</div>
-          <h3>點擊島嶼與 ①②③ 細項</h3>
-          <p>點擊任一六角島或上方膠囊標籤，自動展開 ①②③ 珊瑚紅圖釘與左側 3D 旋轉模型縮圖卡。</p>
+          <h3>點擊島嶼與 ①②③④ 細項</h3>
+          <p>點擊任一六角島或细項模型，自動展開 ①②③④ 珊瑚紅圖釘與左側 160² 3D 旋轉模型縮圖卡。</p>
         </div>
         <div class="step-card">
           <div class="step-num">3</div>
-          <h3>切換日夜與煙火盛典</h3>
-          <p>使用底部時段按鈕切換清晨、白天、黃昏與夜晚，並可隨時點擊「點火施放」欣賞高空尺玉煙火！</p>
+          <h3>日夜光影與從容煙火</h3>
+          <p>每隔約 6~7 秒自動施放一輪高空尺玉煙火；亦可切換至「黃昏 18 / 夜晚 21」欣賞暖黃燈火與璀璨花火。</p>
         </div>
       </div>
       <button class="primary-btn" id="btn-close-onboarding">開始探索花火工藝島</button>
@@ -121,7 +126,7 @@
     <div class="loader-box">
       <div class="loader-spinner"></div>
       <h2 id="loading-title">正在組合花火工藝島…</h2>
-      <p id="loading-sub">建構 4 倍大六角群島、梯田山脈、實例化零件庫與 S 型閉環路網</p>
+      <p id="loading-sub">拉開寬闊海道距離、雕刻高密度微縮園區細節與精緻小人比例</p>
     </div>
   </div>
 

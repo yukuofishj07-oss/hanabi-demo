@@ -1,13 +1,11 @@
-// 島嶼放大四倍 (原 R = 2.02 -> 4倍 R = 8.08, 原 SPACING = 2.28 -> 4倍 SPACING = 9.12)
 export const WORLD = {
-  SCALE: 4.0,
-  R: 8.08,          // 2.02 * 4
-  SPACING: 9.12,    // 2.28 * 4
-  TOP: 1.65,        // 島面高度按比例增厚，呈現厚實微縮模型感
-  WATER_Y: -0.45
+  R: 5.2,              // 寬廣的六角島半徑 (面積為原版 6.6 倍)
+  SPACING: 7.4,        // 大幅拉開島心距！讓島與島之間擁有寬闊海道與修長拱橋
+  TOP: 0.95,           // 島面高度
+  WATER_Y: -0.25,
+  WALKER_SCALE: 1.05   // 保持小人為精緻的微縮比例 (身高約 0.38)，絕不變成巨人！
 };
 
-// 原版規格書第 5 節指定色票
 export const PALETTE = {
   coral: 0xdb6a41,
   ink: 0x211d1d,
@@ -30,8 +28,6 @@ export const PALETTE = {
   glowGold: 0xffc777
 };
 
-// 原版規格書第 4 節指定日夜 Keyframes
-// 欄位：min, skyTop, horizon, sunColor, sunI, hemiSky, hemiGround, hemiI, night, water
 export const DAY_KEYFRAMES = [
   { min: 0,    skyTop: 0x1e2c58, horizon: 0x3f4f80, sunColor: 0xb4c2ff, sunI: 1.15, hemiSky: 0x94a2d8, hemiGround: 0x64566a, hemiI: 1.85, night: 1.0,  water: 0x5a88b2 },
   { min: 300,  skyTop: 0x26365f, horizon: 0x4c5688, sunColor: 0xb8c4ff, sunI: 1.0,  hemiSky: 0x96a4da, hemiGround: 0x66586c, hemiI: 1.85, night: 1.0,  water: 0x5c8ab4 },
@@ -45,7 +41,6 @@ export const DAY_KEYFRAMES = [
   { min: 1440, skyTop: 0x1e2c58, horizon: 0x3f4f80, sunColor: 0xb4c2ff, sunI: 1.15, hemiSky: 0x94a2d8, hemiGround: 0x64566a, hemiI: 1.85, night: 1.0,  water: 0x5a88b2 }
 ];
 
-// mulberry32 固定種子隨機函式
 export function mulberry32(a) {
   return function() {
     let t = a += 0x6D2B79F5;

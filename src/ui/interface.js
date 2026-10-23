@@ -17,7 +17,6 @@ export class UIController {
     this.scene.add(this.pinGroup);
     this.activePins = [];
 
-    // 160² 離屏渲染器 (用於細項卡的 3D 旋轉模型縮圖)
     this.initThumbnailRenderer();
     this.buildIslandPillLabels();
     this.populateRightSidebar();
@@ -90,13 +89,12 @@ export class UIController {
       });
 
       const obj = new CSS2DObject(div);
-      obj.position.set(x, WORLD.TOP + 0.35, z + WORLD.R * 0.86);
+      obj.position.set(x, WORLD.TOP + 0.25, z + WORLD.R * 0.88);
       this.scene.add(obj);
       this.islandPills[isl.id] = div;
     });
   }
 
-  // 規格書第 7 節：選島後，每個細項上方出現 ①②③ pin，用 coral 細線（depthTest false）連到模型頂端
   showItemPinsForIsland(island) {
     this.clearItemPins();
     if (!island) return;
@@ -107,7 +105,7 @@ export class UIController {
       const anchor = this.kitBuilder.itemAnchors[item.id];
       if (!anchor) return;
 
-      const pinY = anchor.y + 2.6;
+      const pinY = anchor.y + 1.35;
       const pts = [new THREE.Vector3(anchor.x, anchor.y, anchor.z), new THREE.Vector3(anchor.x, pinY, anchor.z)];
       const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
       const line = new THREE.Line(lineGeo, lineMat);
@@ -157,7 +155,6 @@ export class UIController {
     });
   }
 
-  // 左側詳細卡片：島卡
   renderIslandCard(island) {
     this.updatePillSelection(island.id);
     this.showItemPinsForIsland(island);
@@ -198,7 +195,6 @@ export class UIController {
     card.classList.add("active");
   }
 
-  // 左側詳細卡片：細項卡 (含 160² 離屏 3D 模型縮圖 + 3 個大數字磚 + 時程軸)
   renderItemCard(item, island) {
     this.updatePillSelection(island.id);
     this.showItemPinsForIsland(island);
@@ -240,7 +236,6 @@ export class UIController {
     card.classList.add("active");
   }
 
-  // 左側詳細卡片：協作線卡
   renderFlowCard(flow) {
     const fromIsl = this.data.islands.find((i) => i.id === flow.from);
     const toIsl = this.data.islands.find((i) => i.id === flow.to);

@@ -23,12 +23,11 @@ body, html {
   z-index: 1;
 }
 
-/* 毛玻璃通用面板 */
 .glass-panel {
-  background: rgba(255, 248, 244, 0.84);
+  background: rgba(255, 248, 244, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.74);
   box-shadow: 0 8px 28px rgba(74, 42, 20, 0.10), 0 2px 6px rgba(74, 42, 20, 0.06);
   color: #211d1d;
 }
@@ -43,7 +42,6 @@ body, html {
   margin-bottom: 4px;
 }
 
-/* 左上品牌與工具列 */
 #top-left-stack {
   position: absolute;
   top: 18px;
@@ -51,13 +49,14 @@ body, html {
   z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 340px;
+  gap: 8px;
+  max-width: 460px;
 }
 
 #brand-card {
-  padding: 16px 20px;
+  padding: 15px 20px;
   border-radius: 18px;
+  max-width: 350px;
 }
 
 #brand-card h1 {
@@ -76,7 +75,8 @@ body, html {
 
 #quick-toolbar {
   display: flex;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 5px;
   padding: 6px;
   border-radius: 14px;
   width: fit-content;
@@ -84,7 +84,7 @@ body, html {
 
 .icon-pill-btn {
   min-height: 38px;
-  padding: 6px 12px;
+  padding: 6px 11px;
   border-radius: 9px;
   border: 1px solid rgba(197, 181, 167, 0.55);
   background: #fff8f4;
@@ -105,6 +105,11 @@ body, html {
 .icon-pill-btn:active, .icon-pill-btn.active {
   background: #211d1d;
   color: #fff8f4;
+  border-color: #211d1d;
+}
+
+.icon-pill-btn.nav-accent {
+  border-color: #e2a58d;
 }
 
 .icon-pill-btn.fire-highlight {
@@ -117,7 +122,6 @@ body, html {
   background: #e87b52;
 }
 
-/* 左側詳細卡片 */
 #detail-card {
   position: absolute;
   top: 195px;
@@ -177,7 +181,6 @@ body, html {
   margin-bottom: 14px;
 }
 
-/* 160² 離屏渲染縮圖框 */
 .thumb-stage-wrap {
   width: 160px;
   height: 160px;
@@ -192,7 +195,6 @@ body, html {
   overflow: hidden;
 }
 
-/* Georgia 斜體大數字磚 */
 .big-stats-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
@@ -223,7 +225,6 @@ body, html {
   line-height: 1.25;
 }
 
-/* 細項列表與 Chip */
 .item-pill-list {
   display: flex;
   flex-direction: column;
@@ -289,7 +290,6 @@ body, html {
   background: #fcea8b;
 }
 
-/* 時程軸 */
 .timeline-bar {
   display: flex;
   gap: 4px;
@@ -312,7 +312,6 @@ body, html {
   color: #fff8f4;
 }
 
-/* 右上城市日誌 */
 #live-log-panel {
   position: absolute;
   top: 18px;
@@ -384,7 +383,6 @@ body.sidebar-closed #live-log-panel {
   background: #fcea8b;
 }
 
-/* 右側清單側欄 */
 #right-sidebar {
   position: absolute;
   top: 18px;
@@ -512,7 +510,6 @@ details.island-acc summary:hover {
   background: #fcea8b;
 }
 
-/* 底部 HUD 工具列 */
 #hud-toolbar {
   position: absolute;
   bottom: 18px;
@@ -608,7 +605,6 @@ details.island-acc summary:hover {
   color: #fff8f4;
 }
 
-/* 協作線圖例 */
 #flow-legend {
   position: absolute;
   bottom: 82px;
@@ -651,16 +647,16 @@ details.island-acc summary:hover {
   background: repeating-linear-gradient(90deg, #db6a41 0 3px, transparent 3px 7px);
 }
 
-/* CSS2DRenderer 標籤樣式 (島名 Pill、①②③ Pin、小人名牌氣泡) */
+/* 輕巧精緻的島嶼標籤（不遮擋放大後的島內豐富細節） */
 .island-pill-tag {
-  background: #fff8f4;
+  background: rgba(255, 248, 244, 0.94);
   border: 1.5px solid #e4d6c3;
   color: #211d1d;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 800;
-  box-shadow: 0 4px 12px rgba(33, 29, 29, 0.16);
+  box-shadow: 0 3px 10px rgba(33, 29, 29, 0.15);
   pointer-events: auto;
   cursor: pointer;
   white-space: nowrap;
@@ -682,21 +678,21 @@ details.island-acc summary:hover {
   background: #211d1d;
   color: #fff8f4;
   border-color: #211d1d;
-  transform: scale(1.1);
+  transform: scale(1.12);
 }
 
 .island-pill-tag.dimmed {
-  opacity: 0.48;
+  opacity: 0.45;
 }
 
 .item-pin-tag {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #db6a41;
   color: #fff8f4;
   border: 2px solid #fff8f4;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -715,16 +711,15 @@ details.island-acc summary:hover {
 .walker-speech-tag {
   background: rgba(33, 29, 29, 0.86);
   color: #fff8f4;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
-/* 說明彈窗與載入畫面 */
 .modal-backdrop {
   position: fixed;
   inset: 0;

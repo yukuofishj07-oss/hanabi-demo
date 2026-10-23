@@ -14,10 +14,15 @@ class HanabiPolicyIslandApp {
   constructor() {
     try {
       this.container = document.getElementById("canvas-container");
-      this.minutes = 600; // 從白天 10:00 開始自動走
+      this.minutes = 600; // 從白天 10:00 開始
       this.isPaused = false;
       this.isTopDown = false;
       this.selectedOwnerId = null;
+
+      // 導覽狀態
+      this.currentStepIndex = 0;
+      this.autoTour = false;
+      this.tourTimer = 0;
 
       this.initRendererAndCamera();
       this.env = new EnvironmentManager(this.scene);
@@ -36,25 +41,35 @@ class HanabiPolicyIslandApp {
       this.fireworks = new FireworksShow(this.scene, DATA.islands);
 
       this.ui = new UIController(this.scene, DATA, this.kitBuilder, {
-        onSelectIsland: (isl) => this.selectIsland(isl),
-        onSelectItem: (item, isl) => this.selectItem(item, isl),
-        onSelectFlow: (flow) => this.selectFlow(flow)
+        onSelectIsland: (isl) => {
+          this.stopAutoTour();
+          this.selectIsland(isl);
+        },
+        onSelectItem: (item, isl) => {
+          this.stopAutoTour();
+          this.selectItem(item, isl);
+        },
+        onSelectFlow: (flow) => {
+          this.stopAutoTour();
+          this.selectFlow(flow);
+        }
       });
 
-      // 初始推播 3 筆日誌
       this.ui.pushLiveLog("depart", DATA.flows[0]);
       this.ui.pushLiveLog("handoff", DATA.flows[5]);
       this.ui.pushLiveLog("handoff", DATA.flows[9]);
 
       this.bindEvents();
-      this.setPanoramaView(false);
 
-      // 定期施放煙火 (於 11 號迫擊砲陣地與 12 號觀禮台)
+      // 開場採用近距離微距斜視角（先聚焦前段 01~02 島群，讓拉開的水道與島上高密度細節一眼可見！）
+      this.setInitialCloseView();
+
+      // 減少煙火施放頻率：改為每隔 6.5 秒（約 5~8 秒區間）從容施放一次！
       setInterval(() => {
         if (!this.isPaused) {
           this.fireworks.launchFromIsland(DATA.islands[10]);
         }
-      }, 3200);
+      }, 6500);
 
       document.getElementById("loading-overlay").classList.add("hidden");
 
@@ -74,9 +89,7 @@ class HanabiPolicyIslandApp {
     this.height = window.innerHeight;
 
     this.scene = new THREE.Scene();
-
-    // 規格書第 3 節：PerspectiveCamera fov 32（窄視角做出微縮模型城市感）
-    this.camera = new THREE.PerspectiveCamera(32, this.width / this.height, 0.5, 650);
+    this.camera = new THREE.PerspectiveCamera(32, this.width / this.height, 0.5, 550);
 
     const isMobile = this.width <= 800;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -99,13 +112,13 @@ class HanabiPolicyIslandApp {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.07;
-    this.controls.enablePan = false;
+    this.controls.enablePan = true;
     this.controls.minPolarAngle = THREE.MathUtils.degToRad(18);
     this.controls.maxPolarAngle = THREE.MathUtils.degToRad(70);
-    this.controls.minDistance = 12;
-    this.controls.maxDistance = 195;
+    this.controls.minDistance = 6;
+    this.controls.maxDistance = 165;
 
-    this.flyState = { active: false, t0: 0, dur: 800, sPos: new THREE.Vector3(), ePos: new THREE.Vector3(), sTar: new THREE.Vector3(), eTar: new THREE.Vector3() };
+    this.flyState = { active: false, t0: 0, dur: 850, sPos: new THREE.Vector3(), ePos: new THREE.Vector3(), sTar: new THREE.Vector3(), eTar: new THREE.Vector3() };
 
     this.renderer.domElement.addEventListener("pointerdown", () => {
       this.flyState.active = false;
@@ -122,61 +135,86 @@ class HanabiPolicyIslandApp {
     ro.observe(document.body);
   }
 
-  flyTo(targetVec, offsetVec) {
+  flyTo(targetVec, offsetVec, duration = 850) {
     this.flyState.sPos.copy(this.camera.position);
     this.flyState.sTar.copy(this.controls.target);
     this.flyState.eTar.copy(targetVec);
     this.flyState.ePos.copy(targetVec).add(offsetVec);
+    this.flyState.dur = duration;
     this.flyState.t0 = performance.now();
     this.flyState.active = true;
   }
 
+  // 開場黃金微距視角：讓使用者一進來就看到拉開的寬闊海道、修長拱橋與島上細緻入微的物件與小人
+  setInitialCloseView() {
+    const p1 = axialToWorld(DATA.islands[0].axial.q, DATA.islands[0].axial.r);
+    const p2 = axialToWorld(DATA.islands[5].axial.q, DATA.islands[5].axial.r);
+    const center = new THREE.Vector3((p1.x + p2.x) * 0.5, WORLD.TOP, (p1.z + p2.z) * 0.5);
+    const offset = new THREE.Vector3(10, 22, 34);
+    this.controls.target.copy(center);
+    this.camera.position.copy(center).add(offset);
+    this.controls.update();
+  }
+
   setPanoramaView(animate = true) {
-    const dir = new THREE.Vector3(0.24, 0.36, 0.87).normalize();
-    const dist = this.width / this.height > 1.3 ? 105 : 135;
-    const center = new THREE.Vector3(-4, 0, 0);
+    const dir = new THREE.Vector3(0.22, 0.38, 0.86).normalize();
+    const dist = this.width / this.height > 1.3 ? 68 : 88;
+    const center = new THREE.Vector3(-3, 0, 0);
 
     if (!animate) {
       this.controls.target.copy(center);
       this.camera.position.copy(center).addScaledVector(dir, dist);
       this.controls.update();
     } else {
-      this.flyTo(center, dir.multiplyScalar(dist));
+      this.flyTo(center, dir.multiplyScalar(dist), 950);
     }
   }
 
-  selectIsland(island) {
-    const S = WORLD.SCALE;
+  stopAutoTour() {
+    this.autoTour = false;
+    const btn = document.getElementById("btn-auto-tour");
+    const lbl = document.getElementById("tour-label");
+    if (btn) btn.classList.remove("active");
+    if (lbl) lbl.innerText = "導覽: 關";
+  }
+
+  selectIsland(island, triggerFirework = false) {
     this.selectedOwnerId = island.id;
+    this.currentStepIndex = DATA.islands.findIndex((i) => i.id === island.id);
     this.ui.renderIslandCard(island);
     this.walkersMgr.highlightRelatedFlows(island.id, null);
 
     const { x, z } = axialToWorld(island.axial.q, island.axial.r);
-    const deskShift = this.width > 860 ? 1.5 * S : 0;
+    const deskShift = this.width > 860 ? 1.8 : 0;
+    // 近距離飛行對焦，完美呈現大島內部的 4 個細項園區與小人
     this.flyTo(
-      new THREE.Vector3(x + deskShift * 0.25, WORLD.TOP, z),
-      new THREE.Vector3(2.75 * S, 5.3 * S, 6.2 * S)
+      new THREE.Vector3(x - deskShift, WORLD.TOP, z),
+      new THREE.Vector3(6.5, 11.5, 14.5),
+      850
     );
-    this.fireworks.launchFromIsland(island);
+
+    if (triggerFirework || island.num === "11" || island.num === "12") {
+      this.fireworks.launchFromIsland(island);
+    }
   }
 
   selectItem(item, island) {
-    const S = WORLD.SCALE;
     this.selectedOwnerId = item.id;
+    this.currentStepIndex = DATA.islands.findIndex((i) => i.id === island.id);
     this.ui.renderItemCard(item, island);
     this.walkersMgr.highlightRelatedFlows(island.id, null);
 
     const anchor = this.kitBuilder.itemAnchors[item.id];
     if (anchor) {
       this.flyTo(
-        new THREE.Vector3(anchor.x, WORLD.TOP + 0.5, anchor.z),
-        new THREE.Vector3(1.6 * S, 2.5 * S, 3.2 * S)
+        new THREE.Vector3(anchor.x, WORLD.TOP + 0.4, anchor.z),
+        new THREE.Vector3(3.6, 5.2, 6.8),
+        800
       );
     }
   }
 
   selectFlow(flow) {
-    const S = WORLD.SCALE;
     this.selectedOwnerId = null;
     this.ui.clearItemPins();
     this.ui.updatePillSelection(null);
@@ -190,7 +228,8 @@ class HanabiPolicyIslandApp {
       const pB = axialToWorld(islB.axial.q, islB.axial.r);
       this.flyTo(
         new THREE.Vector3((pA.x + pB.x) * 0.5, WORLD.TOP, (pA.z + pB.z) * 0.5),
-        new THREE.Vector3(3.2 * S, 6.8 * S, 8.2 * S)
+        new THREE.Vector3(6.5, 13.5, 16.5),
+        850
       );
     }
   }
@@ -219,9 +258,9 @@ class HanabiPolicyIslandApp {
       mouse.y = -(e.clientY / this.height) * 2 + 1;
       raycaster.setFromCamera(mouse, this.camera);
 
-      // 優先拾取細項 -> 小人 -> 協作線 -> 島嶼
       const itemHits = raycaster.intersectObjects(this.kitBuilder.itemPickMeshes, false);
       if (itemHits.length > 0) {
+        this.stopAutoTour();
         const { item, island } = itemHits[0].object.userData;
         this.selectItem(item, island);
         return;
@@ -232,6 +271,7 @@ class HanabiPolicyIslandApp {
         let obj = walkerHits[0].object;
         while (obj && !obj.userData?.flow) obj = obj.parent;
         if (obj && obj.userData?.flow) {
+          this.stopAutoTour();
           this.selectFlow(obj.userData.flow);
           return;
         }
@@ -239,12 +279,39 @@ class HanabiPolicyIslandApp {
 
       const islHits = raycaster.intersectObjects(this.islandsBuilder.islandMeshes, false);
       if (islHits.length > 0) {
+        this.stopAutoTour();
         this.selectIsland(islHits[0].object.userData.island);
+      }
+    });
+
+    // 導覽按鈕：◀ 上一站 / 🎬 自動導覽 / 下一站 ▶
+    document.getElementById("btn-prev-step").addEventListener("click", () => {
+      this.stopAutoTour();
+      this.currentStepIndex = (this.currentStepIndex - 1 + DATA.islands.length) % DATA.islands.length;
+      this.selectIsland(DATA.islands[this.currentStepIndex]);
+    });
+
+    document.getElementById("btn-next-step").addEventListener("click", () => {
+      this.stopAutoTour();
+      this.currentStepIndex = (this.currentStepIndex + 1) % DATA.islands.length;
+      this.selectIsland(DATA.islands[this.currentStepIndex]);
+    });
+
+    const btnTour = document.getElementById("btn-auto-tour");
+    const lblTour = document.getElementById("tour-label");
+    btnTour.addEventListener("click", () => {
+      this.autoTour = !this.autoTour;
+      btnTour.classList.toggle("active", this.autoTour);
+      lblTour.innerText = this.autoTour ? "導覽: 開" : "導覽: 關";
+      this.tourTimer = 0;
+      if (this.autoTour) {
+        this.selectIsland(DATA.islands[this.currentStepIndex]);
       }
     });
 
     document.getElementById("card-close-btn").addEventListener("click", () => this.clearSelection());
     document.getElementById("btn-panorama").addEventListener("click", () => {
+      this.stopAutoTour();
       this.clearSelection();
       this.setPanoramaView(true);
     });
@@ -262,12 +329,11 @@ class HanabiPolicyIslandApp {
         btn.classList.add("active");
         this.minutes = parseInt(btn.getAttribute("data-min"), 10);
         if (this.minutes >= 1080) {
-          this.fireworks.launchSalvo();
+          this.fireworks.launchFromIsland(DATA.islands[10]);
         }
       });
     });
 
-    // 六個 HUD 開關
     const bindSwitch = (id, fn) => {
       const el = document.getElementById(id);
       el.addEventListener("click", () => {
@@ -286,7 +352,7 @@ class HanabiPolicyIslandApp {
     bindSwitch("sw-topdown", (v) => {
       this.isTopDown = v;
       if (v) {
-        this.flyTo(new THREE.Vector3(-4, 0, 0), new THREE.Vector3(0.05, 145, 18));
+        this.flyTo(new THREE.Vector3(-3, 0, 0), new THREE.Vector3(0.05, 95, 12));
       } else {
         this.setPanoramaView(true);
       }
@@ -296,7 +362,18 @@ class HanabiPolicyIslandApp {
     });
 
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") this.clearSelection();
+      if (e.key === "Escape") {
+        this.stopAutoTour();
+        this.clearSelection();
+      } else if (e.key === "ArrowRight") {
+        this.stopAutoTour();
+        this.currentStepIndex = (this.currentStepIndex + 1) % DATA.islands.length;
+        this.selectIsland(DATA.islands[this.currentStepIndex]);
+      } else if (e.key === "ArrowLeft") {
+        this.stopAutoTour();
+        this.currentStepIndex = (this.currentStepIndex - 1 + DATA.islands.length) % DATA.islands.length;
+        this.selectIsland(DATA.islands[this.currentStepIndex]);
+      }
     });
   }
 
@@ -322,12 +399,20 @@ class HanabiPolicyIslandApp {
     const elapsed = this.clock.getElapsedTime();
 
     if (!this.isPaused) {
-      // 時鐘：每秒 10 分鐘 (一天 144 秒)
       this.minutes = (this.minutes + dt * 10) % 1440;
       document.getElementById("clock-display").innerText = this.formatClock(this.minutes);
+
+      // 自動巡島導覽計時 (每 5.5 秒前往下一站)
+      if (this.autoTour) {
+        this.tourTimer += dt;
+        if (this.tourTimer >= 5.5) {
+          this.tourTimer = 0;
+          this.currentStepIndex = (this.currentStepIndex + 1) % DATA.islands.length;
+          this.selectIsland(DATA.islands[this.currentStepIndex]);
+        }
+      }
     }
 
-    // 相機 800ms easeInOutCubic 飛行插值
     if (this.flyState.active) {
       const p = Math.min((performance.now() - this.flyState.t0) / this.flyState.dur, 1.0);
       const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;

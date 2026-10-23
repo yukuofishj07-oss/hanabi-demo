@@ -1,5 +1,3 @@
-// 檔案頂端 DATA 物件：完全驅動全島佈局、細項模型種類、協作線與日夜高亮時段
-// 排列採【直線 S 型 (4 - 4 - 4 三排蛇行)】，結尾由 12 觀禮台直線回到原點 01 配藥！
 export const DATA = {
   city: "花火工藝島",
   islands: [
@@ -226,7 +224,6 @@ export const DATA = {
     }
   ],
 
-  // 10 條協作線：嚴格沿著 01 -> 02 -> ... -> 12 直線 S 型推進，最後第 10 條由 12 直線回到原點 01！
   flows: [
     { id: "f01", from: "isl_01", to: "isl_02", cargo: "基底黑火藥桶", icon: "barrel", role: "worker", level: "official", desc: "將研磨過篩完成的 200 目高純度黑火藥送往調色所進行配伍。" },
     { id: "f02", from: "isl_02", to: "isl_03", cargo: "五彩金屬顯色鹽", icon: "flask", role: "researcher", level: "official", desc: "將調配標定完成的鍶紅、鋇綠、銅藍與草酸鈉顯色藥劑送入造粒滾筒。" },
@@ -240,7 +237,6 @@ export const DATA = {
     { id: "f10", from: "isl_12", to: "isl_01", cargo: "環保紙殼與觀測譜", icon: "recycle", role: "traveler", level: "pending", desc: "【結尾直線回到原點】將 12 號觀禮台收集之光譜數據與可降解紙殼，沿直線跨海長橋回流至 01 號火藥配研室，啟動新一輪工藝循環！" }
   ],
 
-  // 一天 6 個時段：指定哪些細項在該時段亮起黃色高亮 (#fcea8b)
   dayCycle: [
     { name: "清晨備料", start: 300, end: 540, activeItems: ["i01_1", "i01_3", "i03_2", "i05_2"] },
     { name: "上午配研與造粒", start: 540, end: 780, activeItems: ["i01_2", "i02_1", "i03_1", "i04_1", "i05_1"] },
