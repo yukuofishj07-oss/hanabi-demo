@@ -23,7 +23,7 @@ export function buildBridges(scene, islandDataList) {
         const length = Math.hypot(p2.x - p1.x, p2.z - p1.z) - (GRID.R * 1.55);
 
         if (length > 0) {
-          const bridgeGeo = new THREE.BoxGeometry(0.35, 0.08, length);
+          const bridgeGeo = new THREE.BoxGeometry(0.38, 0.08, length);
           const bridge = new THREE.Mesh(bridgeGeo, deckMat);
           bridge.position.set(midX, GRID.TOP + 0.02, midZ);
           bridge.lookAt(p2.x, GRID.TOP + 0.02, p2.z);

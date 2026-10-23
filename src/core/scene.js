@@ -9,8 +9,8 @@ export class SceneManager {
     this.height = window.innerHeight;
 
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(32, this.width / this.height, 0.3, 320);
-    this.camera.position.set(22, 28, 44);
+    this.camera = new THREE.PerspectiveCamera(32, this.width / this.height, 0.3, 350);
+    this.camera.position.set(24, 28, 46);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
     this.renderer.setSize(this.width, this.height);
@@ -18,7 +18,7 @@ export class SceneManager {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.toneMappingExposure = 1.05;
     this.container.appendChild(this.renderer.domElement);
 
     this.labelRenderer = new CSS2DRenderer();
@@ -36,7 +36,7 @@ export class SceneManager {
     this.controls.minPolarAngle = THREE.MathUtils.degToRad(25);
     this.controls.maxPolarAngle = THREE.MathUtils.degToRad(72);
     this.controls.minDistance = 6;
-    this.controls.maxDistance = 68;
+    this.controls.maxDistance = 70;
     this.controls.target.set(0, 0, 0);
 
     this.isFlying = false;

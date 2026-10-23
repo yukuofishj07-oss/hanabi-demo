@@ -1,4 +1,3 @@
-// Web Audio 程序化聲音合成系統 (Zero External Audio Assets)
 export class AudioManager {
   constructor() {
     this.ctx = null;
@@ -23,15 +22,15 @@ export class AudioManager {
       this.ctx = new AudioContext();
 
       this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.setValueAtTime(0.7, this.ctx.currentTime);
+      this.masterGain.gain.setValueAtTime(0.75, this.ctx.currentTime);
       this.masterGain.connect(this.ctx.destination);
 
       this.bgmGain = this.ctx.createGain();
-      this.bgmGain.gain.setValueAtTime(0.22, this.ctx.currentTime);
+      this.bgmGain.gain.setValueAtTime(0.20, this.ctx.currentTime);
       this.bgmGain.connect(this.masterGain);
 
       this.sfxGain = this.ctx.createGain();
-      this.sfxGain.gain.setValueAtTime(0.85, this.ctx.currentTime);
+      this.sfxGain.gain.setValueAtTime(0.9, this.ctx.currentTime);
       this.sfxGain.connect(this.masterGain);
 
       this.createNoiseBuffer();
@@ -59,11 +58,11 @@ export class AudioManager {
     const gain = this.ctx.createGain();
 
     osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(320 * pitch, t);
-    osc.frequency.exponentialRampToValueAtTime(1150 * pitch, t + 0.65);
+    osc.frequency.setValueAtTime(280 * pitch, t);
+    osc.frequency.exponentialRampToValueAtTime(1250 * pitch, t + 0.7);
 
-    gain.gain.setValueAtTime(0.12, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+    gain.gain.setValueAtTime(0.14, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
 
     const filter = this.ctx.createBiquadFilter();
     filter.type = "bandpass";
@@ -75,7 +74,7 @@ export class AudioManager {
     gain.connect(this.sfxGain);
 
     osc.start(t);
-    osc.stop(t + 0.72);
+    osc.stop(t + 0.76);
   }
 
   playExplosion(type = "peony") {
@@ -88,57 +87,57 @@ export class AudioManager {
 
     const noiseFilter = this.ctx.createBiquadFilter();
     noiseFilter.type = "lowpass";
-    noiseFilter.frequency.setValueAtTime(type === "willow" ? 380 : 580, t);
-    noiseFilter.frequency.exponentialRampToValueAtTime(80, t + 1.2);
+    noiseFilter.frequency.setValueAtTime(type === "willow" ? 380 : 620, t);
+    noiseFilter.frequency.exponentialRampToValueAtTime(60, t + 1.4);
 
     const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.9, t);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 1.3);
+    noiseGain.gain.setValueAtTime(0.95, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 1.45);
 
     noiseSource.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
     noiseGain.connect(this.sfxGain);
 
     noiseSource.start(t);
-    noiseSource.stop(t + 1.35);
+    noiseSource.stop(t + 1.5);
 
     const subOsc = this.ctx.createOscillator();
     const subGain = this.ctx.createGain();
 
     subOsc.type = "sine";
-    subOsc.frequency.setValueAtTime(130, t);
-    subOsc.frequency.exponentialRampToValueAtTime(35, t + 0.5);
+    subOsc.frequency.setValueAtTime(140, t);
+    subOsc.frequency.exponentialRampToValueAtTime(32, t + 0.55);
 
-    subGain.gain.setValueAtTime(0.7, t);
-    subGain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+    subGain.gain.setValueAtTime(0.8, t);
+    subGain.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
 
     subOsc.connect(subGain);
     subGain.connect(this.sfxGain);
 
     subOsc.start(t);
-    subOsc.stop(t + 0.62);
+    subOsc.stop(t + 0.68);
 
     if (type === "willow" || type === "chrysanthemum") {
       setTimeout(() => {
         this.playCrackle();
-      }, 420);
+      }, 450);
     }
   }
 
   playCrackle() {
     if (!this.ctx || this.isMuted) return;
     const t = this.ctx.currentTime;
-    for (let i = 0; i < 4; i++) {
-      const dt = t + i * 0.08 + Math.random() * 0.04;
+    for (let i = 0; i < 5; i++) {
+      const dt = t + i * 0.07 + Math.random() * 0.04;
       const crackleSource = this.ctx.createBufferSource();
       crackleSource.buffer = this.noiseBuffer;
 
       const filter = this.ctx.createBiquadFilter();
       filter.type = "highpass";
-      filter.frequency.setValueAtTime(3500, dt);
+      filter.frequency.setValueAtTime(3200, dt);
 
       const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(0.18, dt);
+      gain.gain.setValueAtTime(0.20, dt);
       gain.gain.exponentialRampToValueAtTime(0.001, dt + 0.06);
 
       crackleSource.connect(filter);
@@ -210,7 +209,7 @@ export class AudioManager {
   toggleMute() {
     this.isMuted = !this.isMuted;
     if (this.masterGain && this.ctx) {
-      this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : 0.7, this.ctx.currentTime);
+      this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : 0.75, this.ctx.currentTime);
     }
     return !this.isMuted;
   }

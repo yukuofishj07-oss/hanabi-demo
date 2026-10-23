@@ -1,12 +1,10 @@
 import { axialToWorld } from "../island/grid.js";
 import { GRID } from "../config/constants.js";
 
-// 建構 12 座工島之間的行人路網圖
 export class NetworkGraph {
   constructor(islandDataList, bridgeList) {
-    this.nodes = {}; // id -> { x, z, islandId }
-    this.adjacency = {}; // id -> [{ to, weight }]
-
+    this.nodes = {};
+    this.adjacency = {};
     this.buildGraph(islandDataList, bridgeList);
   }
 
@@ -25,54 +23,53 @@ export class NetworkGraph {
   }
 
   buildGraph(islandDataList, bridgeList) {
-    // 1. 每座島建立 1 個中心節點與 6 個邊緣節點
+    // 走島內寬廣平整的中央石板路 (半徑 0.5~0.8)，絕不在外緣 1.8 邊角走
     islandDataList.forEach((isl) => {
       const center = axialToWorld(isl.axial.q, isl.axial.r);
       const centerId = `${isl.id}_center`;
       this.addNode(centerId, center.x, center.z, isl.id);
 
+      // 島內寬闊主幹道節點 (半徑 0.65)
       for (let i = 0; i < 6; i++) {
         const angle = (Math.PI / 3) * i + Math.PI / 6;
-        const ex = center.x + Math.cos(angle) * (GRID.R * 0.72);
-        const ez = center.z + Math.sin(angle) * (GRID.R * 0.72);
-        const edgeId = `${isl.id}_edge_${i}`;
-        this.addNode(edgeId, ex, ez, isl.id);
+        const ex = center.x + Math.cos(angle) * 0.65;
+        const ez = center.z + Math.sin(angle) * 0.65;
+        const innerId = `${isl.id}_inner_${i}`;
+        this.addNode(innerId, ex, ez, isl.id);
 
-        this.addEdge(centerId, edgeId);
+        this.addEdge(centerId, innerId);
       }
       for (let i = 0; i < 6; i++) {
         const next = (i + 1) % 6;
-        this.addEdge(`${isl.id}_edge_${i}`, `${isl.id}_edge_${next}`);
+        this.addEdge(`${isl.id}_inner_${i}`, `${isl.id}_inner_${next}`);
       }
     });
 
-    // 2. 依照橋樑連接相鄰島嶼最近的邊緣節點
+    // 連接橋樑口：從島內內圈平滑引導上橋
     bridgeList.forEach((b) => {
-      // 尋找兩個島上距離橋中點最近的邊緣點
-      const findClosestEdge = (islandId, mid) => {
+      const findClosestInner = (islandId, mid) => {
         let bestId = null;
         let minDist = Infinity;
         for (let i = 0; i < 6; i++) {
-          const edgeId = `${islandId}_edge_${i}`;
-          const n = this.nodes[edgeId];
+          const innerId = `${islandId}_inner_${i}`;
+          const n = this.nodes[innerId];
           const d = Math.hypot(n.x - mid.x, n.z - mid.z);
           if (d < minDist) {
             minDist = d;
-            bestId = edgeId;
+            bestId = innerId;
           }
         }
         return bestId;
       };
 
-      const u = findClosestEdge(b.from, b.mid);
-      const v = findClosestEdge(b.to, b.mid);
+      const u = findClosestInner(b.from, b.mid);
+      const v = findClosestInner(b.to, b.mid);
       if (u && v) {
         this.addEdge(u, v);
       }
     });
   }
 
-  // Dijkstra 最短路徑尋路
   findPath(startIslandId, endIslandId) {
     const startNode = `${startIslandId}_center`;
     const endNode = `${endIslandId}_center`;

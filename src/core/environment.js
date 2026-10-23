@@ -36,8 +36,8 @@ export class Environment {
       side: THREE.BackSide,
       depthWrite: false,
       uniforms: {
-        uTop: { value: new THREE.Color(0x1a2444) },
-        uHorizon: { value: new THREE.Color(0x303b60) },
+        uTop: { value: new THREE.Color(0x0f182f) },     // 更深邃純淨的夜空藍，突顯煙火光芒
+        uHorizon: { value: new THREE.Color(0x1e2744) },
         uNight: { value: 1.0 }
       },
       vertexShader: `
@@ -83,8 +83,8 @@ export class Environment {
       transparent: true,
       uniforms: {
         uTime: { value: 0 },
-        uDeepColor: { value: new THREE.Color(0x2a4e6c) },
-        uShallowColor: { value: new THREE.Color(0x629cb0) }
+        uDeepColor: { value: new THREE.Color(0x1a3348) },
+        uShallowColor: { value: new THREE.Color(0x427588) }
       },
       vertexShader: `
         varying vec3 vWorldPos;
@@ -170,11 +170,11 @@ export class Environment {
   }
 
   setNight() {
-    this.skyMat.uniforms.uTop.value.setHex(0x1a2444);
-    this.skyMat.uniforms.uHorizon.value.setHex(0x303b60);
+    this.skyMat.uniforms.uTop.value.setHex(0x0f182f);
+    this.skyMat.uniforms.uHorizon.value.setHex(0x1e2744);
     this.skyMat.uniforms.uNight.value = 1.0;
     this.dirLight.color.setHex(0xc0ccff);
-    this.dirLight.intensity = 0.8;
+    this.dirLight.intensity = 0.7;
     this.dirLight.position.set(-10, 25, -10);
     this.hemiLight.color.setHex(0x98a8dc);
     this.hemiLight.groundColor.setHex(0x685a6e);

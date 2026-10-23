@@ -40,7 +40,7 @@ class App {
       // 4. 物料輸送流光線
       this.flowMgr = new FlowLinesManager(this.sceneMgr.scene, DATA.islands, DATA.flowLines);
 
-      // 5. 真實工作環節工人（尋路跨橋、搬運與交接）
+      // 5. 擬真 Chibi 工人（走島內平整道路、雙手搬托盤、交接卸載）
       this.workerCrowd = new WorkerCrowd(
         this.sceneMgr.scene,
         DATA.islands,
@@ -51,7 +51,7 @@ class App {
         }
       );
 
-      // 6. 煙火粒子物理引擎
+      // 6. 升級版璀璨花火物理引擎
       this.fireworks = new FireworksEngine(this.sceneMgr.scene, this.audio);
 
       this.setupRaycast();
@@ -79,9 +79,10 @@ class App {
   }
 
   setupAutoFireworks() {
+    // 縮短間隔至 3 秒，並隨機發射菊花、牡丹或金色垂柳
     setInterval(() => {
       this.fireworks.launch();
-    }, 4200);
+    }, 3200);
   }
 
   setupRaycast() {
@@ -105,7 +106,7 @@ class App {
   selectIsland(island) {
     this.currentSelectedIsland = island;
     const card = document.getElementById("detail-card");
-    document.getElementById("card-type").innerText = "花火工藝流程島";
+    document.getElementById("card-type").innerText = `第 ${island.step} 道工序`;
     document.getElementById("card-title").innerText = island.name;
     document.getElementById("card-desc").innerText = island.desc;
 
@@ -127,14 +128,14 @@ class App {
     this.sceneMgr.flyTo(new THREE.Vector3(target.x, 0.65, target.z));
 
     document.querySelectorAll(".island-label-pill").forEach((pill) => {
-      if (pill.innerText.includes(island.name)) {
+      if (pill.innerText.includes(island.name.split(" ")[1])) {
         pill.classList.add("selected");
       } else {
         pill.classList.remove("selected");
       }
     });
 
-    this.addLiveLog(`🔍 聚焦工島：${island.name}（工序執行狀態正常）`);
+    this.addLiveLog(`🔍 聚焦工序：${island.name}`);
   }
 
   addLiveLog(msg) {
@@ -201,7 +202,7 @@ class App {
       if (topdown) {
         this.sceneMgr.setTopdownView();
       } else {
-        this.sceneMgr.flyTo(new THREE.Vector3(0, 0, 0), new THREE.Vector3(22, 28, 44));
+        this.sceneMgr.flyTo(new THREE.Vector3(0, 0, 0), new THREE.Vector3(24, 28, 46));
       }
     });
 
