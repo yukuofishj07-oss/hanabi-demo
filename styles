@@ -1,1 +1,203 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
 
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background: radial-gradient(#fffdf9, #edddcf);
+  color: #211d1d;
+}
+
+#canvas-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.glass-panel {
+  position: absolute;
+  z-index: 10;
+  background: rgba(255, 248, 244, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 10px 30px rgba(74, 42, 20, 0.08);
+}
+
+.eyebrow {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: #db6a41;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+#brand-card {
+  top: 24px;
+  left: 24px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  max-width: 320px;
+}
+
+#brand-card h1 {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+#brand-card p {
+  font-size: 12px;
+  color: #665858;
+  line-height: 1.4;
+}
+
+#hud-toolbar {
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+}
+
+.hud-btn {
+  background: #fff8f4;
+  border: 1px solid #c5b5a7;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #211d1d;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hud-btn:hover {
+  background: #fcea8b;
+}
+
+.hud-btn.active {
+  background: #211d1d;
+  color: #fff8f4;
+  border-color: #211d1d;
+}
+
+.hud-btn.fire-action {
+  background: #db6a41;
+  color: #fff;
+  border-color: #db6a41;
+}
+
+.hud-btn.fire-action:hover {
+  background: #ff7e54;
+}
+
+#detail-card {
+  top: 24px;
+  right: 24px;
+  width: 320px;
+  padding: 20px;
+  border-radius: 22px;
+  display: none;
+}
+
+#detail-card.active {
+  display: block;
+}
+
+.card-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 20px;
+  cursor: pointer;
+  color: #7d6660;
+}
+
+#card-title {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+#card-desc {
+  font-size: 13px;
+  color: #554848;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.stat-box {
+  background: rgba(255, 255, 255, 0.6);
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid #ebdacf;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #7d6660;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-weight: bold;
+  color: #db6a41;
+}
+
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: #fff8f4;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: opacity 0.5s ease;
+}
+
+#loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 800px) {
+  #brand-card {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    max-width: none;
+  }
+  #detail-card {
+    top: auto;
+    bottom: 84px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+  #hud-toolbar {
+    bottom: 16px;
+    overflow-x: auto;
+    max-width: 95vw;
+  }
+}
