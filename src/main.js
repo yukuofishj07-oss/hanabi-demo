@@ -1,15 +1,12 @@
 import * as THREE from "three";
 import { SceneManager } from "./core/scene.js";
 import { Environment } from "./core/environment.js";
-import { AudioManager } from "./core/audio.js";
 import { DATA } from "./config/data.js";
 import { buildHexIslands, axialToWorld } from "./island/grid.js";
 import { buildBridges } from "./island/bridges.js";
-import { NetworkGraph } from "./logistics/pathfinding.js";
 import { AssetKit } from "./assets/kit.js";
 import { buildAllBuildings } from "./assets/buildings.js";
 import { FlowLinesManager } from "./logistics/flows.js";
-import { WorkerCrowd } from "./logistics/workers.js";
 import { FireworksEngine } from "./fireworks/engine.js";
 
 class App {
@@ -19,10 +16,9 @@ class App {
     try {
       this.sceneMgr = new SceneManager(this.container);
       this.env = new Environment(this.sceneMgr.scene);
-      this.audio = new AudioManager();
       this.kit = new AssetKit();
 
-      // 1. 六角島與標籤
+      // 1. 六角島 (S 型蛇狀佈局)
       const { islandMeshes } = buildHexIslands(
         this.sceneMgr.scene,
         DATA.islands,
@@ -30,29 +26,17 @@ class App {
       );
       this.islandMeshes = islandMeshes;
 
-      // 2. 橋樑建構與真實路網拓撲圖
-      const bridgeList = buildBridges(this.sceneMgr.scene, DATA.islands);
-      this.graph = new NetworkGraph(DATA.islands, bridgeList);
+      // 2. S 型小拱橋
+      buildBridges(this.sceneMgr.scene, DATA.islands);
 
-      // 3. 實例化建築
+      // 3. 實例化工坊、植栽樹木、長椅與路燈
       buildAllBuildings(this.sceneMgr.scene, this.kit, DATA.islands);
 
-      // 4. 物料輸送流光線
+      // 4. 工藝流光帶
       this.flowMgr = new FlowLinesManager(this.sceneMgr.scene, DATA.islands, DATA.flowLines);
 
-      // 5. 擬真 Chibi 工人（走島內平整道路、雙手搬托盤、交接卸載）
-      this.workerCrowd = new WorkerCrowd(
-        this.sceneMgr.scene,
-        DATA.islands,
-        DATA.flowLines,
-        this.graph,
-        (flow, action) => {
-          this.addLiveLog(`📦 [${flow.cargo}] 於工島間${action}完畢（物料：${flow.material}）`);
-        }
-      );
-
-      // 6. 升級版璀璨花火物理引擎
-      this.fireworks = new FireworksEngine(this.sceneMgr.scene, this.audio);
+      // 5. 璀璨煙火引擎 (無音效干擾)
+      this.fireworks = new FireworksEngine(this.sceneMgr.scene);
 
       this.setupRaycast();
       this.setupUI();
@@ -62,10 +46,8 @@ class App {
       this.frameCount = 0;
       this.lastFpsUpdate = performance.now();
 
-      document.getElementById("btn-start").addEventListener("click", () => {
-        this.audio.init();
-        document.getElementById("loading-overlay").classList.add("hidden");
-      });
+      // 進入畫面
+      document.getElementById("loading-overlay").classList.add("hidden");
 
       this.clock = new THREE.Clock();
       this.animate();
@@ -79,10 +61,10 @@ class App {
   }
 
   setupAutoFireworks() {
-    // 縮短間隔至 3 秒，並隨機發射菊花、牡丹或金色垂柳
+    // 每隔 2.5 秒自動由發射陣地升空一枚璀璨煙火
     setInterval(() => {
       this.fireworks.launch();
-    }, 3200);
+    }, 2500);
   }
 
   setupRaycast() {
@@ -135,7 +117,7 @@ class App {
       }
     });
 
-    this.addLiveLog(`🔍 聚焦工序：${island.name}`);
+    this.addLiveLog(`🔍 檢視工藝工序：${island.name}`);
   }
 
   addLiveLog(msg) {
@@ -150,20 +132,12 @@ class App {
   }
 
   setupUI() {
-    const btnAudio = document.getElementById("btn-audio");
-    btnAudio.addEventListener("click", () => {
-      this.audio.init();
-      const enabled = this.audio.toggleMute();
-      btnAudio.innerText = enabled ? "🔊 音效: 開" : "🔇 音效: 關";
-      btnAudio.classList.toggle("active", enabled);
-      this.addLiveLog(enabled ? "🔊 聲景系統已啟用" : "🔇 聲景系統已靜音");
-    });
-
     document.getElementById("card-close-btn").addEventListener("click", () => {
       document.getElementById("detail-card").classList.remove("active");
       document.querySelectorAll(".island-label-pill").forEach((p) => p.classList.remove("selected"));
     });
 
+    // 於指定島嶼上空發射
     document.getElementById("card-fire-btn").addEventListener("click", () => {
       if (this.currentSelectedIsland) {
         const p = axialToWorld(this.currentSelectedIsland.axial.q, this.currentSelectedIsland.axial.r);
@@ -172,6 +146,7 @@ class App {
       }
     });
 
+    // 時段切換
     document.querySelectorAll(".hud-btn[data-time]").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         document.querySelectorAll(".hud-btn[data-time]").forEach((b) => b.classList.remove("active"));
@@ -182,6 +157,7 @@ class App {
       });
     });
 
+    // 流光開關
     let flowActive = true;
     document.getElementById("toggle-flow").addEventListener("click", (e) => {
       flowActive = !flowActive;
@@ -189,31 +165,27 @@ class App {
       this.flowMgr.toggle(flowActive);
     });
 
-    let workersActive = true;
-    document.getElementById("toggle-workers").addEventListener("click", (e) => {
-      workersActive = !workersActive;
-      e.target.classList.toggle("active", workersActive);
-      this.workerCrowd.toggle(workersActive);
-    });
-
+    // 鳥瞰模式切換
     let topdown = false;
     document.getElementById("btn-topdown").addEventListener("click", () => {
       topdown = !topdown;
       if (topdown) {
         this.sceneMgr.setTopdownView();
       } else {
-        this.sceneMgr.flyTo(new THREE.Vector3(0, 0, 0), new THREE.Vector3(24, 28, 46));
+        this.sceneMgr.flyTo(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 26, 44));
       }
     });
 
+    // 單發發射
     document.getElementById("btn-launch-firework").addEventListener("click", () => {
       this.fireworks.launch();
-      this.addLiveLog("💥 11號陣地發射 10吋尺玉錦冠煙火");
+      this.addLiveLog("💥 10號砲陣地發射 10吋尺玉錦冠煙火");
     });
 
+    // 萬彈齊發
     document.getElementById("btn-launch-barrage").addEventListener("click", () => {
       this.fireworks.launchBarrage();
-      this.addLiveLog("🎆 11號陣地啟動 32 連發矩陣花火速射盛典！");
+      this.addLiveLog("🎆 10號砲陣地啟動連發矩陣盛典齊射！");
     });
   }
 
@@ -235,7 +207,6 @@ class App {
     this.sceneMgr.update();
     this.env.update(time);
     this.flowMgr.update(time);
-    this.workerCrowd.update(time);
     this.fireworks.update();
     this.sceneMgr.render();
   }

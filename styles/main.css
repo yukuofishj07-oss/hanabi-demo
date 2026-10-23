@@ -362,25 +362,6 @@ body, html {
   to { transform: rotate(360deg); }
 }
 
-.start-btn {
-  margin-top: 18px;
-  padding: 12px 30px;
-  background: #db6a41;
-  color: #ffffff;
-  border: none;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 6px 18px rgba(219, 106, 65, 0.35);
-  transition: all 0.2s;
-}
-
-.start-btn:hover {
-  background: #ff5424;
-  transform: scale(1.05);
-}
-
 @media (max-width: 860px) {
   #brand-card {
     top: 10px;

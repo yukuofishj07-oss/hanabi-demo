@@ -15,10 +15,10 @@ export class Environment {
     this.dirLight.shadow.mapSize.height = 1024;
     this.dirLight.shadow.camera.near = 1;
     this.dirLight.shadow.camera.far = 85;
-    this.dirLight.shadow.camera.left = -22;
-    this.dirLight.shadow.camera.right = 22;
-    this.dirLight.shadow.camera.top = 22;
-    this.dirLight.shadow.camera.bottom = -22;
+    this.dirLight.shadow.camera.left = -26;
+    this.dirLight.shadow.camera.right = 26;
+    this.dirLight.shadow.camera.top = 26;
+    this.dirLight.shadow.camera.bottom = -26;
     this.dirLight.shadow.bias = -0.0006;
     this.dirLight.shadow.normalBias = 0.04;
     this.scene.add(this.dirLight);
@@ -36,8 +36,8 @@ export class Environment {
       side: THREE.BackSide,
       depthWrite: false,
       uniforms: {
-        uTop: { value: new THREE.Color(0x0f182f) },     // 更深邃純淨的夜空藍，突顯煙火光芒
-        uHorizon: { value: new THREE.Color(0x1e2744) },
+        uTop: { value: new THREE.Color(0x0c152a) },     // 純淨深藍夜空，突顯璀璨煙火
+        uHorizon: { value: new THREE.Color(0x1a233c) },
         uNight: { value: 1.0 }
       },
       vertexShader: `
@@ -147,7 +147,7 @@ export class Environment {
   }
 
   createSurroundingHills() {
-    const hillGeo = new THREE.CylinderGeometry(38, 44, 3.5, 24, 1, true);
+    const hillGeo = new THREE.CylinderGeometry(40, 46, 3.5, 24, 1, true);
     const hillMat = new THREE.MeshStandardMaterial({
       color: 0x8a9a7a,
       roughness: 0.95,
@@ -170,8 +170,8 @@ export class Environment {
   }
 
   setNight() {
-    this.skyMat.uniforms.uTop.value.setHex(0x0f182f);
-    this.skyMat.uniforms.uHorizon.value.setHex(0x1e2744);
+    this.skyMat.uniforms.uTop.value.setHex(0x0c152a);
+    this.skyMat.uniforms.uHorizon.value.setHex(0x1a233c);
     this.skyMat.uniforms.uNight.value = 1.0;
     this.dirLight.color.setHex(0xc0ccff);
     this.dirLight.intensity = 0.7;

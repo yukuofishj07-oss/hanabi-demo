@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-// 以純 Canvas 程序生成具備真實微縮景觀高亮度的「發光星芒光暈貼圖」(Zero External Assets)
+// Canvas 程序生成發光星芒貼圖 (Zero External Assets)
 function createSparkleTexture() {
   const canvas = document.createElement("canvas");
   canvas.width = 64;
@@ -9,8 +9,8 @@ function createSparkleTexture() {
 
   const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
   grad.addColorStop(0, "rgba(255, 255, 255, 1.0)");
-  grad.addColorStop(0.2, "rgba(255, 240, 200, 0.85)");
-  grad.addColorStop(0.5, "rgba(255, 180, 80, 0.35)");
+  grad.addColorStop(0.2, "rgba(255, 235, 180, 0.9)");
+  grad.addColorStop(0.5, "rgba(255, 160, 60, 0.4)");
   grad.addColorStop(1, "rgba(0, 0, 0, 0.0)");
 
   ctx.fillStyle = grad;
@@ -22,11 +22,10 @@ function createSparkleTexture() {
 }
 
 export class FireworksEngine {
-  constructor(scene, audioManager) {
+  constructor(scene) {
     this.scene = scene;
-    this.audio = audioManager;
 
-    this.MAX_PARTICLES = 6000; // 擴充粒子規模，盛大壯觀
+    this.MAX_PARTICLES = 6500;
     this.pool = new Array(this.MAX_PARTICLES);
     for (let i = 0; i < this.MAX_PARTICLES; i++) {
       this.pool[i] = {
@@ -37,12 +36,11 @@ export class FireworksEngine {
         life: 0,
         decay: 0.012,
         gravity: 0.002,
-        twinkle: false,
-        size: 0.8
+        twinkle: false
       };
     }
 
-    this.MAX_ROCKETS = 20;
+    this.MAX_ROCKETS = 24;
     this.rockets = [];
 
     const pGeo = new THREE.BufferGeometry();
@@ -57,7 +55,7 @@ export class FireworksEngine {
     pGeo.setAttribute("color", new THREE.BufferAttribute(this.colors, 3));
 
     const pMat = new THREE.PointsMaterial({
-      size: 0.72, // 放大粒子尺寸，清晰璀璨
+      size: 0.75, // 超大星芒尺寸，清晰奪目
       map: createSparkleTexture(),
       vertexColors: true,
       blending: THREE.AdditiveBlending,
@@ -68,18 +66,18 @@ export class FireworksEngine {
     this.points = new THREE.Points(pGeo, pMat);
     this.scene.add(this.points);
 
-    // 爆炸夜空點光源
-    this.burstLight = new THREE.PointLight(0xffb844, 0, 60, 1.4);
+    // 夜空引爆動態光照
+    this.burstLight = new THREE.PointLight(0xffb844, 0, 65, 1.4);
     this.scene.add(this.burstLight);
 
-    // 日本傳統競技花火經典色系
+    // 日本競技尺玉純淨金屬色彩
     this.palette = [
-      { r: 1.0, g: 0.22, b: 0.28 },  // 紅色星珠 (鍶鹽)
-      { r: 0.15, g: 0.95, b: 0.45 }, // 翡翠綠 (鋇鹽)
-      { r: 0.12, g: 0.75, b: 1.0 },  // 靛藍 (銅鹽)
-      { r: 1.0, g: 0.82, b: 0.12 },  // 錦冠純金 (松炭與鈉)
-      { r: 0.98, g: 0.42, b: 0.95 }, // 櫻花紫 (鍶+銅)
-      { r: 1.0, g: 0.95, b: 0.90 }   // 白金銀 (鋁鎂合金)
+      { r: 1.0, g: 0.22, b: 0.28 },  // 鍶紅
+      { r: 0.15, g: 0.95, b: 0.45 }, // 翡翠綠
+      { r: 0.12, g: 0.75, b: 1.0 },  // 銅藍
+      { r: 1.0, g: 0.82, b: 0.12 },  // 錦冠純金
+      { r: 0.98, g: 0.42, b: 0.95 }, // 櫻花紫
+      { r: 1.0, g: 0.95, b: 0.90 }   // 鈦白銀
     ];
   }
 
@@ -93,7 +91,8 @@ export class FireworksEngine {
     return null;
   }
 
-  launch(origin = new THREE.Vector3(-3.9, 0.65, -1.8), type = null) {
+  // 預設發射位置在最後一島（第10島：砲陣地）
+  launch(origin = new THREE.Vector3(0, 0.65, 3.0), type = null) {
     if (this.rockets.length >= this.MAX_ROCKETS) return;
 
     const types = ["chrysanthemum", "peony", "willow"];
@@ -101,48 +100,40 @@ export class FireworksEngine {
     const col = this.palette[Math.floor(Math.random() * this.palette.length)];
 
     this.rockets.push({
-      x: origin.x,
+      x: origin.x + (Math.random() - 0.5) * 0.8,
       y: origin.y,
-      z: origin.z,
-      vx: (Math.random() - 0.5) * 0.16,
-      vy: 0.65 + Math.random() * 0.24, // 升得更高更磅礡
-      vz: (Math.random() - 0.5) * 0.16,
-      targetY: 13 + Math.random() * 7,  // 升空至 13~20 公尺高空爆裂
+      z: origin.z + (Math.random() - 0.5) * 0.8,
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: 0.65 + Math.random() * 0.25, // 直沖夜空
+      vz: (Math.random() - 0.5) * 0.15,
+      targetY: 13 + Math.random() * 7,  // 升空高度 13~20m
       col,
       type: actualType
     });
-
-    if (this.audio) {
-      this.audio.playLaunch(0.9 + Math.random() * 0.25);
-    }
   }
 
   explode(x, y, z, col, type) {
-    let count = 280;
-    let speedBase = 0.22;
-    let decayBase = 0.011;
+    let count = 300;
+    let speedBase = 0.24;
+    let decayBase = 0.010;
     let gravity = 0.0022;
 
     if (type === "willow") {
-      count = 340;
+      count = 350;
       speedBase = 0.14;
-      decayBase = 0.006; // 垂柳滯空金色長流
+      decayBase = 0.006;
       gravity = 0.0038;
     } else if (type === "chrysanthemum") {
       count = 320;
       speedBase = 0.26;
-      decayBase = 0.010;
+      decayBase = 0.009;
     }
 
     this.burstLight.position.set(x, y, z);
     this.burstLight.color.setRGB(col.r, col.g, col.b);
-    this.burstLight.intensity = 9.5;
+    this.burstLight.intensity = 10.0;
 
-    if (this.audio) {
-      this.audio.playExplosion(type);
-    }
-
-    // 外環主體星珠爆發
+    // 1. 外層花瓣爆發
     for (let i = 0; i < count; i++) {
       const p = this.allocParticle();
       if (!p) break;
@@ -166,7 +157,7 @@ export class FireworksEngine {
       p.twinkle = (type === "willow") || Math.random() > 0.4;
     }
 
-    // 內核小球變色雙層花火 (Core Burst)
+    // 2. 內蕊白金星光 (Core Burst)
     for (let k = 0; k < 60; k++) {
       const p = this.allocParticle();
       if (!p) break;
@@ -183,7 +174,7 @@ export class FireworksEngine {
       p.vz = spd * Math.sin(phi) * Math.sin(theta);
       p.r = 1.0;
       p.g = 0.95;
-      p.b = 0.7; // 純白金內蕊
+      p.b = 0.7;
       p.life = 0.75;
       p.decay = 0.02;
       p.gravity = 0.001;
@@ -191,28 +182,27 @@ export class FireworksEngine {
     }
   }
 
-  launchBarrage(center = new THREE.Vector3(-3.9, 0.65, -1.8)) {
+  launchBarrage(center = new THREE.Vector3(0, 0.65, 3.0)) {
     for (let i = 0; i < 7; i++) {
       setTimeout(() => {
         const offset = new THREE.Vector3(
-          (Math.random() - 0.5) * 3.5,
+          (Math.random() - 0.5) * 4.0,
           0,
-          (Math.random() - 0.5) * 3.5
+          (Math.random() - 0.5) * 3.0
         );
         this.launch(center.clone().add(offset));
-      }, i * 240);
+      }, i * 220);
     }
   }
 
   update() {
-    // 火箭升空推進
     for (let i = this.rockets.length - 1; i >= 0; i--) {
       const r = this.rockets[i];
       r.x += r.vx;
       r.y += r.vy;
       r.z += r.vz;
 
-      // 金色火花尾跡
+      // 金色升空尾跡
       if (Math.random() > 0.15) {
         const tp = this.allocParticle();
         if (tp) {
@@ -236,7 +226,6 @@ export class FireworksEngine {
       }
     }
 
-    // 粒子渲染更新
     const pos = this.positions;
     const col = this.colors;
     let needsPosUpdate = false;

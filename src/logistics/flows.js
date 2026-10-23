@@ -36,7 +36,7 @@ export class FlowLinesManager {
         transparent: true,
         uniforms: {
           uTime: { value: 0 },
-          uColor: { value: new THREE.Color(def.color) }
+          uColor: { value: new THREE.Color(0xff8444) }
         },
         vertexShader: `
           varying vec2 vUv;

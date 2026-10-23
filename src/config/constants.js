@@ -1,6 +1,6 @@
 export const GRID = {
   R: 2.02,
-  SPACING: 2.28,
+  SPACING: 2.30,
   TOP: 0.65,
   WATER_Y: -0.18
 };
@@ -11,7 +11,8 @@ export const COLORS = {
   cream: 0xfff8f4,
   yellow: 0xfcea8b,
   stone: 0xc5b5a7,
-  green: 0x71806a,
+  green: 0x5a7a52,     // 森林深綠
+  cherry: 0xf7a8b8,    // 櫻花粉
   glass: 0x86a8a6,
   wood: 0xb48560,
   teal: 0x3e7c8c,

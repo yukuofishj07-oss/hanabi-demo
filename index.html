@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>花火島 HANABI ISLAND - 傳統煙火工藝與盛典</title>
+  <title>花火島 HANABI ISLAND - 3D 微縮工藝與璀璨盛典</title>
   <link rel="stylesheet" href="./styles/main.css">
   <script type="importmap">
     {
@@ -19,27 +19,27 @@
 
   <!-- 品牌面板 -->
   <div class="glass-panel" id="brand-card">
-    <div class="eyebrow">HANABI TRADITIONAL CRAFT</div>
+    <div class="eyebrow">HANABI CRAFT & FESTIVAL</div>
     <h1>示範市．花火島</h1>
-    <p>走訪傳統尺玉煙火完整的 12 道製造工序：從火藥研磨、星珠滾製到夜空盛大綻放！</p>
+    <p>蛇狀 S 型工藝島鏈：從火藥配研、星珠造粒、玉張糊緊到夜空盛大綻放！</p>
     <div class="badge-row">
-      <span class="chip">✨ 實裝璀璨發光花火</span>
-      <span class="chip">👷 擬真雙足擺動工匠</span>
-      <span class="chip">📜 12道真實煙火古法</span>
+      <span class="chip">🐍 S 型工藝蛇狀排列</span>
+      <span class="chip">🌳 綠植步道與微縮路燈</span>
+      <span class="chip">🎆 璀璨雙層實時煙火</span>
     </div>
   </div>
 
-  <!-- 即時工藝物流日誌 -->
+  <!-- 右上工藝即時動態 -->
   <div class="glass-panel" id="live-log-panel">
     <div class="log-header">
       <span class="live-dot"></span>
-      <span class="eyebrow" style="margin:0;">FACTORY LIVE LOG</span>
+      <span class="eyebrow" style="margin:0;">WORKSHOP STATUS</span>
       <span id="fps-badge">60 FPS</span>
     </div>
     <div id="log-list">
-      <div class="log-item">🟢 01研磨室：黑色基底火藥比例混合完成</div>
-      <div class="log-item">🚚 工匠搬運：[星珠乾燥盤] 運往 06填裝室</div>
-      <div class="log-item">✨ 11發射陣地：10吋錦冠尺玉已裝入發射筒</div>
+      <div class="log-item">🟢 01 配研室：黑火藥 75:15:10 黃金配比完成</div>
+      <div class="log-item">✨ 03 造粒廠：同心星珠滾製 24 層完畢</div>
+      <div class="log-item">🎆 10 砲陣地：10 吋尺玉錦冠彈填裝發射中</div>
     </div>
   </div>
 
@@ -53,11 +53,9 @@
     </div>
     <div class="hud-divider"></div>
     <div class="hud-group">
-      <button class="hud-btn toggle-btn active" id="btn-audio">🔊 音效: 開</button>
-      <button class="hud-btn toggle-btn active" id="toggle-flow">⚡ 原料流動</button>
-      <button class="hud-btn toggle-btn active" id="toggle-workers">👷 工人搬運</button>
-      <button class="hud-btn" id="btn-topdown">🔭 鳥瞰模式</button>
-      <button class="hud-btn fire-action" id="btn-launch-firework">🎇 施放煙火</button>
+      <button class="hud-btn toggle-btn active" id="toggle-flow">⚡ 工藝流光</button>
+      <button class="hud-btn" id="btn-topdown">🔭 全景鳥瞰</button>
+      <button class="hud-btn fire-action" id="btn-launch-firework">🎇 立即點火</button>
       <button class="hud-btn fire-action-combo" id="btn-launch-barrage">🎆 萬彈齊發</button>
     </div>
   </div>
@@ -67,18 +65,17 @@
     <div class="card-close" id="card-close-btn">&times;</div>
     <div class="eyebrow" id="card-type">第 01 道工序</div>
     <h2 id="card-title">點選島嶼查看作業流程</h2>
-    <div id="card-desc">在微縮地圖中選擇六角工坊，查看真實製造細節與檢驗數據。</div>
+    <div id="card-desc">在微縮地圖中選擇六角工坊，查看專屬工藝內容與重要指標。</div>
     <div class="stats-grid" id="card-stats"></div>
-    <button class="card-action-btn" id="card-fire-btn">🚀 在此工島上空施放試驗彈</button>
+    <button class="card-action-btn" id="card-fire-btn">🚀 在此工島上空施放專屬煙火</button>
   </div>
 
-  <!-- 啟動覆蓋層 -->
+  <!-- 載入層 -->
   <div id="loading-overlay">
     <div class="loader-content">
       <div class="loader-spinner"></div>
-      <h2>花火工藝微縮世界組裝中...</h2>
-      <p>點擊按鈕開啟 3D 黏土微縮工藝島與花火夜空</p>
-      <button id="btn-start" class="start-btn">進入花火島世界</button>
+      <h2>花火島 蛇狀工藝世界組裝中...</h2>
+      <p>正在建造 S 型六角島鏈、鋪設步道植栽與調校璀璨煙火</p>
     </div>
   </div>
 
